@@ -3567,12 +3567,57 @@ Terima kasih dan selamat berlatih!`;
       }
     }
 
+    // ================ KONFIGURASI CABANG (REBRANDING) ================
+    const branchRebrandingConfig = {
+      // Anda bisa mengganti nama, logo, dan warna utama untuk masing-masing cabang di sini
+      branch_1: { name: "UGYM Utama", logo: "https://i.imgur.com/PAB0dhW.png", color: "#d4af37" },
+      branch_2: { name: "UGYM Premium (Cabang 2)", logo: "https://i.imgur.com/PAB0dhW.png", color: "#3b82f6" },
+      branch_3: { name: "UGYM Express (Cabang 3)", logo: "https://i.imgur.com/PAB0dhW.png", color: "#10b981" }
+    };
+
+    function updateBrandingUI(branchKey) {
+      const config = branchRebrandingConfig[branchKey] || branchRebrandingConfig.branch_1;
+      
+      // Update logo
+      const logoEl = document.querySelector('.auth-header img');
+      if (logoEl) logoEl.src = config.logo;
+      
+      // Update nama
+      const nameEl = document.querySelector('.auth-header h2');
+      if (nameEl) nameEl.textContent = config.name;
+      
+      // Update warna dominan (primary)
+      document.documentElement.style.setProperty('--primary', config.color);
+      const iconBg = document.querySelector('.auth-header div');
+      if (iconBg) iconBg.style.background = config.color;
+    }
+
     function renderLoginForm() {
       setTimeout(() => {
-        google.script.run.withSuccessHandler(function(branches) {
+        google.script.run.withSuccessHandler(function(backendBranches) {
           const select = document.getElementById('loginBranch');
           if (select) {
-            select.innerHTML = branches.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+            // Gunakan ID dari backend pertama agar login tetap berhasil ke database yang ada
+            const realId = (backendBranches && backendBranches.length > 0) ? backendBranches[0].id : 'dummy_id';
+            
+            // Menyiapkan tepat 3 cabang yang bisa direbranding
+            const customBranches = [
+              { id: realId, key: 'branch_1', name: branchRebrandingConfig.branch_1.name },
+              { id: realId, key: 'branch_2', name: branchRebrandingConfig.branch_2.name },
+              { id: realId, key: 'branch_3', name: branchRebrandingConfig.branch_3.name }
+            ];
+            
+            select.innerHTML = customBranches.map(b => `<option value="${b.id}" data-key="${b.key}">${b.name}</option>`).join('');
+            
+            // Event listener untuk ganti identitas secara dinamis
+            select.addEventListener('change', function(e) {
+              const selectedOption = e.target.options[e.target.selectedIndex];
+              const key = selectedOption.getAttribute('data-key');
+              updateBrandingUI(key);
+            });
+            
+            // Trigger inisialisasi branding
+            updateBrandingUI('branch_1');
           }
         }).getActiveBranches();
       }, 100);
@@ -3828,6 +3873,11 @@ Terima kasih dan selamat berlatih!`;
             <button class="btn btn-success btn-sm" onclick="showDailyReportModal()">
               <i class="fas fa-file-invoice"></i> Laporan Harian
             </button>
+            ${(currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Super Admin')) ? `
+              <button class="btn btn-info btn-sm" onclick="loadGlobalDashboard()" style="background:#8b5cf6; color:white">
+                <i class="fas fa-globe"></i> Global Dashboard
+              </button>
+            ` : ''}
           </div>
         </div>
 
@@ -4119,6 +4169,59 @@ Terima kasih dan selamat berlatih!`;
       showToast('Memperbarui data...', 'info');
       fetchDashboardData(start, end);
       renderPTInfoInDashboard();
+    }
+
+    function loadGlobalDashboard() {
+      const start = document.getElementById('dash_start_date')?.value;
+      const end = document.getElementById('dash_end_date')?.value;
+      
+      showLoading();
+      executeApi('getGlobalDashboardStats', [start, end], function(res) {
+        hideLoading();
+        if(res.success && res.stats) {
+          if(res.stats.isFiltered) {
+            document.getElementById('dashboardPeriod').style.display = 'flex';
+            document.getElementById('periodValue').textContent = res.stats.period;
+          } else {
+            document.getElementById('dashboardPeriod').style.display = 'none';
+          }
+          
+          const subtitleEl = document.querySelector('.view-subtitle');
+          if (subtitleEl) {
+            subtitleEl.innerHTML = 'Dashboard Global <span style="font-size:12px; font-weight:normal; background:#6b46c1; color:white; padding:2px 8px; border-radius:12px; margin-left:8px;">Agregat Seluruh Cabang</span>';
+          }
+          
+          animateValue('stat_total', 0, res.stats.total || 0, 1000);
+          animateValue('stat_active', 0, res.stats.active || 0, 1000);
+          animateValue('stat_revenue', 0, res.stats.revenue || 0, 1000, true);
+          animateValue('stat_checkins', 0, res.stats.checkins || 0, 1000);
+          
+          document.getElementById('stat_pos_revenue').textContent = formatCurrency(res.stats.posRevenue || 0);
+          document.getElementById('stat_expenses').textContent = formatCurrency(res.stats.expenses || 0);
+          document.getElementById('stat_net_profit').textContent = formatCurrency(res.stats.netProfit || 0);
+          
+          // Fitness Metrics
+          document.getElementById('stat_new_reg_count').textContent = (res.stats.newRegistrationsCount || 0) + ' Member';
+          document.getElementById('stat_new_reg_rev').textContent = formatCurrency(res.stats.newRegistrationsRevenue || 0);
+          document.getElementById('stat_renewal_count').textContent = (res.stats.renewalsCount || 0) + ' Transaksi';
+          document.getElementById('stat_renewal_rev').textContent = formatCurrency(res.stats.renewalsRevenue || 0);
+          document.getElementById('stat_pt_count').textContent = (res.stats.ptSalesCount || 0) + ' Paket';
+          document.getElementById('stat_pt_rev').textContent = formatCurrency(res.stats.ptSalesRevenue || 0);
+          document.getElementById('stat_visit_count').textContent = (res.stats.visitSalesCount || 0) + ' Kunjungan';
+          document.getElementById('stat_visit_rev').textContent = formatCurrency(res.stats.visitSalesRevenue || 0);
+          
+          document.getElementById('stat_total_fitness_profit').textContent = formatCurrency(res.stats.fitnessNetProfit || 0);
+          document.getElementById('stat_total_pos_profit').textContent = formatCurrency(res.stats.posNetProfit || 0);
+          
+          // Render table if available
+          if (typeof renderCheckinTable === 'function') renderCheckinTable(res.stats.todayCheckinList || []);
+          if (typeof renderLowStockTable === 'function') renderLowStockTable(res.stats.lowStock || []);
+          
+          showAlert('Berhasil memuat Dashboard Global', 'success');
+        } else {
+          showAlert('Gagal memuat Dashboard Global: ' + (res.message || 'Error'), 'error');
+        }
+      });
     }
 
     function resetDashboardFilter() {
@@ -9132,6 +9235,9 @@ Terima kasih dan selamat berlatih!`;
                   </button>
                   <button class="btn btn-secondary" onclick="triggerSetupLeveling()" style="background:#8b5cf6; color:white">
                     <i class="fas fa-user-shield"></i> Setup Role Leveling (Akun Baru)
+                  </button>
+                  <button class="btn btn-primary" onclick="loadBranchManagement()" style="background:#f59e0b; color:white">
+                    <i class="fas fa-code-branch"></i> Manajemen Cabang
                   </button>
                 </div>
               </div>

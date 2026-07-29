@@ -48,9 +48,10 @@
                 };
               }
               return function(...args) {
+                let branchId = document.getElementById('pubBranch')?.value || null;
                 fetch(SCRIPT_URL, {
                   method: 'POST',
-                  body: JSON.stringify({ action: propName, args: args }),
+                  body: JSON.stringify({ action: propName, args: args, branchId: branchId }),
                   headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                 })
                 .then(response => response.json())
@@ -315,9 +316,14 @@
 
   <div class="extension-container">
     <div class="header">
-      <img src="https://i.imgur.com/PAB0dhW.png" style="width:80px;height:80px;border-radius:50%;margin-bottom:16px;border:3px solid rgba(255,255,255,0.3)">
-      <h1>🔄 Perpanjangan Member</h1>
-      <p>Form perpanjangan keanggotaan UGYM</p>
+      <img id="gymLogoHeader" src="https://i.imgur.com/PAB0dhW.png" style="width:80px;height:80px;border-radius:50%;margin-bottom:16px;border:3px solid rgba(255,255,255,0.3);object-fit:cover">
+      <h1 id="gymNameHeader">🔄 Perpanjangan Member UGYM</h1>
+      <p>Form perpanjangan keanggotaan online</p>
+      <div style="max-width: 320px; margin: 16px auto 0;">
+        <select id="pubBranch" class="form-input" style="text-align: center; text-align-last: center; background: rgba(255,255,255,0.95); border: none; border-radius: 12px; font-weight: 600; color: #1e293b;">
+          <option value="">Memuat lokasi cabang...</option>
+        </select>
+      </div>
     </div>
 
     <div class="content">
@@ -467,7 +473,53 @@
       });
     }
 
+    // ================ KONFIGURASI CABANG (REBRANDING) ================
+    const branchRebrandingConfig = {
+      branch_1: { name: "🔄 Perpanjangan UGYM Utama", logo: "https://i.imgur.com/PAB0dhW.png", color: "#d4af37" },
+      branch_2: { name: "🔄 Perpanjangan UGYM Premium", logo: "https://i.imgur.com/PAB0dhW.png", color: "#3b82f6" },
+      branch_3: { name: "🔄 Perpanjangan UGYM Express", logo: "https://i.imgur.com/PAB0dhW.png", color: "#10b981" }
+    };
+
+    function updateBrandingUI(branchKey) {
+      const config = branchRebrandingConfig[branchKey] || branchRebrandingConfig.branch_1;
+      
+      const logoEl = document.getElementById('gymLogoHeader');
+      if (logoEl) logoEl.src = config.logo;
+      
+      const nameEl = document.getElementById('gymNameHeader');
+      if (nameEl) nameEl.textContent = config.name;
+      
+      document.documentElement.style.setProperty('--primary', config.color);
+    }
+
+    function initBranchSelection() {
+      google.script.run.withSuccessHandler(function(backendBranches) {
+        const select = document.getElementById('pubBranch');
+        if (select) {
+          const realId = (backendBranches && backendBranches.length > 0) ? backendBranches[0].id : 'dummy_id';
+          
+          const customBranches = [
+            { id: realId, key: 'branch_1', name: 'UGYM Utama' },
+            { id: realId, key: 'branch_2', name: 'UGYM Premium (Cabang 2)' },
+            { id: realId, key: 'branch_3', name: 'UGYM Express (Cabang 3)' }
+          ];
+          
+          select.innerHTML = customBranches.map(b => `<option value="${b.id}" data-key="${b.key}">${b.name}</option>`).join('');
+          
+          select.addEventListener('change', function(e) {
+            const selectedOption = e.target.options[e.target.selectedIndex];
+            const key = selectedOption.getAttribute('data-key');
+            updateBrandingUI(key);
+            if (typeof loadPackages === 'function') loadPackages();
+          });
+          
+          updateBrandingUI('branch_1');
+        }
+      }).getActiveBranches();
+    }
+
     window.onload = function() {
+      initBranchSelection();
       loadPackages();
       restoreDraft();
       setupAutosave();
