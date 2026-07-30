@@ -9758,39 +9758,53 @@ Terima kasih dan selamat berlatih!`;
                   </button>
                 </div>
                 <div style="overflow-x:auto">
-                  <table class="data-table">
-                    <thead>
-                      <tr>
-                        <th>Nama</th>
-                        <th>Username</th>
-                        <th>Role</th>
-                        <th>Kontak</th>
-                        <th>Last Login</th>
-                        <th>Aksi</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      ${list.map(u => `
+                  <table class="data-table" style="min-width:900px">
+                      <thead>
                         <tr>
-                          <td><b>${escapeHtml(u.name)}</b></td>
-                          <td><code>${u.username}</code></td>
-                          <td><span class="badge badge-${u.role === 'Super Admin' ? 'danger' : (u.role === 'Admin' ? 'primary' : 'secondary')}">${u.role}</span></td>
-                          <td><small>${u.email || '-'}<br>${u.phone || '-'}</small></td>
-                          <td><small>${u.lastLogin ? formatDate(new Date(u.lastLogin)) : '-'}</small></td>
-                          <td>
-                            ${u.username !== 'superadmin' ? `
-                              <button class="btn btn-sm btn-warning" onclick="openResetPasswordModal('${u.id}', '${u.username}')" title="Reset Password" style="margin-right:4px; color:white;">
-                                <i class="fas fa-key"></i>
-                              </button>
-                              <button class="btn btn-sm btn-danger" onclick="confirmDeleteUser('${u.id}', '${u.username}')" title="Hapus User">
-                                <i class="fas fa-trash"></i>
-                              </button>
-                            ` : '-'}
-                          </td>
+                          <th>Profil</th>
+                          <th>Nama</th>
+                          <th>Cabang</th>
+                          <th>Username</th>
+                          <th>Role</th>
+                          <th>Last Login</th>
+                          <th style="text-align:right">Aksi</th>
                         </tr>
-                      `).join('')}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        ${list.map(u => {
+                          const pic = u.profilePic ? getDirectLink(u.profilePic) : "https://i.imgur.com/vHEx3jR.png";
+                          let branchName = "Semua Cabang";
+                          if (u.branchId !== "ALL" && typeof currentLoginBranches !== 'undefined') {
+                            const b = currentLoginBranches.find(cb => cb.id === u.branchId);
+                            if (b) branchName = b.name;
+                          }
+                          return `
+                          <tr>
+                            <td>
+                              <img src="${pic}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid #e2e8f0;display:block;margin:auto;">
+                            </td>
+                            <td><b style="white-space:nowrap">${escapeHtml(u.name)}</b><br><small style="color:var(--text-secondary)">${u.email || ''}</small></td>
+                            <td><span class="badge" style="background:#e0f2fe;color:#0369a1">${branchName}</span></td>
+                            <td><code>${u.username}</code></td>
+                            <td><span class="badge badge-${u.role === 'Super Admin' ? 'danger' : (u.role === 'Admin' ? 'primary' : 'secondary')}">${u.role}</span></td>
+                            <td><small>${u.lastLogin ? formatDate(new Date(u.lastLogin)) : '-'}</small></td>
+                            <td style="text-align:right">
+                              ${u.username !== 'superadmin' ? `
+                                <button class="btn btn-sm" style="background:none;border:1px solid var(--primary);color:var(--primary);margin-right:4px;" onclick='openEditUserModal(${JSON.stringify(u).replace(/'/g, "&#39;")})' title="Edit User">
+                                  <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-warning" onclick="openResetPasswordModal('${u.id}', '${u.username}')" title="Reset Password" style="margin-right:4px; color:white;">
+                                  <i class="fas fa-key"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="confirmDeleteUser('${u.id}', '${u.username}')" title="Hapus User">
+                                  <i class="fas fa-trash"></i>
+                                </button>
+                              ` : '-'}
+                            </td>
+                          </tr>
+                        `}).join('')}
+                      </tbody>
+                    </table>
                 </div>
               </div>
             `;
