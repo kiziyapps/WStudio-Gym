@@ -12154,6 +12154,17 @@ Terima kasih dan selamat berlatih!`;
   }
 
   // --- Modals User Management ---
+  
+  function getBranchOptionsHtml(selectedVal = 'ALL') {
+    let opts = `<option value="ALL" ${selectedVal==='ALL'?'selected':''}>SEMUA CABANG (Super Admin / Akses Bebas)</option>`;
+    if (typeof currentLoginBranches !== 'undefined') {
+      currentLoginBranches.forEach(b => {
+        opts += `<option value="${b.id}" ${selectedVal===b.id?'selected':''}>${b.name}</option>`;
+      });
+    }
+    return opts;
+  }
+
   function openAddUserModal() {
     // Inject HTML modal if it doesn't exist yet
     if (!document.getElementById('addUserModal')) {
@@ -12166,6 +12177,13 @@ Terima kasih dan selamat berlatih!`;
             </div>
             <div class="modal-body">
               <form id="addUserForm" onsubmit="submitNewUser(event)">
+                <label class="form-label">Foto Profil (Opsional)</label>
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+                  <img id="addUserPhotoPreview" src="https://i.imgur.com/vHEx3jR.png" style="width:50px;height:50px;border-radius:50%;object-fit:cover;border:2px solid #e2e8f0;">
+                  <input type="file" accept="image/*" class="form-input" style="padding:6px" onchange="previewUserPhoto(this, 'addUserPhotoPreview', 'addUserPhotoBase64')">
+                  <input type="hidden" id="addUserPhotoBase64">
+                </div>
+                
                 <label class="form-label">Nama Lengkap</label>
                 <input type="text" id="addUserName" class="form-input" required>
                 
@@ -12175,6 +12193,12 @@ Terima kasih dan selamat berlatih!`;
                   <option value="Admin">Admin</option>
                   <option value="Kasir">Kasir</option>
                   <option value="Personal Trainer">Personal Trainer</option>
+                  <option value="Super Admin">Super Admin</option>
+                </select>
+                
+                <label class="form-label">Akses Cabang</label>
+                <select id="addUserBranchId" class="form-input" required>
+                  ${getBranchOptionsHtml()}
                 </select>
                 
                 <label class="form-label">Username</label>
