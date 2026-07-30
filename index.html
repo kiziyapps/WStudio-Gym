@@ -11828,14 +11828,170 @@ Terima kasih dan selamat berlatih!`;
 
   </script>
 
+<!-- Added by Antigravity for missing features -->
+<div id="branchManagementModal" class="modal-overlay" style="display:none;z-index:9999">
+  <div class="modal-content" style="max-width:800px; width:95%">
+    <div class="modal-header">
+      <h3 style="margin:0"><i class="fas fa-code-branch"></i> Manajemen Cabang</h3>
+      <button class="btn-close" onclick="closeBranchManagementModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" style="max-height:70vh; overflow-y:auto">
+      <div id="branchManagementLoading" style="text-align:center; padding:20px;">
+        <i class="fas fa-spinner fa-spin fa-2x"></i><br>Memuat data cabang...
+      </div>
+      <div id="branchManagementContent" style="display:none;">
+        <table class="table" style="width:100%">
+          <thead>
+            <tr>
+              <th>ID Cabang</th>
+              <th>Nama Cabang</th>
+              <th>Status</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="branchManagementTableBody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function loadBranchManagement() {
+    document.getElementById('branchManagementModal').style.display = 'flex';
+    document.getElementById('branchManagementLoading').style.display = 'block';
+    document.getElementById('branchManagementContent').style.display = 'none';
+
+    google.script.run
+      .withSuccessHandler(function (res) {
+        document.getElementById('branchManagementLoading').style.display = 'none';
+        if (res && res.success) {
+          const tbody = document.getElementById('branchManagementTableBody');
+          tbody.innerHTML = '';
+          res.branches.forEach(b => {
+            const tr = document.createElement('tr');
+            const isActive = b.status !== 'Nonaktif';
+            tr.innerHTML = `
+              <td>${b.id}</td>
+              <td><b>${escapeHtml(b.name)}</b></td>
+              <td>
+                <span class="badge ${isActive ? 'badge-success' : 'badge-danger'}">${b.status || 'Aktif'}</span>
+              </td>
+              <td>
+                <button class="btn btn-sm ${isActive ? 'btn-danger' : 'btn-success'}" onclick="toggleBranchStatusUI('${b.id}', '${isActive ? 'Nonaktif' : 'Aktif'}')">
+                  ${isActive ? '<i class="fas fa-ban"></i> Nonaktifkan' : '<i class="fas fa-check"></i> Aktifkan'}
+                </button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+          document.getElementById('branchManagementContent').style.display = 'block';
+        } else {
+          showToast('Gagal memuat cabang: ' + (res ? res.message : ''), 'error');
+        }
+      })
+      .withFailureHandler(function (err) {
+        document.getElementById('branchManagementLoading').style.display = 'none';
+        showToast('Error: ' + err.message, 'error');
+      })
+      .getAllBranches();
+  }
+
+  function closeBranchManagementModal() {
+    document.getElementById('branchManagementModal').style.display = 'none';
+  }
+
+  function toggleBranchStatusUI(branchId, newStatus) {
+    if (!confirm('Apakah Anda yakin ingin mengubah status cabang ini menjadi ' + newStatus + '?')) return;
+    showToast('Mengubah status cabang...', 'info');
+    google.script.run
+      .withSuccessHandler(function (res) {
+        if (res && res.success) {
+          showToast('✅ Status berhasil diubah', 'success');
+          loadBranchManagement(); // reload list
+        } else {
+          showToast('Gagal: ' + (res ? res.message : ''), 'error');
+        }
+      })
+      .withFailureHandler(function (err) {
+        showToast('Error: ' + err.message, 'error');
+      })
+      .toggleBranchStatus(branchId, newStatus);
+  }
+
+  function viewMemberDetail(memberId) {
+    const members = LocalCache.get('all_members') || [];
+    const member = members.find(m => m.memberId === memberId || m.id === memberId);
+    if (!member) {
+      showToast('Data member tidak ditemukan', 'error');
+      return;
+    }
+    
+    const modal = document.getElementById('detailModal');
+    const title = document.getElementById('detailModalTitle');
+    const container = document.getElementById('detailModalBody');
+    
+    title.innerHTML = '<i class="fas fa-id-card"></i> Detail Member';
+    
+    let photoHtml = '';
+    if (member.profilePic) {
+      let photoUrl = member.profilePic;
+      photoHtml = `<div style="text-align:center; margin-bottom:15px"><img src="${photoUrl}" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:3px solid var(--primary)"></div>`;
+    } else {
+      photoHtml = `<div style="text-align:center; margin-bottom:15px"><div style="width:100px; height:100px; border-radius:50%; background:#e2e8f0; display:inline-flex; align-items:center; justify-content:center; color:#94a3b8; font-size:40px; border:3px solid var(--primary)"><i class="fas fa-user"></i></div></div>`;
+    }
+
+    container.innerHTML = `
+      ${photoHtml}
+      <table class="table" style="width:100%; border:none">
+        <tbody>
+          <tr><td style="border:none; padding:4px"><b>ID Member</b></td><td style="border:none; padding:4px">${escapeHtml(member.memberId || '-')}</td></tr>
+          <tr><td style="border:none; padding:4px"><b>Nama</b></td><td style="border:none; padding:4px">${escapeHtml(member.fullName || member.name || '-')}</td></tr>
+          <tr><td style="border:none; padding:4px"><b>Telepon</b></td><td style="border:none; padding:4px">${escapeHtml(member.phone || '-')}</td></tr>
+          <tr><td style="border:none; padding:4px"><b>Paket</b></td><td style="border:none; padding:4px">${escapeHtml(member.currentPackage || member.package || '-')}</td></tr>
+          <tr><td style="border:none; padding:4px"><b>Kadaluarsa</b></td><td style="border:none; padding:4px">${formatDate(member.expiryDate || member.expiry)}</td></tr>
+          <tr><td style="border:none; padding:4px"><b>Status</b></td><td style="border:none; padding:4px"><span class="badge badge-success">Aktif</span></td></tr>
+        </tbody>
+      </table>
+    `;
+    
+    modal.style.display = 'flex';
+  }
+
+  function showPOSReceiptDetail(transactionId) {
+    const transactions = LocalCache.get('recent_transactions') || [];
+    const trx = transactions.find(t => t['ID Transaksi'] === transactionId || t.id === transactionId);
+    if (!trx) {
+      showToast('Transaksi tidak ditemukan di histori saat ini', 'error');
+      return;
+    }
+    
+    let items = [];
+    try {
+      items = typeof trx.Items === 'string' ? JSON.parse(trx.Items) : (trx.Items || []);
+    } catch(e) {
+      items = [];
+    }
+
+    const data = {
+      receiptNumber: trx['ID Transaksi'] || trx.id,
+      customerName: trx['Nama Pembeli'] || trx.customerName || 'Pelanggan',
+      total: trx.Total || trx.total,
+      paymentMethod: trx['Metode Bayar'] || trx.paymentMethod || 'Cash',
+      items: items
+    };
+    
+    if (typeof ReceiptGenerator !== 'undefined' && ReceiptGenerator.showPreview) {
+      ReceiptGenerator.showPreview(data, 'pos');
+    } else {
+      showToast('Modul Resi tidak tersedia', 'error');
+    }
+  }
+</script>
+<!-- End of added missing features -->
+
 </body>
-
-</html>
-
-
-
-
-
 
 
 
