@@ -3599,7 +3599,7 @@ Terima kasih dan selamat berlatih!`;
       
       // Update logo
       const logoEl = document.querySelector('.auth-header img');
-      if (logoEl && config.logoUrl) logoEl.src = config.logoUrl;
+      if (logoEl) logoEl.src = config.logoUrl || "https://i.imgur.com/PAB0dhW.png";
       
       // Update nama
       const nameEl = document.querySelector('.auth-header h2');
@@ -3799,12 +3799,12 @@ Terima kasih dan selamat berlatih!`;
             applyRolePermissions();
             
             // Update Sidebar Branding
-            const selectedBranch = currentLoginBranches.find(b => b.id === branchId);
+            const selectedBranch = currentLoginBranches.find(b => String(b.id) === String(branchId));
             if (selectedBranch) {
               const sbLogo = document.getElementById('sidebarLogo');
               const sbName = document.getElementById('sidebarBrandName');
-              if (sbLogo && selectedBranch.logoUrl) sbLogo.src = selectedBranch.logoUrl;
-              if (sbName && selectedBranch.name) sbName.textContent = selectedBranch.name;
+              if (sbLogo) sbLogo.src = selectedBranch.logoUrl || "https://i.imgur.com/PAB0dhW.png";
+              if (sbName) sbName.textContent = selectedBranch.name || "Kiziy";
             }
 
             showView('dashboard');
