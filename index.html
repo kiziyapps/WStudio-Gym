@@ -471,9 +471,9 @@
               <p style="margin:8px 0 0 0;opacity:0.8;font-size:13px">${data.receiptNumber || 'Baru'}</p>
             </div>
             <div style="padding:24px;background:white">
-              <div style="text-align:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px dashed #e2e8f0">
+              <div style="text-align:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px dashed var(--border-color)">
                 <h4 style="margin:0;color:#1e293b">${escapeHtml(data.memberName || data.customerName || 'Customer')}</h4>
-                <div style="font-size:12px;color:#64748b;margin-top:4px">${formatDateTime(new Date())}</div>
+                <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">${formatDateTime(new Date())}</div>
               </div>
               <div style="margin-bottom:20px">
                 ${itemsHtml}
@@ -481,18 +481,18 @@
                   <span>Total</span>
                   <span>${formatCurrency(data.total || data.totalAmount)}</span>
                 </div>
-                <div style="margin-top:4px;font-size:11px;color:#64748b;text-align:right">Metode: ${data.paymentMethod}</div>
+                <div style="margin-top:4px;font-size:11px;color:var(--text-secondary);text-align:right">Metode: ${data.paymentMethod}</div>
               </div>
               
               ${(data.expiry && data.expiry !== '-') ? `
-              <div style="margin-bottom:16px;text-align:center;font-size:12px;padding:8px;background:#f1f5f9;border-radius:8px">
+              <div style="margin-bottom:16px;text-align:center;font-size:12px;padding:8px;background:var(--bg-light);border-radius:8px">
                 Berlaku s/d: <b>${formatDate(data.expiry)}</b>
               </div>
               ` : ''}
 
               ${(data.qr) ? `
               <div style="margin-bottom:20px;text-align:center">
-                <div style="font-size:11px;color:#64748b;margin-bottom:8px">QR Code ID Member:</div>
+                <div style="font-size:11px;color:var(--text-secondary);margin-bottom:8px">QR Code ID Member:</div>
                 <img src="${data.qr}" style="width:120px;height:120px;margin:0 auto;display:block">
               </div>
               ` : ''}
@@ -506,7 +506,7 @@
                 </button>
               </div>
             </div>
-            <div style="background:#f8fafc;padding:12px;text-align:center;font-size:11px;color:#94a3b8">Terima kasih atas kunjungan Anda</div>
+            <div style="background:var(--bg-light);padding:12px;text-align:center;font-size:11px;color:var(--text-secondary)">Terima kasih atas kunjungan Anda</div>
           </div>
         `;
         document.body.appendChild(modal);
@@ -717,35 +717,37 @@
     }
   </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #d4af37;
-      --primary-light: #fdf8e7;
-      --primary-dark: #b5952f;
-      --secondary: #000000;
-      --accent: #d4af37;
-      --dark: #000000;
-      --bg-light: #f9f9f9;
+      --primary: #4f46e5;
+      --primary-light: #e0e7ff;
+      --primary-dark: #3730a3;
+      --secondary: #0f172a;
+      --accent: #10b981;
+      --dark: #0f172a;
+      --bg-light: #f8fafc;
       --bg-card: #ffffff;
-      --text-main: #000000;
-      --text-secondary: #555555;
-      --sidebar-bg: #000000;
-      --border-color: #e5e5ea;
-      --shadow-premium: 0 10px 30px rgba(0, 0, 0, 0.05);
+      --text-main: #0f172a;
+      --text-secondary: #64748b;
+      --sidebar-bg: #0f172a;
+      --border-color: #e2e8f0;
+      --shadow-premium: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+      --shadow-widget: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
       --glass-bg: rgba(255, 255, 255, 0.9);
     }
 
-
     body.dark-mode {
-      --bg-light: #000000;
-      --bg-card: #1c1c1e;
-      --text-main: #ffffff;
-      --text-secondary: #aeaeb2;
-      --sidebar-bg: rgba(44, 44, 46, 0.9);
-      --border-color: #38383a;
-      --shadow-premium: 0 10px 30px rgba(0, 0, 0, 0.4);
-      --glass-bg: rgba(28, 28, 30, 0.7);
-      --input-bg: #2c2c2e;
+      --bg-light: #0f172a;
+      --bg-card: #1e293b;
+      --text-main: #f8fafc;
+      --text-secondary: #94a3b8;
+      --sidebar-bg: rgba(15, 23, 42, 0.95);
+      --border-color:var(--text-main);
+      --shadow-premium: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      --shadow-widget: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+      --glass-bg: rgba(30, 41, 59, 0.7);
+      --input-bg: #0f172a;
     }
 
     body.dark-mode .pos-products,
@@ -766,7 +768,7 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
       background: var(--bg-light);
       color: var(--text-main);
       margin: 0;
@@ -820,7 +822,7 @@
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
       width: 100%;
       max-width: 420px;
-      border: 1px solid rgba(255, 255, 255, 1);
+      border:1px solid var(--border-color);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1149,14 +1151,14 @@
       padding: 24px;
       box-shadow: var(--shadow-premium);
       border: 1px solid var(--border-color);
-      transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
     }
 
     .stat-card:hover {
-      transform: translateY(-4px);
+      transform: translateY(-6px) scale(1.02);
       box-shadow: var(--shadow-widget);
     }
 
@@ -1251,8 +1253,27 @@
       align-items: center;
       justify-content: center;
       gap: 10px;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
       text-decoration: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 150%;
+      height: 150%;
+      background: rgba(255, 255, 255, 0.1);
+      transform: translate(-50%, -50%) scale(0);
+      border-radius: 50%;
+      transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .btn:hover::after {
+      transform: translate(-50%, -50%) scale(1);
     }
 
     .btn-block {
@@ -1261,12 +1282,14 @@
     }
 
     .btn:hover {
-      transform: translateY(-1px);
-      opacity: 0.9;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      opacity: 0.95;
     }
 
     .btn:active {
-      transform: scale(0.96);
+      transform: translateY(1px) scale(0.98);
+      box-shadow: 0 5px 10px -3px rgba(0, 0, 0, 0.1);
     }
 
     .btn-primary {
@@ -1364,14 +1387,14 @@
       border-radius: 24px;
       overflow: hidden;
       box-shadow: var(--shadow-premium);
-      border: 1px solid rgba(255, 255, 255, 1);
+      border:1px solid var(--border-color);
       margin-bottom: 24px;
     }
 
     .form-card-header {
       padding: 24px 32px;
-      background: rgba(242, 242, 247, 0.5);
-      border-bottom: 1px solid #E5E5EA;
+      background:var(--bg-light);
+      border-bottom:1px solid var(--border-color);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -1380,7 +1403,7 @@
     .form-card-header h3 {
       font-size: 18px;
       font-weight: 700;
-      color: #1C1C1E;
+      color:var(--text-main);
       margin: 0;
       display: flex;
       align-items: center;
@@ -1443,7 +1466,7 @@
       align-items: center;
       padding: 14px 20px;
       border-bottom: 0.5px solid var(--border-color);
-      transition: 0.2s;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
       cursor: pointer;
     }
 
@@ -1453,7 +1476,7 @@
 
     .list-item:hover {
       background: var(--bg-light);
-      opacity: 0.8;
+      transform: translateX(4px);
     }
 
     .list-item-content {
@@ -1485,7 +1508,7 @@
 
     .list-item.contacted .list-item-title {
       text-decoration: line-through;
-      color: #94a3b8;
+      color:var(--text-secondary);
     }
 
     .followup-checkbox {
@@ -1549,7 +1572,7 @@
       border-radius: 16px;
       padding: 16px 20px;
       margin-bottom: 24px;
-      background: rgba(255, 255, 255, 0.85);
+      background:var(--glass-bg);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       box-shadow: var(--shadow-premium);
@@ -1680,7 +1703,7 @@
 
     .modal-header {
       padding: 16px 20px;
-      background: rgba(255, 255, 255, 0.85);
+      background:var(--glass-bg);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       color: var(--text-main);
@@ -1726,7 +1749,7 @@
 
     .modal-footer {
       padding: 16px 24px;
-      background: rgba(255, 255, 255, 0.85);
+      background:var(--glass-bg);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       display: flex;
@@ -1853,7 +1876,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(255, 255, 255, 0.85);
+      background:var(--glass-bg);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1863,7 +1886,7 @@
     .spinner {
       width: 40px;
       height: 40px;
-      border: 4px solid #e2e8f0;
+      border:4px solid var(--border-color);
       border-top: 4px solid var(--primary);
       border-radius: 50%;
       animation: spin 1s linear infinite;
@@ -1871,7 +1894,7 @@
 
     /* Package Cards */
     .pkg-card {
-      border: 2px solid #e2e8f0;
+      border:2px solid var(--border-color);
       border-radius: 10px;
       padding: 14px;
       cursor: pointer;
@@ -1905,8 +1928,8 @@
     }
 
     .admin-card {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
+      background:var(--bg-light);
+      border:1px solid var(--border-color);
       border-radius: 12px;
       padding: 20px;
     }
@@ -1916,7 +1939,7 @@
       display: flex;
       align-items: center;
       margin: 20px 0;
-      color: #94a3b8;
+      color:var(--text-secondary);
       font-size: 13px;
     }
 
@@ -1934,7 +1957,7 @@
 
     /* Text utilities */
     .text-muted {
-      color: #64748b;
+      color:var(--text-secondary);
     }
 
     /* Payment Info */
@@ -1965,7 +1988,7 @@
 
     /* Info Box */
     .info-box {
-      background: #f8fafc;
+      background:var(--bg-light);
       border-radius: 8px;
       padding: 16px;
       margin: 12px 0;
@@ -1979,7 +2002,7 @@
       padding: 16px;
       border: 2px dashed #cbd5e1;
       border-radius: 12px;
-      background: #f8fafc;
+      background:var(--bg-light);
       transition: border-color 0.2s, background 0.2s;
       margin-bottom: 4px;
     }
@@ -2015,7 +2038,7 @@
 
     .admin-photo-actions p {
       font-size: 13px;
-      color: #64748b;
+      color:var(--text-secondary);
       margin-bottom: 10px;
     }
 
@@ -2088,7 +2111,7 @@
       border-radius: 8px;
       border: 1.5px solid #cbd5e1;
       background: white;
-      color: #334155;
+      color:var(--text-main);
       cursor: pointer;
       display: inline-flex;
       align-items: center;
@@ -2554,7 +2577,7 @@
     .product-image {
       width: 100%;
       aspect-ratio: 1 / 1;
-      background: #f8fafc;
+      background:var(--bg-light);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -2706,7 +2729,7 @@
       justify-content: space-between;
       margin-bottom: 8px;
       font-size: 14px;
-      color: #64748b;
+      color:var(--text-secondary);
     }
 
     .cart-total {
@@ -2715,7 +2738,7 @@
       padding-top: 10px;
       font-size: 18px;
       font-weight: 700;
-      color: #1c1c1e;
+      color:var(--text-main);
     }
 
     /* Report Table Footer Styles */
@@ -2733,14 +2756,14 @@
       padding: 12px;
       text-align: left;
       font-size: 12px;
-      color: #1C1C1E;
+      color:var(--text-main);
       border-bottom: 2px solid #E5E5EA;
     }
 
     .report-footer-table td {
       padding: 12px;
       font-size: 13px;
-      border-bottom: 1px solid #E5E5EA;
+      border-bottom:1px solid var(--border-color);
     }
 
     .report-footer-table .total-row {
@@ -2767,7 +2790,7 @@
       right: 0;
       top: 100%;
       background: white;
-      border: 1px solid #e2e8f0;
+      border:1px solid var(--border-color);
       border-radius: 10px;
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
       z-index: 1000;
@@ -2789,17 +2812,17 @@
     }
 
     .search-item:hover {
-      background: #f8fafc;
+      background:var(--bg-light);
     }
 
     .search-item b {
-      color: #334155;
+      color:var(--text-main);
       display: block;
       font-size: 14px;
     }
 
     .search-item small {
-      color: #64748b;
+      color:var(--text-secondary);
       font-size: 12px;
     }
 
@@ -2812,11 +2835,11 @@
       align-items: center;
       gap: 10px;
       padding-bottom: 8px;
-      border-bottom: 2px solid #e2e8f0;
+      border-bottom:2px solid var(--border-color);
     }
 
     .filter-container {
-      background: rgba(255, 255, 255, 0.85);
+      background:var(--glass-bg);
       padding: 16px 20px;
       border-radius: 16px;
       backdrop-filter: blur(20px);
@@ -2851,7 +2874,7 @@
       outline: none;
       transition: 0.2s;
       background: rgba(142, 142, 147, 0.12);
-      color: #1C1C1E;
+      color:var(--text-main);
       -webkit-appearance: none;
       appearance: none;
     }
@@ -2944,7 +2967,7 @@
       </div>
       <div class="modal-body text-center">
         <div id="changePhotoPreviewBox"
-          style="width:160px;height:160px;border-radius:50%;margin:0 auto 20px;border:4px solid #f1f5f9;overflow:hidden;background:#f8fafc;display:flex;align-items:center;justify-content:center">
+          style="width:160px;height:160px;border-radius:50%;margin:0 auto 20px;border:4px solid #f1f5f9;overflow:hidden;background:var(--bg-light);display:flex;align-items:center;justify-content:center">
           <img id="changePhotoPreview" src="" style="width:100%;height:100%;object-fit:cover;display:none">
           <i id="changePhotoPlaceholder" class="fas fa-user fa-4x" style="color:#cbd5e1"></i>
         </div>
@@ -2990,7 +3013,7 @@
         <h3>Konfirmasi</h3>
       </div>
       <div class="modal-body">
-        <p id="confirmMessage" style="font-size:15px;line-height:1.7;white-space:pre-line;color:#334155"></p>
+        <p id="confirmMessage" style="font-size:15px;line-height:1.7;white-space:pre-line;color:var(--text-main)"></p>
       </div>
       <div class="modal-footer">
         <button class="btn btn-outline" onclick="hideConfirmModal(false)">
@@ -3115,7 +3138,7 @@
           style="font-weight: 800; color: #1e293b; font-size: 16px; letter-spacing: 2px; text-align: center; text-transform: uppercase;">
           KIZIY</div>
         <div
-          style="font-family: 'Outfit', sans-serif; font-weight: 500; font-size: 11px; color: #64748b; margin-top: 2px; text-align: center; letter-spacing: 1px;">
+          style="font-family: 'Outfit', sans-serif; font-weight: 500; font-size: 11px; color:var(--text-secondary); margin-top: 2px; text-align: center; letter-spacing: 1px;">
           key to easy</div>
       </div>
     </div>
@@ -3626,7 +3649,7 @@ Terima kasih dan selamat berlatih!`;
           <div style="background: var(--primary); width: 80px; height: 80px; border-radius: 24px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(88, 86, 214, 0.2);">
             <img src="https://i.imgur.com/PAB0dhW.png" style="width: 100%; height: 100%; border-radius: 24px; object-fit: cover;">
           </div>
-          <h2 style="font-size: 28px; font-weight: 800; color: #1c1c1e; letter-spacing: -0.5px;">UGYM</h2>
+          <h2 style="font-size: 28px; font-weight: 800; color:var(--text-main); letter-spacing: -0.5px;">UGYM</h2>
           <p style="color: #636366; margin-top: 6px; font-size: 14px; font-weight: 500;">Management System v2.0</p>
         </div>
         
@@ -3667,7 +3690,7 @@ Terima kasih dan selamat berlatih!`;
             <span style="background: #fff; padding: 0 12px;">External Access</span>
           </div>
           
-          <button class="btn btn-outline btn-block" onclick="window.open('https://kiziyapps.github.io/WStudio-Gym/PublicRegistration.html', '_blank')" style="justify-content: center; padding: 14px; border-radius: 16px; border-color: #e5e5ea; color: #1c1c1e;">
+          <button class="btn btn-outline btn-block" onclick="window.open('https://kiziyapps.github.io/WStudio-Gym/PublicRegistration.html', '_blank')" style="justify-content: center; padding: 14px; border-radius: 16px; border-color: #e5e5ea; color:var(--text-main);">
             <i class="fas fa-user-plus"></i> Public Registration
           </button>
           
@@ -3863,8 +3886,8 @@ Terima kasih dan selamat berlatih!`;
             <p class="view-subtitle">Ringkasan performa operasional dan keuangan UGYM</p>
           </div>
           <div style="display:flex; flex-wrap:wrap; gap:12px">
-            <div class="filter-group" style="display:flex; align-items:center; gap:8px; background:white; padding:4px 12px; border-radius:10px; border:1px solid #e2e8f0">
-              <i class="fas fa-calendar-alt" style="color:#64748b"></i>
+            <div class="filter-group" style="display:flex; align-items:center; gap:8px; background:white; padding:4px 12px; border-radius:10px; border:1px solid var(--border-color)">
+              <i class="fas fa-calendar-alt" style="color:var(--text-secondary)"></i>
               <input type="date" id="dash_start_date" class="filter-input" style="border:none; background:transparent">
               <span style="color:#cbd5e1">s/d</span>
               <input type="date" id="dash_end_date" class="filter-input" style="border:none; background:transparent">
@@ -3898,7 +3921,7 @@ Terima kasih dan selamat berlatih!`;
               <div class="stat-card stat-card-clickable" id="cardTotalMember" onclick="showDashboardDetail('total_member')">
                 <div class="stat-header">
                   <span class="stat-label">Total Member</span>
-                  <div class="stat-icon" style="background:#f1f5f9; color:#64748b"><i class="fas fa-users"></i></div>
+                  <div class="stat-icon" style="background:var(--bg-light); color:var(--text-secondary)"><i class="fas fa-users"></i></div>
                 </div>
                 <div class="stat-value" id="statTotal">0</div>
                 <div class="stat-label">Database Terdaftar</div>
@@ -4073,11 +4096,11 @@ Terima kasih dan selamat berlatih!`;
                 <div class="profit-title">Fitness (Membership)</div>
                 <div style="display:flex; justify-content:space-between; align-items:center">
                   <div>
-                    <div style="font-size:12px; color:#94a3b8">Revenue</div>
+                    <div style="font-size:12px; color:var(--text-secondary)">Revenue</div>
                     <div id="statFitnessRevenue" style="font-weight:700">Rp 0</div>
                   </div>
                   <div style="text-align:right">
-                    <div style="font-size:12px; color:#94a3b8">Net (Gym - Ops)</div>
+                    <div style="font-size:12px; color:var(--text-secondary)">Net (Gym - Ops)</div>
                     <div id="statFitnessNetProfit" style="font-weight:700; color:#4f46e5">Rp 0</div>
                   </div>
                 </div>
@@ -4087,11 +4110,11 @@ Terima kasih dan selamat berlatih!`;
                 <div class="profit-title">Retail (POS Shop)</div>
                 <div style="display:flex; justify-content:space-between; align-items:center">
                   <div>
-                    <div style="font-size:12px; color:#94a3b8">Revenue</div>
+                    <div style="font-size:12px; color:var(--text-secondary)">Revenue</div>
                     <div id="statPOSRevenue" style="font-weight:700">Rp 0</div>
                   </div>
                   <div style="text-align:right">
-                    <div style="font-size:12px; color:#94a3b8">Net (Rev - Modal)</div>
+                    <div style="font-size:12px; color:var(--text-secondary)">Net (Rev - Modal)</div>
                     <div id="statPOSNetProfit" style="font-weight:700; color:#0891b2">Rp 0</div>
                   </div>
                 </div>
@@ -4111,11 +4134,11 @@ Terima kasih dan selamat berlatih!`;
 
             <!-- 4. AKTIVITAS TERBARU -->
             <div class="dashboard-section-title" id="checkinTableTitle">
-              <i class="fas fa-history" style="color:#64748b"></i> Aktivitas Check-In Terbaru
+              <i class="fas fa-history" style="color:var(--text-secondary)"></i> Aktivitas Check-In Terbaru
             </div>
             <div class="table-container">
                <div id="recentCheckinsContainer">
-                 <div style="text-align:center;padding:40px;color:#94a3b8"><i class="fas fa-spinner fa-spin"></i> Memuat...</div>
+                 <div style="text-align:center;padding:40px;color:var(--text-secondary)"><i class="fas fa-spinner fa-spin"></i> Memuat...</div>
                </div>
             </div>
           </div>
@@ -4140,11 +4163,11 @@ Terima kasih dan selamat berlatih!`;
             </div>
 
             <div class="form-card" style="margin-top:20px">
-              <div class="form-card-header" style="padding:12px 16px; background:#f8fafc; border-bottom:1px solid #e2e8f0; color:#334155">
+              <div class="form-card-header" style="padding:12px 16px; background:var(--bg-light); border-bottom:1px solid var(--border-color); color:var(--text-main)">
                 <h4 style="font-size:14px"><i class="fas fa-dumbbell"></i> Sesi PT Aktif</h4>
               </div>
               <div class="form-card-body" style="padding:16px" id="ptInfoWidget">
-                 <div style="text-align:center;padding:10px;color:#94a3b8;font-size:13px">Memuat...</div>
+                 <div style="text-align:center;padding:10px;color:var(--text-secondary);font-size:13px">Memuat...</div>
               </div>
             </div>
           </div>
@@ -4266,10 +4289,10 @@ Terima kasih dan selamat berlatih!`;
         if (s.isFiltered) {
           periodEl.style.display = 'flex';
           periodVal.textContent = s.period;
-          if (titleEl) titleEl.innerHTML = `<i class="fas fa-history" style="color:#64748b"></i> Aktivitas Check-In (${s.period})`;
+          if (titleEl) titleEl.innerHTML = `<i class="fas fa-history" style="color:var(--text-secondary)"></i> Aktivitas Check-In (${s.period})`;
         } else {
           periodEl.style.display = 'none';
-          if (titleEl) titleEl.innerHTML = `<i class="fas fa-history" style="color:#64748b"></i> Aktivitas Check-In Terbaru`;
+          if (titleEl) titleEl.innerHTML = `<i class="fas fa-history" style="color:var(--text-secondary)"></i> Aktivitas Check-In Terbaru`;
         }
       }
 
@@ -4372,7 +4395,7 @@ Terima kasih dan selamat berlatih!`;
                   <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:${isOutOfStock ? '#fef2f2' : '#fffbeb'}; border-radius:10px; border-left:4px solid ${isOutOfStock ? '#ef4444' : '#f59e0b'}">
                     <div style="display:flex; flex-direction:column">
                       <span style="font-size:13px; font-weight:700; color:${isOutOfStock ? '#991b1b' : '#92400e'}">${escapeHtml(item.name)}</span>
-                      <span style="font-size:11px; color:#64748b">ID: ${item.id}</span>
+                      <span style="font-size:11px; color:var(--text-secondary)">ID: ${item.id}</span>
                     </div>
                     <span class="badge ${isOutOfStock ? 'badge-danger' : 'badge-warning'}" style="font-size:11px">
                       ${isOutOfStock ? 'HABIS' : 'Sisa: ' + item.stock} ${item.unit}
@@ -4498,13 +4521,13 @@ Terima kasih dan selamat berlatih!`;
                       <div class="pkg-card" data-id="${p.id}" data-price="${p.price}" data-name="${p.name}" data-dur="${p.duration}" onclick="selectPkg(this)">
                         <div style="font-weight:600;margin-bottom:6px">${escapeHtml(p.name)}</div>
                         <div style="color:#667eea;font-weight:700">${formatCurrency(p.price)}</div>
-                        <div style="font-size:12px;color:#64748b;margin-top:4px">${escapeHtml(p.duration || '')}</div>
+                        <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">${escapeHtml(p.duration || '')}</div>
                       </div>
                     `).join('') : '<p class="text-muted">Tidak ada paket tersedia</p>'}
                   </div>
                 </div>
                 <div class="payment-info">
-                  <h4 style="margin-bottom:12px;color:#334155"><i class="fas fa-credit-card"></i> Informasi Pembayaran</h4>
+                  <h4 style="margin-bottom:12px;color:var(--text-main)"><i class="fas fa-credit-card"></i> Informasi Pembayaran</h4>
                   <div class="payment-row">
                     <span>Harga Paket</span>
                     <span id="paymentPackagePrice">Rp 0</span>
@@ -4520,7 +4543,7 @@ Terima kasih dan selamat berlatih!`;
                 </div>
                 <!-- Foto Member -->
                 <div class="form-group">
-                  <label class="form-label"><i class="fas fa-camera" style="color:#667eea"></i> Foto Member <span style="color:#94a3b8;font-weight:400">(Opsional)</span></label>
+                  <label class="form-label"><i class="fas fa-camera" style="color:#667eea"></i> Foto Member <span style="color:var(--text-secondary);font-weight:400">(Opsional)</span></label>
                   <div class="admin-photo-upload" id="adminPhotoUploadBox">
                     <img id="adminPhotoPreview"
                          src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90' viewBox='0 0 24 24' fill='none' stroke='%23aaa' stroke-width='1.5'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E"
@@ -4542,7 +4565,7 @@ Terima kasih dan selamat berlatih!`;
                     <input type="file" id="adminPhotoFile" accept="image/*" style="display:none" onchange="adminPreviewMemberPhoto(this)">
                     <input type="hidden" id="adminPhotoBase64">
                   </div>
-                  <small style="color:#94a3b8;font-size:12px"><i class="fas fa-info-circle"></i> Format: JPG, PNG, WEBP (maks 2MB)</small>
+                  <small style="color:var(--text-secondary);font-size:12px"><i class="fas fa-info-circle"></i> Format: JPG, PNG, WEBP (maks 2MB)</small>
                 </div>
 
                 <div class="form-row">
@@ -4923,34 +4946,34 @@ Terima kasih dan selamat berlatih!`;
                   <div class="info-box" style="background:white;border-radius:10px;padding:16px;margin:12px 0">
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:14px">
                       <div>
-                        <span style="color:#64748b">Member ID</span><br>
-                        <code style="background:#f1f5f9;padding:4px 8px;border-radius:4px">${escapeHtml(res.memberId || '-')}</code>
+                        <span style="color:var(--text-secondary)">Member ID</span><br>
+                        <code style="background:var(--bg-light);padding:4px 8px;border-radius:4px">${escapeHtml(res.memberId || '-')}</code>
                       </div>
                       <div>
-                        <span style="color:#64748b">Nama</span><br>
+                        <span style="color:var(--text-secondary)">Nama</span><br>
                         <b>${escapeHtml(res.memberName || name)}</b>
                       </div>
                       <div>
-                        <span style="color:#64748b">Paket</span><br>
+                        <span style="color:var(--text-secondary)">Paket</span><br>
                         <b>${escapeHtml(res.currentPackage || pkg.name)}</b>
                       </div>
                       <div>
-                        <span style="color:#64748b">Telepon</span><br>
+                        <span style="color:var(--text-secondary)">Telepon</span><br>
                         ${escapeHtml(res.memberPhone || phone)}
                       </div>
                       <div>
-                        <span style="color:#64748b">Berlaku s/d</span><br>
+                        <span style="color:var(--text-secondary)">Berlaku s/d</span><br>
                         <b>${formatDate(res.expiryDate)}</b>
                       </div>
                       <div>
-                        <span style="color:#64748b">Sisa Hari</span><br>
+                        <span style="color:var(--text-secondary)">Sisa Hari</span><br>
                         <b style="color:${daysLeft <= 7 ? '#f59e0b' : '#22c55e'};font-size:18px">${daysLeft} hari</b>
                       </div>
                     </div>
                   </div>
                   
                   <div class="payment-info" style="margin:12px 0">
-                    <h4 style="margin-bottom:12px;color:#334155"><i class="fas fa-credit-card"></i> Informasi Pembayaran</h4>
+                    <h4 style="margin-bottom:12px;color:var(--text-main)"><i class="fas fa-credit-card"></i> Informasi Pembayaran</h4>
                     <div class="payment-row">
                       <span>Harga Paket</span>
                       <span>${formatCurrency(res.packagePrice || pkg.price)}</span>
@@ -4977,7 +5000,7 @@ Terima kasih dan selamat berlatih!`;
                   
                   ${res.qrCodeUrl ? `
                     <div style="text-align:center;margin:20px 0 10px 0">
-                      <h4 style="color:#334155;margin:0 0 12px 0">QR Code Member</h4>
+                      <h4 style="color:var(--text-main);margin:0 0 12px 0">QR Code Member</h4>
                       <img src="${escapeHtml(res.qrCodeUrl)}" alt="QR Code" style="width:150px;height:150px;border:2px solid #667eea;border-radius:8px;padding:8px">
                     </div>
                   ` : ''}
@@ -4994,7 +5017,7 @@ Terima kasih dan selamat berlatih!`;
                   
                   ${warningHtml}
                   
-                  <div style="margin-top:12px;text-align:right;color:#64748b;font-size:12px">
+                  <div style="margin-top:12px;text-align:right;color:var(--text-secondary);font-size:12px">
                     <i class="far fa-clock"></i> Registrasi: ${formatTime(checkinTime)}
                   </div>
                   
@@ -5026,7 +5049,7 @@ Terima kasih dan selamat berlatih!`;
                     </div>
                   </div>
                   <div class="info-box" style="background:white;border-radius:10px;padding:16px;margin:12px 0">
-                    <p style="margin:0"><i class="fas fa-info-circle" style="color:#64748b"></i> ${escapeHtml(res.details || '')}</p>
+                    <p style="margin:0"><i class="fas fa-info-circle" style="color:var(--text-secondary)"></i> ${escapeHtml(res.details || '')}</p>
                   </div>
                 `;
 
@@ -5143,7 +5166,7 @@ Terima kasih dan selamat berlatih!`;
                     .member-id { font-family: monospace; font-size: 14px; color: #7c3aed; font-weight: bold; margin-top: 2px; }
                     
                     .details { display: grid; grid-template-columns: 1fr; gap: 4px; }
-                    .info-row { font-size: 10px; display: flex; align-items: center; gap: 8px; color: #94a3b8; }
+                    .info-row { font-size: 10px; display: flex; align-items: center; gap: 8px; color:var(--text-secondary); }
                     .info-row b { color: #facc15; font-size: 11px; }
                     
                     .footer-tag { 
@@ -5251,7 +5274,7 @@ Terima kasih dan selamat berlatih!`;
                   </div>
                   <div class="form-group">
                     <label class="form-label">Info Member</label>
-                    <div id="selectedMemberInfo" style="padding:14px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;font-size:13px;color:#64748b;min-height:100px">
+                    <div id="selectedMemberInfo" style="padding:14px;background:var(--bg-light);border-radius:8px;border:1px solid var(--border-color);font-size:13px;color:var(--text-secondary);min-height:100px">
                       <i class="fas fa-info-circle"></i> Belum ada member dipilih
                     </div>
                   </div>
@@ -5283,7 +5306,7 @@ Terima kasih dan selamat berlatih!`;
                 </div>
                 <div class="payment-info">
                   <h4 style="margin-bottom:12px"><i class="fas fa-receipt"></i> Ringkasan Transaksi</h4>
-                  <div id="transactionSummary" style="color:#334155">
+                  <div id="transactionSummary" style="color:var(--text-main)">
                     <p class="text-muted">Pilih member dan paket untuk melihat ringkasan</p>
                   </div>
                 </div>
@@ -5336,7 +5359,7 @@ Terima kasih dan selamat berlatih!`;
         renderMemberSearchResults(localResults, 'memberSearchResults', 'selectMemberForTrx');
         // Still fire server search in background to ensure freshness, but no spinner
       } else {
-        document.getElementById('memberSearchResults').innerHTML = '<div style="text-align:center;padding:10px;color:#94a3b8"><i class="fas fa-spinner fa-spin"></i> Mencari...</div>';
+        document.getElementById('memberSearchResults').innerHTML = '<div style="text-align:center;padding:10px;color:var(--text-secondary)"><i class="fas fa-spinner fa-spin"></i> Mencari...</div>';
       }
 
       window.trxSearchTimeout = setTimeout(function () {
@@ -5356,7 +5379,7 @@ Terima kasih dan selamat berlatih!`;
       if (!el) return;
 
       if (!members || members.length === 0) {
-        el.innerHTML = `<div style="padding:20px;text-align:center;background:#f8fafc;border-radius:8px"><p style="color:#64748b;font-size:13px">Tidak ada member ditemukan</p></div>`;
+        el.innerHTML = `<div style="padding:20px;text-align:center;background:var(--bg-light);border-radius:8px"><p style="color:var(--text-secondary);font-size:13px">Tidak ada member ditemukan</p></div>`;
         return;
       }
 
@@ -5367,7 +5390,7 @@ Terima kasih dan selamat berlatih!`;
 
         html += `
           <div onclick="${selectFnName}(decodeURIComponent('${memberJson}'))" 
-               style="padding:12px 14px;background:white;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer;margin-bottom:6px;font-size:13px;transition:0.2s" 
+               style="padding:12px 14px;background:white;border:1px solid var(--border-color);border-radius:8px;cursor:pointer;margin-bottom:6px;font-size:13px;transition:0.2s" 
                onmouseover="this.style.background='#f0f4ff'" 
                onmouseout="this.style.background='white'">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
@@ -5420,7 +5443,7 @@ Terima kasih dan selamat berlatih!`;
       if (localResults) {
         renderMemberSearchResults(localResults, 'posMemberResults', 'selectMemberForPOS');
       } else {
-        document.getElementById('posMemberResults').innerHTML = '<div style="text-align:center;padding:10px;color:#94a3b8"><i class="fas fa-spinner fa-spin"></i></div>';
+        document.getElementById('posMemberResults').innerHTML = '<div style="text-align:center;padding:10px;color:var(--text-secondary)"><i class="fas fa-spinner fa-spin"></i></div>';
       }
 
       window.posSearchTimeout = setTimeout(function () {
@@ -5476,7 +5499,7 @@ Terima kasih dan selamat berlatih!`;
               </div>
               <span class="badge badge-${statusClass}">${escapeHtml(member.status)}</span>
             </div>
-            <div style="background:#f8fafc;padding:10px;border-radius:8px;margin:8px 0">
+            <div style="background:var(--bg-light);padding:10px;border-radius:8px;margin:8px 0">
               <div><i class="fas fa-id-card"></i> <code>${escapeHtml(member.memberId)}</code></div>
               <div><i class="fas fa-phone"></i> ${escapeHtml(member.phone)}</div>
               <div><i class="fas fa-envelope"></i> ${escapeHtml(member.email || '-')}</div>
@@ -5650,7 +5673,7 @@ Terima kasih dan selamat berlatih!`;
                 <div class="form-group" style="flex:1; margin-bottom:0">
                   <div style="display:flex; gap:8px">
                     <div style="position:relative; flex:1">
-                      <i class="fas fa-search" style="position:absolute; left:12px; top:12px; color:#94a3b8"></i>
+                      <i class="fas fa-search" style="position:absolute; left:12px; top:12px; color:var(--text-secondary)"></i>
                       <input type="text" id="posSearch" class="form-input" style="padding-left:36px" placeholder="Cari produk atau scan barcode..." oninput="filterPOSProducts()">
                     </div>
                     <button class="btn btn-info" onclick="startBarcodeScannerForPOS()" title="Scan Barcode">
@@ -5669,7 +5692,7 @@ Terima kasih dan selamat berlatih!`;
                 <div class="category-pill active" onclick="filterPOSByCategory('All')">All Items</div>
               </div>
               <div id="posProductGrid" class="product-grid">
-                <div style="text-align:center; padding:40px; color:#94a3b8; grid-column: 1/-1">
+                <div style="text-align:center; padding:40px; color:var(--text-secondary); grid-column: 1/-1">
                   <i class="fas fa-spinner fa-spin fa-2x"></i>
                   <p>Memuat produk...</p>
                 </div>
@@ -5688,7 +5711,7 @@ Terima kasih dan selamat berlatih!`;
                 </button>
               </div>
               <div class="form-card-body" id="posTodayTransactions" style="padding:0">
-                <div style="text-align:center; padding:30px; color:#94a3b8">
+                <div style="text-align:center; padding:30px; color:var(--text-secondary)">
                   <i class="fas fa-spinner fa-spin"></i>
                 </div>
               </div>
@@ -5716,7 +5739,7 @@ Terima kasih dan selamat berlatih!`;
                     <input type="text" id="pos_memberId" class="form-input" placeholder="Cari Nama/ID/HP..." oninput="searchMemberForPOS(this.value)">
                     <div id="posMemberResults" class="search-dropdown"></div>
                   </div>
-                  <div id="pos_memberInfo" style="margin-top:4px; font-size:12px; color:#64748b">Guest Customer</div>
+                  <div id="pos_memberInfo" style="margin-top:4px; font-size:12px; color:var(--text-secondary)">Guest Customer</div>
                 </div>
                 <div class="form-group" style="margin-bottom:0">
                   <label class="form-label">WhatsApp Customer</label>
@@ -5790,7 +5813,7 @@ Terima kasih dan selamat berlatih!`;
             });
 
             if (list.length === 0) {
-              el.innerHTML = '<div style="text-align:center; padding:30px; color:#94a3b8">Belum ada transaksi hari ini</div>';
+              el.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-secondary)">Belum ada transaksi hari ini</div>';
               return;
             }
 
@@ -5842,7 +5865,7 @@ Terima kasih dan selamat berlatih!`;
       const el = document.getElementById(containerId);
       if (!el) return;
 
-      el.innerHTML = '<div style="text-align:center; padding:30px; color:#94a3b8"><i class="fas fa-spinner fa-spin"></i> Memuat transaksi terakhir...</div>';
+      el.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-secondary)"><i class="fas fa-spinner fa-spin"></i> Memuat transaksi terakhir...</div>';
 
       const isAdmin = currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Super Admin');
 
@@ -5851,7 +5874,7 @@ Terima kasih dan selamat berlatih!`;
           if (res && res.success) {
             let list = res.transactions || [];
             if (list.length === 0) {
-              el.innerHTML = '<div style="text-align:center; padding:30px; color:#94a3b8">Belum ada transaksi terakhir</div>';
+              el.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-secondary)">Belum ada transaksi terakhir</div>';
               return;
             }
 
@@ -5940,7 +5963,7 @@ Terima kasih dan selamat berlatih!`;
                         <td>${t.transactionDate}</td>
                         <td>
                           <b>${escapeHtml(t.memberName)}</b><br>
-                          <small style="color:#64748b">${t.memberId}</small>
+                          <small style="color:var(--text-secondary)">${t.memberId}</small>
                         </td>
                         <td>${escapeHtml(t.packageName)}</td>
                         <td><b>${formatCurrency(t.totalAmount)}</b><br><span class="badge badge-outline" style="font-size:10px">${escapeHtml(t.paymentMethod)}</span></td>
@@ -6032,7 +6055,7 @@ Terima kasih dan selamat berlatih!`;
       if (!el) return;
 
       if (list.length === 0) {
-        el.innerHTML = '<div style="text-align:center; padding:40px; color:#94a3b8; grid-column: 1/-1">Produk tidak ditemukan</div>';
+        el.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-secondary); grid-column: 1/-1">Produk tidak ditemukan</div>';
         return;
       }
 
@@ -6528,7 +6551,7 @@ Terima kasih dan selamat berlatih!`;
       });
 
       if (!combined.length) {
-        container.innerHTML = '<div style="text-align:center;padding:20px;color:#94a3b8">Belum ada aktivitas hari ini</div>';
+        container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-secondary)">Belum ada aktivitas hari ini</div>';
         return;
       }
 
@@ -6623,7 +6646,7 @@ Terima kasih dan selamat berlatih!`;
             <div class="form-group" style="max-width:500px; margin:0 auto 20px auto; position:relative">
               <label class="form-label" style="text-align:left">Cari Nama atau ID Produk</label>
               <div style="position:relative">
-                <i class="fas fa-search" style="position:absolute; left:12px; top:12px; color:#94a3b8"></i>
+                <i class="fas fa-search" style="position:absolute; left:12px; top:12px; color:var(--text-secondary)"></i>
                 <input type="text" id="opnameSearch" class="form-input" style="padding-left:36px" placeholder="Ketik nama produk..." oninput="searchProductForOpname(this.value)" onfocus="ensureProductsLoaded()">
               </div>
               <!-- Floating search results -->
@@ -6632,11 +6655,11 @@ Terima kasih dan selamat berlatih!`;
             
             <div style="margin:20px 0; display:flex; align-items:center; gap:12px; justify-content:center">
               <span style="height:1px; background:#e2e8f0; flex:1"></span>
-              <span style="color:#64748b; font-size:13px; font-weight:600">ATAU SCAN BARCODE</span>
+              <span style="color:var(--text-secondary); font-size:13px; font-weight:600">ATAU SCAN BARCODE</span>
               <span style="height:1px; background:#e2e8f0; flex:1"></span>
             </div>
 
-            <div id="invScannerContainer" style="max-width:500px; margin:0 auto; border:2px solid #e2e8f0; border-radius:12px; overflow:hidden; margin-bottom:20px; background:#f1f5f9">
+            <div id="invScannerContainer" style="max-width:500px; margin:0 auto; border:2px solid var(--border-color); border-radius:12px; overflow:hidden; margin-bottom:20px; background:var(--bg-light)">
               <div id="inv-reader" style="width:100%"></div>
             </div>
             <div id="invScannerResult" style="margin-bottom:20px; font-weight:600; color:#667eea"></div>
@@ -6686,7 +6709,7 @@ Terima kasih dan selamat berlatih!`;
       );
 
       if (filtered.length === 0) {
-        resultsEl.innerHTML = '<div style="padding:10px; color:#94a3b8">Produk tidak ditemukan</div>';
+        resultsEl.innerHTML = '<div style="padding:10px; color:var(--text-secondary)">Produk tidak ditemukan</div>';
         resultsEl.style.display = 'block';
         return;
       }
@@ -6694,7 +6717,7 @@ Terima kasih dan selamat berlatih!`;
       resultsEl.innerHTML = filtered.map(p => `
         <div class="search-item" onclick="selectProductForOpname('${p.id}')">
           <div style="font-weight:600; font-size:13px">${escapeHtml(p.name)}</div>
-          <div style="font-size:11px; color:#64748b">ID: ${p.id} | Stok: ${p.stock} ${p.unit}</div>
+          <div style="font-size:11px; color:var(--text-secondary)">ID: ${p.id} | Stok: ${p.stock} ${p.unit}</div>
         </div>
       `).join('');
       resultsEl.style.display = 'block';
@@ -6817,7 +6840,7 @@ Terima kasih dan selamat berlatih!`;
               </div>
             `;
           } else {
-            el.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8">Belum ada riwayat update pada periode ini.</div>';
+            el.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-secondary)">Belum ada riwayat update pada periode ini.</div>';
           }
         })
         .getFilteredRestockHistory(start, end, prodQuery);
@@ -7462,7 +7485,7 @@ Terima kasih dan selamat berlatih!`;
             <div id="checkinResult"></div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
               <div>
-                <h4 style="margin-bottom:16px;font-weight:600;color:#334155">
+                <h4 style="margin-bottom:16px;font-weight:600;color:var(--text-main)">
                   <i class="fas fa-camera"></i> Scan QR Code
                 </h4>
                 <div class="scanner-container" id="scannerContainer">
@@ -7470,7 +7493,7 @@ Terima kasih dan selamat berlatih!`;
                   <div class="scanner-frame" id="scannerFrame">
                     <div class="scan-line"></div>
                   </div>
-                  <div id="scannerPlaceholder" style="padding:60px 20px;text-align:center;color:#94a3b8">
+                  <div id="scannerPlaceholder" style="padding:60px 20px;text-align:center;color:var(--text-secondary)">
                     <i class="fas fa-camera fa-3x" style="margin-bottom:16px;display:block"></i>
                     <p>Klik "Mulai Scan" untuk mengaktifkan kamera</p>
                   </div>
@@ -7485,14 +7508,14 @@ Terima kasih dan selamat berlatih!`;
                 </div>
               </div>
               <div>
-                <h4 style="margin-bottom:16px;font-weight:600;color:#334155">
+                <h4 style="margin-bottom:16px;font-weight:600;color:var(--text-main)">
                   <i class="fas fa-keyboard"></i> Input Manual
                 </h4>
                 <div class="form-group">
                   <label class="form-label">Member ID / Nama / HP</label>
                   <input id="ci_memberId" class="form-input" placeholder="Ketik ID, Nama, atau No. HP..." oninput="searchMemberForCheckin(this.value)" autocomplete="off">
                 </div>
-                <p style="font-size:13px;color:#64748b;margin-bottom:12px">Profil member akan muncul secara otomatis di atas.</p>
+                <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px">Profil member akan muncul secara otomatis di atas.</p>
                 <button class="btn btn-info btn-block" onclick="openVisitModal()">
                   <i class="fas fa-walking"></i> Visit Harian (Rp 25.000)
                 </button>
@@ -7500,13 +7523,13 @@ Terima kasih dan selamat berlatih!`;
             </div>
             <div id="todayCheckinWidget" style="margin-top:24px">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-                <h4 style="font-weight:600;color:#334155"><i class="fas fa-list-check"></i> Check-In Hari Ini</h4>
+                <h4 style="font-weight:600;color:var(--text-main)"><i class="fas fa-list-check"></i> Check-In Hari Ini</h4>
                 <button class="btn btn-sm btn-outline" onclick="loadTodayCheckins()">
                   <i class="fas fa-sync-alt"></i> Refresh
                 </button>
               </div>
               <div id="todayCheckinsTable">
-                <div style="text-align:center;padding:20px;color:#94a3b8">
+                <div style="text-align:center;padding:20px;color:var(--text-secondary)">
                   <i class="fas fa-spinner fa-spin"></i> Memuat...
                 </div>
               </div>
@@ -7638,7 +7661,7 @@ Terima kasih dan selamat berlatih!`;
             `;
           } else {
             el.innerHTML = `
-              <div style="text-align:center;padding:40px;color:#94a3b8">
+              <div style="text-align:center;padding:40px;color:var(--text-secondary)">
                 <p>Belum ada check-in hari ini</p>
               </div>
             `;
@@ -7672,9 +7695,9 @@ Terima kasih dan selamat berlatih!`;
         renderCheckinProfile(localM, false);
       } else {
         previewArea.innerHTML = `
-          <div style="text-align:center;padding:20px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:20px">
+          <div style="text-align:center;padding:20px;background:var(--bg-light);border-radius:12px;border:1px solid var(--border-color);margin-bottom:20px">
             <i class="fas fa-spinner fa-spin fa-2x" style="color:#667eea;margin-bottom:12px"></i>
-            <p style="color:#64748b">Mengambil data member...</p>
+            <p style="color:var(--text-secondary)">Mengambil data member...</p>
           </div>
         `;
       }
@@ -7745,13 +7768,13 @@ Terima kasih dan selamat berlatih!`;
         <div class="result-card" style="display:block;margin-bottom:20px;border-left:6px solid ${m.status === 'Aktif' ? '#22c55e' : '#ef4444'}; transition: 0.3s">
           <div style="display:flex;gap:20px;align-items:start">
             <div style="flex-shrink:0; position: relative;">
-              <img src="${profilePic || defaultPic}" style="width:130px;height:130px;border-radius:12px;object-fit:cover;border:3px solid #f1f5f9;background:#f8fafc" onerror="this.src='${defaultPic}'">
+              <img src="${profilePic || defaultPic}" style="width:130px;height:130px;border-radius:12px;object-fit:cover;border:3px solid #f1f5f9;background:var(--bg-light)" onerror="this.src='${defaultPic}'">
             </div>
             <div style="flex-grow:1">
               <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px">
                 <div>
                   <h3 style="margin:0;color:#1e293b">${escapeHtml(m.fullName || m.name)}</h3>
-                  <code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;font-size:13px">${escapeHtml(m.memberId || m.id)}</code>
+                  <code style="background:var(--bg-light);padding:2px 6px;border-radius:4px;font-size:13px">${escapeHtml(m.memberId || m.id)}</code>
                 </div>
                 <span class="badge badge-${statusClass}">${escapeHtml(m.status)}</span>
               </div>
@@ -7763,7 +7786,7 @@ Terima kasih dan selamat berlatih!`;
                 <div><span class="text-muted">Nomor HP:</span><br><b>${escapeHtml(m.phone)}</b></div>
               </div>
 
-              <div style="margin-bottom:16px;padding:10px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0">
+              <div style="margin-bottom:16px;padding:10px;background:var(--bg-light);border-radius:8px;border:1px solid var(--border-color)">
                 <label style="display:flex;align-items:center;gap:10px;cursor:${m.ptSessionsLeft > 0 ? 'pointer' : 'not-allowed'}; opacity: ${m.ptSessionsLeft > 0 ? '1' : '0.6'}">
                   <input type="checkbox" id="ci_usePT" style="width:18px;height:18px" ${m.ptSessionsLeft > 0 ? 'checked' : 'disabled'}>
                   <div>
@@ -7974,16 +7997,16 @@ Terima kasih dan selamat berlatih!`;
           <div class="info-box" style="background:white;border-radius:10px;padding:16px;margin:12px 0">
             <div style="font-size:16px;margin-bottom:8px"><b>${escapeHtml(memberName)}</b></div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:14px">
-              <div><span style="color:#64748b">ID Member</span><br><code style="background:#f1f5f9;padding:4px 8px;border-radius:4px">${escapeHtml(res.memberId || mid)}</code></div>
-              <div><span style="color:#64748b">Paket</span><br><b>${escapeHtml(res.currentPackage || '-')}</b></div>
-              <div><span style="color:#64748b">Berlaku s/d</span><br><b>${formatDate(res.expiryDate)}</b></div>
-              <div><span style="color:#64748b">Sisa Hari</span><br><b style="color:${daysLeft <= 7 ? '#f59e0b' : '#22c55e'};font-size:18px">${daysLeft} hari</b></div>
+              <div><span style="color:var(--text-secondary)">ID Member</span><br><code style="background:var(--bg-light);padding:4px 8px;border-radius:4px">${escapeHtml(res.memberId || mid)}</code></div>
+              <div><span style="color:var(--text-secondary)">Paket</span><br><b>${escapeHtml(res.currentPackage || '-')}</b></div>
+              <div><span style="color:var(--text-secondary)">Berlaku s/d</span><br><b>${formatDate(res.expiryDate)}</b></div>
+              <div><span style="color:var(--text-secondary)">Sisa Hari</span><br><b style="color:${daysLeft <= 7 ? '#f59e0b' : '#22c55e'};font-size:18px">${daysLeft} hari</b></div>
             </div>
           </div>
           ${ptHtml} ${warningHtml}
           <div style="margin-top:12px;display:flex;gap:8px;justify-content:space-between;align-items:center">
             <div><span class="badge badge-${ptUsed ? 'success' : 'info'}">${ptUsed ? ' 💪 Menggunakan PT' : 'Tidak 💪 Menggunakan PT'}</span></div>
-            <div style="color:#64748b;font-size:12px"><i class="far fa-clock"></i> Check-in: ${formatTime(checkinTime)}</div>
+            <div style="color:var(--text-secondary);font-size:12px"><i class="far fa-clock"></i> Check-in: ${formatTime(checkinTime)}</div>
           </div>
         </div>
       `;
@@ -8022,8 +8045,8 @@ Terima kasih dan selamat berlatih!`;
             </div>
           </div>
           <div class="info-box" style="background:white;border-radius:10px;padding:16px;margin:12px 0">
-            <p style="margin:0 0 8px 0"><i class="fas fa-info-circle" style="color:#64748b"></i> ${escapeHtml(errorDetails)}</p>
-            ${memberInfo ? `<p style="margin:0"><i class="fas fa-user" style="color:#64748b"></i> ${escapeHtml(memberInfo)}</p>` : ''}
+            <p style="margin:0 0 8px 0"><i class="fas fa-info-circle" style="color:var(--text-secondary)"></i> ${escapeHtml(errorDetails)}</p>
+            ${memberInfo ? `<p style="margin:0"><i class="fas fa-user" style="color:var(--text-secondary)"></i> ${escapeHtml(memberInfo)}</p>` : ''}
           </div>
           ${errorType === 'inactive' || errorType === 'expired' ? `<div style="margin-top:12px"><button class="btn btn-warning btn-sm" onclick="showView('transactions')"><i class="fas fa-sync-alt"></i> Perpanjang Sekarang</button></div>` : ''}
         </div>
@@ -8087,7 +8110,7 @@ Terima kasih dan selamat berlatih!`;
         document.getElementById('visitSearchResults').innerHTML = '';
         return;
       }
-      document.getElementById('visitSearchResults').innerHTML = '<div style="text-align:center;padding:10px;color:#94a3b8"><i class="fas fa-spinner fa-spin"></i></div>';
+      document.getElementById('visitSearchResults').innerHTML = '<div style="text-align:center;padding:10px;color:var(--text-secondary)"><i class="fas fa-spinner fa-spin"></i></div>';
       window.visitSearchTimeout = setTimeout(function () {
         google.script.run
         .withSuccessHandler(function (res) {
@@ -8099,15 +8122,15 @@ Terima kasih dan selamat berlatih!`;
                 const visitorJson = encodeURIComponent(JSON.stringify(v)).replace(/'/g, "%27");
                 html += `
                   <div onclick="selectVisitorForVisit(decodeURIComponent('${visitorJson}'))" 
-                       style="padding:10px;background:white;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer;margin-bottom:6px;font-size:12px">
+                       style="padding:10px;background:white;border:1px solid var(--border-color);border-radius:8px;cursor:pointer;margin-bottom:6px;font-size:12px">
                     <b>${escapeHtml(v.name)}</b>
-                    <div style="color:#64748b;font-size:11px">HP: ${v.phone}</div>
+                    <div style="color:var(--text-secondary);font-size:11px">HP: ${v.phone}</div>
                   </div>
                 `;
               });
               el.innerHTML = html;
             } else {
-              el.innerHTML = '<div style="padding:10px;text-align:center;font-size:12px;color:#94a3b8">Tidak ditemukan</div>';
+              el.innerHTML = '<div style="padding:10px;text-align:center;font-size:12px;color:var(--text-secondary)">Tidak ditemukan</div>';
             }
           })
           .searchPreviousVisitors(searchInput);
@@ -8149,7 +8172,7 @@ Terima kasih dan selamat berlatih!`;
             </div>
             <div class="info-box" style="background:white;border-radius:10px;padding:16px;margin:12px 0">
               <p><b>${escapeHtml(name)}</b> (${escapeHtml(phone)})</p>
-              <p style="margin-top:4px;font-size:13px;color:#64748b">Visit ${escapeHtml(typeName)} - ${payment}</p>
+              <p style="margin-top:4px;font-size:13px;color:var(--text-secondary)">Visit ${escapeHtml(typeName)} - ${payment}</p>
             </div>
           </div>
         `;
@@ -8248,7 +8271,7 @@ Terima kasih dan selamat berlatih!`;
             
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
               <div>
-                <h4 style="margin-bottom:16px;font-weight:600;color:#334155">
+                <h4 style="margin-bottom:16px;font-weight:600;color:var(--text-main)">
                   <i class="fas fa-user-plus"></i> Registrasi Sesi PT
                 </h4>
                 
@@ -8263,8 +8286,8 @@ Terima kasih dan selamat berlatih!`;
                   <div id="ptMemberResults" style="margin-top:8px;max-height:300px;overflow-y:auto;border-radius:8px;"></div>
                 </div>
                 
-                <div id="ptMemberInfo" style="padding:16px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;font-size:13px;color:#64748b;margin-bottom:16px;min-height:100px">
-                  <div style="text-align:center;color:#94a3b8">
+                <div id="ptMemberInfo" style="padding:16px;background:var(--bg-light);border-radius:8px;border:1px solid var(--border-color);font-size:13px;color:var(--text-secondary);margin-bottom:16px;min-height:100px">
+                  <div style="text-align:center;color:var(--text-secondary)">
                     <i class="fas fa-info-circle fa-2x" style="margin-bottom:8px;display:block"></i>
                     <p>Belum ada member dipilih.<br>Ketik untuk mencari member.</p>
                   </div>
@@ -8291,12 +8314,12 @@ Terima kasih dan selamat berlatih!`;
                   <div class="form-group">
                     <label class="form-label"><i class="fas fa-tag"></i> Harga/Sesi *</label>
                     <input id="pt_price" type="number" class="form-input" min="10000" value="150000" 
-                           oninput="updatePTSummary()" placeholder="150000" readonly style="background:#f1f5f9; cursor:not-allowed">
+                           oninput="updatePTSummary()" placeholder="150000" readonly style="background:var(--bg-light); cursor:not-allowed">
                   </div>
                 </div>
                 
                 <div class="payment-info">
-                  <h4 style="margin-bottom:12px;color:#334155">
+                  <h4 style="margin-bottom:12px;color:var(--text-main)">
                     <i class="fas fa-receipt"></i> Ringkasan Pembayaran
                   </h4>
                   <div class="payment-row">
@@ -8329,11 +8352,11 @@ Terima kasih dan selamat berlatih!`;
               </div>
               
               <div>
-                <h4 style="margin-bottom:16px;font-weight:600;color:#334155">
+                <h4 style="margin-bottom:16px;font-weight:600;color:var(--text-main)">
                   <i class="fas fa-list"></i> Sesi PT Aktif
                 </h4>
                 <div id="ptActiveList" style="max-height:500px;overflow-y:auto;padding-right:8px">
-                  <div style="text-align:center;padding:30px;color:#94a3b8">
+                  <div style="text-align:center;padding:30px;color:var(--text-secondary)">
                     <i class="fas fa-spinner fa-spin fa-2x"></i>
                     <p style="margin-top:12px">Memuat data...</p>
                   </div>
@@ -8447,7 +8470,7 @@ Terima kasih dan selamat berlatih!`;
         return;
       }
 
-      resultsEl.innerHTML = '<div style="text-align:center;padding:10px;color:#94a3b8"><i class="fas fa-spinner fa-spin"></i> Mencari...</div>';
+      resultsEl.innerHTML = '<div style="text-align:center;padding:10px;color:var(--text-secondary)"><i class="fas fa-spinner fa-spin"></i> Mencari...</div>';
 
       window.ptSearchTimeout = setTimeout(function () {
 
@@ -8479,7 +8502,7 @@ Terima kasih dan selamat berlatih!`;
 
                 html += `
                   <div onclick="${canRegisterPT ? `selectMemberForPT(decodeURIComponent('${memberJson}'))` : 'showToast(\'Member tidak aktif, tidak bisa registrasi PT\', \'warning\')'}" 
-                       style="padding:12px 14px;background:white;border:1px solid #e2e8f0;border-radius:8px;cursor:${cursorStyle};margin-bottom:6px;font-size:13px;transition:0.2s;${opacityStyle}" 
+                       style="padding:12px 14px;background:white;border:1px solid var(--border-color);border-radius:8px;cursor:${cursorStyle};margin-bottom:6px;font-size:13px;transition:0.2s;${opacityStyle}" 
                        onmouseover="${canRegisterPT ? hoverStyle : ''}" 
                        onmouseout="this.style.background='white'">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
@@ -8493,7 +8516,7 @@ Terima kasih dan selamat berlatih!`;
                       <span><i class="fas fa-id-card" style="font-size:11px"></i> <code>${escapeHtml(m.memberId)}</code></span>
                       <span><i class="fas fa-phone"></i> ${escapeHtml(m.phone)}</span>
                     </div>
-                    <div style="color:#64748b;font-size:12px;margin-top:4px;padding-top:4px;border-top:1px dashed #e2e8f0">
+                    <div style="color:var(--text-secondary);font-size:12px;margin-top:4px;padding-top:4px;border-top:1px dashed var(--border-color)">
                       <i class="fas fa-box"></i> Paket: ${escapeHtml(m.currentPackage || '-')}  
                       <i class="far fa-calendar"></i> Exp: ${formatDate(m.expiryDate)}
                       ${m.daysLeft !== null ? `  Sisa: <b>${m.daysLeft}</b> hari` : ''}
@@ -8509,10 +8532,10 @@ Terima kasih dan selamat berlatih!`;
               resultsEl.innerHTML = html;
             } else {
               resultsEl.innerHTML = `
-                <div style="padding:20px;text-align:center;background:#f8fafc;border-radius:8px">
-                  <i class="fas fa-dumbbell" style="color:#94a3b8;font-size:24px;margin-bottom:8px;display:block"></i>
-                  <p style="color:#64748b;font-size:13px">Tidak ada member ditemukan dengan kata kunci "${escapeHtml(searchInput)}"</p>
-                  <p style="color:#94a3b8;font-size:12px;margin-top:8px">Coba gunakan nama, ID member, atau nomor telepon</p>
+                <div style="padding:20px;text-align:center;background:var(--bg-light);border-radius:8px">
+                  <i class="fas fa-dumbbell" style="color:var(--text-secondary);font-size:24px;margin-bottom:8px;display:block"></i>
+                  <p style="color:var(--text-secondary);font-size:13px">Tidak ada member ditemukan dengan kata kunci "${escapeHtml(searchInput)}"</p>
+                  <p style="color:var(--text-secondary);font-size:12px;margin-top:8px">Coba gunakan nama, ID member, atau nomor telepon</p>
                 </div>
               `;
             }
@@ -8579,7 +8602,7 @@ Terima kasih dan selamat berlatih!`;
               <span class="badge badge-${statusClass}">${escapeHtml(member.status)}</span>
             </div>
             
-            <div style="background:#f8fafc;padding:10px;border-radius:8px;margin:8px 0">
+            <div style="background:var(--bg-light);padding:10px;border-radius:8px;margin:8px 0">
               <div><i class="fas fa-id-card"></i> <code>${escapeHtml(member.memberId)}</code></div>
               <div><i class="fas fa-phone"></i> ${escapeHtml(member.phone)}</div>
               <div><i class="fas fa-envelope"></i> ${escapeHtml(member.email || '-')}</div>
@@ -8687,7 +8710,7 @@ Terima kasih dan selamat berlatih!`;
           ptSelectedMember = null;
           if (document.getElementById('pt_memberId')) document.getElementById('pt_memberId').value = '';
           if (document.getElementById('ptMemberInfo')) {
-            document.getElementById('ptMemberInfo').innerHTML = '<div style="text-align:center;color:#94a3b8"><i class="fas fa-info-circle fa-2x" style="margin-bottom:8px;display:block"></i><p>Belum ada member dipilih.</p></div>';
+            document.getElementById('ptMemberInfo').innerHTML = '<div style="text-align:center;color:var(--text-secondary)"><i class="fas fa-info-circle fa-2x" style="margin-bottom:8px;display:block"></i><p>Belum ada member dipilih.</p></div>';
           }
           if (document.getElementById('pt_trainer')) document.getElementById('pt_trainer').value = '';
           if (document.getElementById('pt_sessions')) document.getElementById('pt_sessions').value = '10';
@@ -8747,14 +8770,14 @@ Terima kasih dan selamat berlatih!`;
           });
 
           if (!list || !list.length) {
-            el.innerHTML = '<p style="text-align:center;padding:30px;color:#94a3b8;background:#f8fafc;border-radius:8px">Tidak ada sesi PT aktif</p>';
+            el.innerHTML = '<p style="text-align:center;padding:30px;color:var(--text-secondary);background:var(--bg-light);border-radius:8px">Tidak ada sesi PT aktif</p>';
             return;
           }
 
           el.innerHTML = list.map(s => {
             const progress = Math.round((s.remainingSessions / s.totalSessions) * 100) || 0;
             return `
-              <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:16px; margin-bottom:12px">
+              <div style="background:var(--bg-light); border:1px solid var(--border-color); border-radius:12px; padding:16px; margin-bottom:12px">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
                   <b style="font-size:15px">${escapeHtml(s.memberName || '-')}</b>
                   <span class="badge badge-success">Aktif</span>
@@ -8789,7 +8812,7 @@ Terima kasih dan selamat berlatih!`;
         .withSuccessHandler(function (res) {
           if (!res || !res.success || !res.sessions || res.sessions.length === 0) {
             ptInfoEl.innerHTML = `
-              <div style="text-align:center;padding:20px;color:#94a3b8">
+              <div style="text-align:center;padding:20px;color:var(--text-secondary)">
                 <i class="fas fa-dumbbell fa-2x"></i>
                 <p style="margin-top:8px">Tidak ada sesi PT aktif</p>
               </div>
@@ -8799,7 +8822,7 @@ Terima kasih dan selamat berlatih!`;
 
           const sessions = res.sessions.slice(0, 3); // Tampilkan 3 teratas
           ptInfoEl.innerHTML = sessions.map(s => `
-            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:8px">
+            <div style="background:var(--bg-light);border:1px solid var(--border-color);border-radius:8px;padding:12px;margin-bottom:8px">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
                 <b style="font-size:14px">${escapeHtml(s.memberName)}</b>
                 <span class="badge badge-success">${s.remainingSessions} sesi</span>
@@ -8807,7 +8830,7 @@ Terima kasih dan selamat berlatih!`;
               <div style="font-size:12px;color:#475569">
                 <i class="fas fa-user-tie"></i> ${escapeHtml(s.packageName || 'PT')}
               </div>
-              <div style="font-size:11px;color:#94a3b8;margin-top:4px">
+              <div style="font-size:11px;color:var(--text-secondary);margin-top:4px">
                 Exp: ${formatDate(s.expiryDate)}
               </div>
             </div>
@@ -8846,7 +8869,7 @@ Terima kasih dan selamat berlatih!`;
     function loadApprovals() {
       document.getElementById('contentArea').innerHTML = `
         <div id="approvalsContainer">
-          <div style="text-align:center;padding:60px;color:#94a3b8">
+          <div style="text-align:center;padding:60px;color:var(--text-secondary)">
             <i class="fas fa-spinner fa-spin fa-2x"></i>
             <p style="margin-top:16px">Memuat...</p>
           </div>
@@ -8872,9 +8895,9 @@ Terima kasih dan selamat berlatih!`;
 
       if (!list || !list.length) {
         el.innerHTML = `
-          <div style="text-align:center;padding:60px;color:#94a3b8">
+          <div style="text-align:center;padding:60px;color:var(--text-secondary)">
             <i class="fas fa-check-circle fa-3x" style="color:#22c55e;margin-bottom:16px"></i>
-            <h3 style="color:#334155">Semua Bersih!</h3>
+            <h3 style="color:var(--text-main)">Semua Bersih!</h3>
             <p style="margin-top:8px">Tidak ada approval yang menunggu</p>
           </div>
         `;
@@ -8895,12 +8918,12 @@ Terima kasih dan selamat berlatih!`;
                       </span>
                       <code style="font-size:12px;margin-left:8px">${escapeHtml(a.approvalId || '-')}</code>
                     </div>
-                    <span style="font-size:12px;color:#64748b">${escapeHtml(a.date)}</span>
+                    <span style="font-size:12px;color:var(--text-secondary)">${escapeHtml(a.date)}</span>
                   </div>
                   
                   <h4 style="font-size:16px;margin-bottom:8px">${escapeHtml(a.memberName || '-')}</h4>
                   
-                  <div style="background:#f8fafc;border-radius:8px;padding:12px;margin:12px 0">
+                  <div style="background:var(--bg-light);border-radius:8px;padding:12px;margin:12px 0">
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px">
                       <div><span class="text-muted"><i class="fas fa-phone"></i> Telepon:</span> ${escapeHtml(data.phone || '-')}</div>
                       <div><span class="text-muted"><i class="fas fa-envelope"></i> Email:</span> ${escapeHtml(data.email || '-')}</div>
@@ -8917,11 +8940,11 @@ Terima kasih dan selamat berlatih!`;
                   <!-- Date Overrides -->
                   <div style="margin:12px 0; display:grid; grid-template-columns:1fr 1fr; gap:8px">
                     <div class="form-group" style="margin:0">
-                      <label style="font-size:11px; font-weight:600; color:#64748b">TANGGAL PEMBAYARAN</label>
+                      <label style="font-size:11px; font-weight:600; color:var(--text-secondary)">TANGGAL PEMBAYARAN</label>
                       <input type="date" id="payDate_${a.approvalId}" class="form-input" style="padding:6px; font-size:12px" value="${localDateStr}">
                     </div>
                     <div class="form-group" style="margin:0">
-                      <label style="font-size:11px; font-weight:600; color:#64748b">TANGGAL MULAI AKTIF</label>
+                      <label style="font-size:11px; font-weight:600; color:var(--text-secondary)">TANGGAL MULAI AKTIF</label>
                       <input type="date" id="startDate_${a.approvalId}" class="form-input" style="padding:6px; font-size:12px" value="${localDateStr}">
                     </div>
                   </div>
@@ -8945,7 +8968,7 @@ Terima kasih dan selamat berlatih!`;
                         <span class="badge badge-success" style="padding:6px 10px; font-size:10px; width:fit-content">
                           <i class="fas fa-check-circle"></i> PEMBAYARAN TERVERIFIKASI
                         </span>
-                        <small style="color:#64748b; font-size:10px">Uang sudah masuk laporan. Menunggu member tentukan tanggal mulai aktif.</small>
+                        <small style="color:var(--text-secondary); font-size:10px">Uang sudah masuk laporan. Menunggu member tentukan tanggal mulai aktif.</small>
                       </div>
                       <button class="btn btn-primary btn-sm" onclick="approveActivation('${escapeHtml(a.approvalId)}', ${index})">
                         <i class="fas fa-bolt"></i> Aktivasi Sekarang
@@ -9162,7 +9185,7 @@ Terima kasih dan selamat berlatih!`;
           <div class="form-card-body">
             <div class="admin-grid">
               <div class="admin-card">
-                <h4 style="margin-bottom:16px;color:#334155">
+                <h4 style="margin-bottom:16px;color:var(--text-main)">
                   <i class="fas fa-user-plus"></i> Buat Akun User
                 </h4>
                 <div id="createUserAlert" class="alert" style="display:none"></div>
@@ -9198,7 +9221,7 @@ Terima kasih dan selamat berlatih!`;
                 </button>
               </div>
               <div class="admin-card">
-                <h4 style="margin-bottom:16px;color:#334155">
+                <h4 style="margin-bottom:16px;color:var(--text-main)">
                   <i class="fas fa-tools"></i> Utilitas
                 </h4>
                 <div id="adminAlert" class="alert" style="display:none"></div>
@@ -9372,7 +9395,7 @@ Terima kasih dan selamat berlatih!`;
 
     function loadMemberList() {
       document.getElementById('adminDataView').innerHTML = `
-        <div style="text-align:center;padding:20px;color:#94a3b8">
+        <div style="text-align:center;padding:20px;color:var(--text-secondary)">
           <i class="fas fa-spinner fa-spin"></i> Memuat...
         </div>
       `;
@@ -9407,7 +9430,7 @@ Terima kasih dan selamat berlatih!`;
 
           el.innerHTML = `
             <div class="table-container">
-              <div style="padding:16px;background:#f8fafc;border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center">
+              <div style="padding:16px;background:var(--bg-light);border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center">
                 <h4 style="font-weight:600; margin:0">Daftar Member (${list.length})</h4>
                 <button class="btn btn-sm btn-outline" onclick="exportMembersToCSV()">
                   <i class="fas fa-file-csv"></i> Export CSV
@@ -9455,7 +9478,7 @@ Terima kasih dan selamat berlatih!`;
 
     function loadTransactionList() {
       document.getElementById('adminDataView').innerHTML = `
-        <div style="text-align:center;padding:20px;color:#94a3b8">
+        <div style="text-align:center;padding:20px;color:var(--text-secondary)">
           <i class="fas fa-spinner fa-spin"></i> Memuat...
         </div>
       `;
@@ -9493,7 +9516,7 @@ Terima kasih dan selamat berlatih!`;
 
           el.innerHTML = `
             <div class="table-container">
-              <div style="padding:16px;background:#f8fafc;border-bottom:1px solid #e2e8f0">
+              <div style="padding:16px;background:var(--bg-light);border-bottom:1px solid var(--border-color)">
                 <h4 style="font-weight:600">Riwayat Transaksi (${list.length})</h4>
               </div>
               <div style="overflow-x:auto">
@@ -9693,7 +9716,7 @@ Terima kasih dan selamat berlatih!`;
       }
 
       document.getElementById('adminDataView').innerHTML = `
-        <div style="text-align:center;padding:20px;color:#94a3b8">
+        <div style="text-align:center;padding:20px;color:var(--text-secondary)">
           <i class="fas fa-spinner fa-spin"></i> Memuat Daftar User...
         </div>
       `;
@@ -9707,10 +9730,10 @@ Terima kasih dan selamat berlatih!`;
             const list = res.users;
             el.innerHTML = `
               <div class="table-container">
-                <div style="padding:16px;background:#f8fafc;border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center">
+                <div style="padding:16px;background:var(--bg-light);border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center">
                   <div>
                     <h4 style="font-weight:600; margin:0">Daftar Pengguna Sistem (${list.length})</h4>
-                    <small style="color:#64748b">Hanya Super Admin yang dapat melihat & mengelola akun.</small>
+                    <small style="color:var(--text-secondary)">Hanya Super Admin yang dapat melihat & mengelola akun.</small>
                   </div>
                   <button class="btn btn-sm btn-primary" onclick="openAddUserModal()">
                     <i class="fas fa-plus"></i> Tambah User Baru
@@ -9880,10 +9903,10 @@ Terima kasih dan selamat berlatih!`;
           <!-- LIST EXPENSES -->
           <div class="table-container list-container">
             <div class="cart-header" style="background:#fff; border-bottom:1px solid #f1f5f9; padding:20px 24px">
-              <h4 style="color:#334155; margin:0"><i class="fas fa-history"></i> Riwayat Pengeluaran</h4>
+              <h4 style="color:var(--text-main); margin:0"><i class="fas fa-history"></i> Riwayat Pengeluaran</h4>
             </div>
             <div id="expensesTableContainer" style="overflow-x:auto">
-              <div style="text-align:center; padding:40px; color:#94a3b8">
+              <div style="text-align:center; padding:40px; color:var(--text-secondary)">
                 <i class="fas fa-spinner fa-spin fa-2x"></i><br>
                 <p style="margin-top:12px">Memuat data pengeluaran...</p>
               </div>
@@ -9903,7 +9926,7 @@ Terima kasih dan selamat berlatih!`;
       const end = document.getElementById('exp_end_date')?.value || '';
 
       document.getElementById('expensesTableContainer').innerHTML = `
-        <div style="text-align:center; padding:40px; color:#94a3b8">
+        <div style="text-align:center; padding:40px; color:var(--text-secondary)">
           <i class="fas fa-spinner fa-spin fa-2x"></i><br>
           <p style="margin-top:12px">Memuat data pengeluaran...</p>
         </div>
@@ -9953,7 +9976,7 @@ Terima kasih dan selamat berlatih!`;
 
       if (!data || data.length === 0) {
         container.innerHTML = `
-          <div style="text-align:center; padding:60px 20px; color:#94a3b8">
+          <div style="text-align:center; padding:60px 20px; color:var(--text-secondary)">
             <i class="fas fa-folder-open fa-3x" style="margin-bottom:16px; opacity:0.3"></i>
             <p>Tidak ada data pengeluaran ditemukan</p>
           </div>
@@ -9988,7 +10011,7 @@ Terima kasih dan selamat berlatih!`;
             <td style="max-width:250px; font-size:13px">${item.description}</td>
             <td style="font-weight:600; color:#ef4444">${formatCurrency(item.amount)}</td>
             <td>${item.paymentMethod}</td>
-            <td style="font-size:12px; color:#64748b">${item.user || '-'}</td>
+            <td style="font-size:12px; color:var(--text-secondary)">${item.user || '-'}</td>
             <td>
               <button class="btn btn-outline btn-sm" onclick="deleteExpenseRecord('${item.id}')" title="Hapus">
                 <i class="fas fa-trash text-danger"></i>
@@ -10180,7 +10203,7 @@ Terima kasih dan selamat berlatih!`;
         .withSuccessHandler(function (res) {
             if (res && res.success) {
               if (!res.data || res.data.length === 0) {
-                container.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8">Tidak ada data riwayat penghapusan.</div>';
+                container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-secondary)">Tidak ada data riwayat penghapusan.</div>';
                 return;
               }
               let html = `
@@ -10220,7 +10243,7 @@ Terima kasih dan selamat berlatih!`;
         .withSuccessHandler(function (res) {
             if (res && res.success) {
               if (!res.data || res.data.length === 0) {
-                container.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8">Tidak ada data untuk periode ini.</div>';
+                container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-secondary)">Tidak ada data untuk periode ini.</div>';
                 return;
               }
 
@@ -10503,9 +10526,9 @@ Terima kasih dan selamat berlatih!`;
 
         <!-- Scanner Area -->
         <div id="productScannerArea"
-          style="display:none; margin-bottom:16px; background:#f8fafc; border:2px dashed #cbd5e1; border-radius:12px; overflow:hidden">
+          style="display:none; margin-bottom:16px; background:var(--bg-light); border:2px dashed #cbd5e1; border-radius:12px; overflow:hidden">
           <div id="product-barcode-reader" style="width:100%; min-height:200px; background:#000; display:none"></div>
-          <div id="productScannerPlaceholder" style="padding:40px 20px; text-align:center; color:#94a3b8">
+          <div id="productScannerPlaceholder" style="padding:40px 20px; text-align:center; color:var(--text-secondary)">
             <i class="fas fa-camera fa-3x" style="margin-bottom:12px"></i>
             <p>Gunakan kamera untuk scan barcode produk</p>
             <button type="button" class="btn btn-primary btn-sm" onclick="startProductBarcodeScanner()"
@@ -10603,7 +10626,7 @@ Terima kasih dan selamat berlatih!`;
         <input type="hidden" id="restock_prod_id">
         <div class="form-group">
           <label class="form-label">Nama Produk</label>
-          <input type="text" id="restock_prod_name" class="form-input" readonly style="background:#f1f5f9">
+          <input type="text" id="restock_prod_name" class="form-input" readonly style="background:var(--bg-light)">
         </div>
         <div class="form-row">
           <div class="form-group">
@@ -10623,7 +10646,7 @@ Terima kasih dan selamat berlatih!`;
             <option value="QRIS">QRIS</option>
           </select>
         </div>
-        <p style="font-size:12px; color:#64748b; margin-top:8px">
+        <p style="font-size:12px; color:var(--text-secondary); margin-top:8px">
           <i class="fas fa-info-circle"></i> Restock akan otomatis tercatat sebagai <b>Pengeluaran</b> di laporan
           keuangan.
         </p>
@@ -10645,7 +10668,7 @@ Terima kasih dan selamat berlatih!`;
         <input type="hidden" id="adjust_prod_id">
         <div class="form-group">
           <label class="form-label">Nama Produk</label>
-          <input type="text" id="adjust_prod_name" class="form-input" readonly style="background:#f1f5f9">
+          <input type="text" id="adjust_prod_name" class="form-input" readonly style="background:var(--bg-light)">
         </div>
         <div class="form-group">
           <label class="form-label">Stok Akhir Sebenarnya (Hasil Opname)</label>
@@ -10802,7 +10825,7 @@ Terima kasih dan selamat berlatih!`;
       const today = new Date().toISOString().split('T')[0];
 
       content.innerHTML = `
-        <div style="background:#f8fafc;padding:16px;border-radius:12px;margin-bottom:20px;border:1px solid #e2e8f0">
+        <div style="background:var(--bg-light);padding:16px;border-radius:12px;margin-bottom:20px;border:1px solid var(--border-color)">
           <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:12px;align-items:flex-end">
             <div class="form-group" style="margin:0">
               <label class="form-label" style="font-size:11px">DARI TANGGAL</label>
@@ -10863,9 +10886,9 @@ Terima kasih dan selamat berlatih!`;
       const content = document.getElementById('reportLoadArea') || document.getElementById('dailyReportContent');
 
       let html = `
-        <div style="margin-bottom:20px; border-bottom:1px solid #e2e8f0; padding-bottom:10px">
+        <div style="margin-bottom:20px; border-bottom:1px solid var(--border-color); padding-bottom:10px">
           <h4 style="color:#6b46c1; margin-bottom:5px">Laporan Kasir - ${report.dateFormatted}</h4>
-          <p style="font-size:12px; color:#64748b">Ringkasan aktivitas keuangan per hari ini</p>
+          <p style="font-size:12px; color:var(--text-secondary)">Ringkasan aktivitas keuangan per hari ini</p>
         </div>
 
         <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-bottom:24px">
@@ -10873,7 +10896,7 @@ Terima kasih dan selamat berlatih!`;
           <div class="stat-card" style="padding:15px; border-top-color:#6b46c1">
             <div class="stat-label" style="font-size:11px; margin-bottom:4px">TOTAL REVENUE</div>
             <div class="stat-value" style="font-size:18px; color:#6b46c1">${formatCurrency(report.summary.totalRevenue)}</div>
-            <div style="font-size:11px; color:#64748b; margin-top:8px; display:grid; grid-template-columns:1fr 1fr; gap:4px">
+            <div style="font-size:11px; color:var(--text-secondary); margin-top:8px; display:grid; grid-template-columns:1fr 1fr; gap:4px">
               <span>Cash: <b style="color:#1e293b">${formatCurrency(report.summary.cashIn || 0)}</b></span>
               <span>Trf: <b style="color:#1e293b">${formatCurrency(report.summary.transferIn || 0)}</b></span>
               <span>QRIS: <b style="color:#1e293b">${formatCurrency(report.summary.qrisIn || 0)}</b></span>
@@ -10885,7 +10908,7 @@ Terima kasih dan selamat berlatih!`;
           <div class="stat-card" style="padding:15px; border-top-color:#ef4444">
             <div class="stat-label" style="font-size:11px; margin-bottom:4px">TOTAL PENGELUARAN</div>
             <div class="stat-value" style="font-size:18px; color:#ef4444">${formatCurrency(report.summary.totalExpenses)}</div>
-            <div style="font-size:11px; color:#64748b; margin-top:8px; display:grid; grid-template-columns:1fr 1fr; gap:4px">
+            <div style="font-size:11px; color:var(--text-secondary); margin-top:8px; display:grid; grid-template-columns:1fr 1fr; gap:4px">
               <span>Cash: <b style="color:#1e293b">${formatCurrency(report.summary.cashOut || 0)}</b></span>
               <span>Trf: <b style="color:#1e293b">${formatCurrency(report.summary.transferOut || 0)}</b></span>
               <span>QRIS: <b style="color:#1e293b">${formatCurrency(report.summary.qrisOut || 0)}</b></span>
@@ -10897,7 +10920,7 @@ Terima kasih dan selamat berlatih!`;
           <div class="stat-card" style="padding:15px; border-top-color:#22c55e">
             <div class="stat-label" style="font-size:11px; margin-bottom:4px">KAS KOMBINASI (NET)</div>
             <div class="stat-value" style="font-size:18px; color:#22c55e">${formatCurrency(report.summary.netIncome)}</div>
-            <div style="font-size:11px; color:#64748b; margin-top:8px; display:grid; grid-template-columns:1fr 1fr; gap:4px">
+            <div style="font-size:11px; color:var(--text-secondary); margin-top:8px; display:grid; grid-template-columns:1fr 1fr; gap:4px">
               <span>Cash: <b style="color:#1e293b">${formatCurrency(report.summary.netCash || 0)}</b></span>
               <span>Trf: <b style="color:#1e293b">${formatCurrency(report.summary.netTransfer || 0)}</b></span>
               <span>QRIS: <b style="color:#1e293b">${formatCurrency(report.summary.netQris || 0)}</b></span>
@@ -10989,7 +11012,7 @@ Terima kasih dan selamat berlatih!`;
         </div>
 
         <!-- RINGKASAN FINANSIAL DI PALING BAWAH -->
-        <div style="background:#f8fafc; border-radius:16px; padding:24px; border:1px solid #e2e8f0; margin-top: 24px">
+        <div style="background:var(--bg-light); border-radius:16px; padding:24px; border:1px solid var(--border-color); margin-top: 24px">
           <div class="dashboard-section-title" style="font-size:16px; margin-bottom:16px; color:#1e293b">
             <i class="fas fa-calculator" style="color:var(--primary)"></i> Ringkasan Finansial (Sesuai Metode Pembayaran)
           </div>
@@ -11070,12 +11093,12 @@ Terima kasih dan selamat berlatih!`;
           </table>
           
           <div style="margin-top:20px; text-align:center; padding:15px; border:1px dashed #cbd5e1; border-radius:12px; background:#fff">
-            <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px">Catatan Verifikasi Kasir</div>
+            <div style="font-size:11px; color:var(--text-secondary); font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px">Catatan Verifikasi Kasir</div>
             <div style="font-size:13px; color:#1e293b">${report.details.transactions[0]?.cashier || currentUser?.name || 'Kasir'} - ${new Date().toLocaleTimeString('id-ID')}</div>
           </div>
         </div>
           
-          <div style="margin-top:20px; font-size:11px; color:#64748b; font-style:italic">
+          <div style="margin-top:20px; font-size:11px; color:var(--text-secondary); font-style:italic">
             * Laporan ini dihasilkan otomatis oleh sistem pada ${new Date().toLocaleString('id-ID')}.
           </div>
         </div>
@@ -11142,7 +11165,7 @@ Terima kasih dan selamat berlatih!`;
       container.style.display = 'flex';
 
       container.innerHTML = `
-        <div class="pos-header" style="background:#f1f5f9">
+        <div class="pos-header" style="background:var(--bg-light)">
           <button class="btn btn-sm btn-outline" onclick="closePOSHistory()" style="margin-right:12px">
             <i class="fas fa-arrow-left"></i> Kembali
           </button>
@@ -11154,7 +11177,7 @@ Terima kasih dan selamat berlatih!`;
           </div>
         </div>
         <div id="posHistoryTableContainer" style="overflow-y:auto; flex:1; background:white">
-          <div style="text-align:center; padding:40px; color:#94a3b8"><i class="fas fa-spinner fa-spin"></i> Memuat data...</div>
+          <div style="text-align:center; padding:40px; color:var(--text-secondary)"><i class="fas fa-spinner fa-spin"></i> Memuat data...</div>
         </div>
       `;
 
@@ -11179,7 +11202,7 @@ Terima kasih dan selamat berlatih!`;
       const end = document.getElementById('pos_hist_end').value;
       const container = document.getElementById('posHistoryTableContainer');
 
-      container.innerHTML = '<div style="text-align:center; padding:40px; color:#94a3b8"><i class="fas fa-spinner fa-spin"></i> Memuat data...</div>';
+      container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-secondary)"><i class="fas fa-spinner fa-spin"></i> Memuat data...</div>';
 
       const isAdmin = currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Super Admin');
 
@@ -11206,7 +11229,7 @@ Terima kasih dan selamat berlatih!`;
             });
 
             if (list.length === 0) {
-              container.innerHTML = '<div style="text-align:center; padding:40px; color:#94a3b8">Tidak ada transaksi ditemukan</div>';
+              container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-secondary)">Tidak ada transaksi ditemukan</div>';
               return;
             }
 
@@ -11370,7 +11393,7 @@ Terima kasih dan selamat berlatih!`;
               </div>
               <div class="card-body">
                 <div id="birthdaysListContainer" style="min-height:300px; max-height: 600px; overflow-y: auto;">
-                  <div style="text-align:center;padding:20px;color:#94a3b8"><i class="fas fa-spinner fa-spin"></i> Memuat data...</div>
+                  <div style="text-align:center;padding:20px;color:var(--text-secondary)"><i class="fas fa-spinner fa-spin"></i> Memuat data...</div>
                 </div>
               </div>
             </div>
@@ -11383,10 +11406,10 @@ Terima kasih dan selamat berlatih!`;
                 <h3 class="card-title">Pesan WhatsApp (Template)</h3>
               </div>
               <div class="card-body">
-                <p style="font-size:13px;color:#64748b;margin-bottom:12px;line-height:1.5">
+                <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px;line-height:1.5">
                   Gunakan parameter berikut dalam pesan:<br>
-                  <code style="background:#f1f5f9;padding:2px 4px;border-radius:4px">{name}</code> : Nama Member<br>
-                  <code style="background:#f1f5f9;padding:2px 4px;border-radius:4px">{age}</code> : Usia yang dirayakan
+                  <code style="background:var(--bg-light);padding:2px 4px;border-radius:4px">{name}</code> : Nama Member<br>
+                  <code style="background:var(--bg-light);padding:2px 4px;border-radius:4px">{age}</code> : Usia yang dirayakan
                 </p>
                 <textarea id="bdayTemplateInput" class="form-input" style="height:200px;resize:vertical;font-size:14px" placeholder="Ketik pesan ulang tahun..."></textarea>
                 <button class="btn btn-primary" style="width:100%;margin-top:16px" onclick="saveBdayTemplate()" id="btnSaveTemplate">
@@ -11405,7 +11428,7 @@ Terima kasih dan selamat berlatih!`;
 
     function refreshBirthdays() {
       const container = document.getElementById('birthdaysListContainer');
-      container.innerHTML = '<div style="text-align:center;padding:20px;color:#94a3b8"><i class="fas fa-spinner fa-spin"></i> Memuat data...</div>';
+      container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-secondary)"><i class="fas fa-spinner fa-spin"></i> Memuat data...</div>';
 
       google.script.run
         .withSuccessHandler(function (res) {
@@ -11423,8 +11446,8 @@ Terima kasih dan selamat berlatih!`;
             container.innerHTML = `
               <div style="text-align:center;padding:40px 20px">
                 <div style="font-size:40px;color:#cbd5e1;margin-bottom:16px"><i class="fas fa-birthday-cake"></i></div>
-                <h3 style="color:#64748b;margin:0 0 8px">Tidak ada Ulang Tahun</h3>
-                <p style="color:#94a3b8;font-size:14px;margin:0">Tidak ada member aktif yang berulang tahun dalam 1 bulan ke depan.</p>
+                <h3 style="color:var(--text-secondary);margin:0 0 8px">Tidak ada Ulang Tahun</h3>
+                <p style="color:var(--text-secondary);font-size:14px;margin:0">Tidak ada member aktif yang berulang tahun dalam 1 bulan ke depan.</p>
               </div>
             `;
             return;
@@ -11530,7 +11553,7 @@ Terima kasih dan selamat berlatih!`;
               </div>
               <div class="card-body">
                 <div id="expiringListContainer" style="min-height:100px; max-height: 400px; overflow-y: auto;">
-                  <div style="text-align:center;padding:20px;color:#94a3b8"><i class="fas fa-spinner fa-spin"></i> Memuat data...</div>
+                  <div style="text-align:center;padding:20px;color:var(--text-secondary)"><i class="fas fa-spinner fa-spin"></i> Memuat data...</div>
                 </div>
               </div>
             </div>
@@ -11541,7 +11564,7 @@ Terima kasih dan selamat berlatih!`;
               </div>
               <div class="card-body">
                 <div id="expiredListContainer" style="min-height:100px; max-height: 400px; overflow-y: auto;">
-                  <div style="text-align:center;padding:20px;color:#94a3b8"><i class="fas fa-spinner fa-spin"></i> Memuat data...</div>
+                  <div style="text-align:center;padding:20px;color:var(--text-secondary)"><i class="fas fa-spinner fa-spin"></i> Memuat data...</div>
                 </div>
               </div>
             </div>
@@ -11554,11 +11577,11 @@ Terima kasih dan selamat berlatih!`;
                 <h3 class="card-title">Pesan WhatsApp (Template)</h3>
               </div>
               <div class="card-body">
-                <p style="font-size:12px;color:#64748b;margin-bottom:12px;line-height:1.4">
+                <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.4">
                   Parameter:<br>
-                  <code style="background:#f1f5f9;padding:2px 4px;border-radius:4px">{name}</code> : Nama Member<br>
-                  <code style="background:#f1f5f9;padding:2px 4px;border-radius:4px">{expiry_date}</code> : Tanggal Expire<br>
-                  <code style="background:#f1f5f9;padding:2px 4px;border-radius:4px">{link}</code> : Link Perpanjangan Online
+                  <code style="background:var(--bg-light);padding:2px 4px;border-radius:4px">{name}</code> : Nama Member<br>
+                  <code style="background:var(--bg-light);padding:2px 4px;border-radius:4px">{expiry_date}</code> : Tanggal Expire<br>
+                  <code style="background:var(--bg-light);padding:2px 4px;border-radius:4px">{link}</code> : Link Perpanjangan Online
                 </p>
                 
                 <label class="form-label" style="font-size:11px">TEMPLATE MENDEKATI EXPIRED</label>
@@ -11588,8 +11611,8 @@ Terima kasih dan selamat berlatih!`;
 
       if (!expiringContainer || !expiredContainer) return;
 
-      expiringContainer.innerHTML = '<div style="text-align:center;padding:20px;color:#94a3b8"><i class="fas fa-spinner fa-spin"></i> Memuat data...</div>';
-      expiredContainer.innerHTML = '<div style="text-align:center;padding:20px;color:#94a3b8"><i class="fas fa-spinner fa-spin"></i> Memuat data...</div>';
+      expiringContainer.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-secondary)"><i class="fas fa-spinner fa-spin"></i> Memuat data...</div>';
+      expiredContainer.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-secondary)"><i class="fas fa-spinner fa-spin"></i> Memuat data...</div>';
 
       google.script.run
         .withSuccessHandler(function (res) {
@@ -11610,7 +11633,7 @@ Terima kasih dan selamat berlatih!`;
 
           // Render Expiring
           if (!res.expiring || res.expiring.length === 0) {
-            expiringContainer.innerHTML = '<div style="text-align:center;padding:20px;color:#94a3b8;font-size:13px">Tidak ada member mendekati expired</div>';
+            expiringContainer.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-secondary);font-size:13px">Tidak ada member mendekati expired</div>';
           } else {
             let html = '<div class="list-container">';
             res.expiring.forEach(m => {
@@ -11641,7 +11664,7 @@ Terima kasih dan selamat berlatih!`;
 
           // Render Expired
           if (!res.expired || res.expired.length === 0) {
-            expiredContainer.innerHTML = '<div style="text-align:center;padding:20px;color:#94a3b8;font-size:13px">Tidak ada member baru saja expired</div>';
+            expiredContainer.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-secondary);font-size:13px">Tidak ada member baru saja expired</div>';
           } else {
             let html = '<div class="list-container">';
             res.expired.forEach(m => {
@@ -12210,7 +12233,7 @@ Terima kasih dan selamat berlatih!`;
       let photoUrl = member.profilePic;
       photoHtml = `<div style="text-align:center; margin-bottom:15px"><img src="${photoUrl}" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:3px solid var(--primary)"></div>`;
     } else {
-      photoHtml = `<div style="text-align:center; margin-bottom:15px"><div style="width:100px; height:100px; border-radius:50%; background:#e2e8f0; display:inline-flex; align-items:center; justify-content:center; color:#94a3b8; font-size:40px; border:3px solid var(--primary)"><i class="fas fa-user"></i></div></div>`;
+      photoHtml = `<div style="text-align:center; margin-bottom:15px"><div style="width:100px; height:100px; border-radius:50%; background:#e2e8f0; display:inline-flex; align-items:center; justify-content:center; color:var(--text-secondary); font-size:40px; border:3px solid var(--primary)"><i class="fas fa-user"></i></div></div>`;
     }
 
     container.innerHTML = `
