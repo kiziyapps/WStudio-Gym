@@ -8,7 +8,7 @@
   <script>
     var $buoop = {
       required: {e:-3, f:-3, o:-3, s:-1, c:-3},
-      insecure: true,
+      insecure: true,a
       api: 2026.06,
       text: {
         "msg": "Browser Anda ({browser_name}) sudah terlalu usang atau memerlukan pembaruan.",
@@ -525,6 +525,18 @@
       setupAutosave();
     };
 
+    function filterPackages(resPackages) {
+      if (!resPackages || !resPackages.length) return [];
+      let filtered = resPackages.filter(p => p.type && p.type.toLowerCase().includes('regular'));
+      if (!filtered || filtered.length === 0) {
+        filtered = resPackages.filter(p => !p.type || (!p.type.toLowerCase().includes('pt') && !p.type.toLowerCase().includes('personal')));
+      }
+      if (!filtered || filtered.length === 0) {
+        filtered = resPackages;
+      }
+      return filtered;
+    }
+
     function loadPackages() {
       const cacheKey = 'ugym_pub_packages';
       const cacheExpiryKey = 'ugym_pub_packages_expiry';
@@ -536,7 +548,7 @@
       if (isCacheValid) {
         try {
           const res = JSON.parse(cachedData);
-          packages = res.packages.filter(p => p.type && p.type.toLowerCase().includes('regular'));
+          packages = filterPackages(res.packages);
           if (currentMember) renderPackages();
           console.log('⚡ Loaded packages from Client-Side Cache in Extension');
         } catch(e) {
@@ -547,11 +559,11 @@
       
       google.script.run
         .withSuccessHandler(function(res) {
-          if (res && res.success) {
+          if (res && res.success && res.packages) {
             localStorage.setItem(cacheKey, JSON.stringify(res));
             localStorage.setItem(cacheExpiryKey, (Date.now() + 2 * 60 * 60 * 1000).toString());
             
-            packages = res.packages.filter(p => p.type && p.type.toLowerCase().includes('regular'));
+            packages = filterPackages(res.packages);
             if (currentMember) renderPackages();
           }
         })
@@ -845,4 +857,3 @@ function setupAutosave() {
   </script>
 </body>
 </html>
-
