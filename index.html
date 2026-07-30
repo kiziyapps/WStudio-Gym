@@ -12292,6 +12292,13 @@ Terima kasih dan selamat berlatih!`;
         if (res && res.success) {
           showToast('✅ User berhasil diperbarui', 'success');
           document.getElementById('editUserModal').style.display='none';
+          if (currentUser && currentUser.id === data.id) {
+            if (data.name) currentUser.name = data.name;
+            if (data.role) currentUser.role = data.role;
+            if (data.branchId) currentUser.branchId = data.branchId;
+            if (res.photoUrl) currentUser.profilePic = res.photoUrl;
+            applyRolePermissions();
+          }
           loadUserList(); 
         } else {
           showToast('Gagal: ' + (res ? res.message : 'Unknown error'), 'error');
@@ -12391,8 +12398,10 @@ Terima kasih dan selamat berlatih!`;
     const data = {
       name: document.getElementById('addUserName').value,
       role: document.getElementById('addUserRole').value,
+      branchId: document.getElementById('addUserBranchId') ? document.getElementById('addUserBranchId').value : 'ALL',
       username: document.getElementById('addUserUsername').value,
       password: document.getElementById('addUserPassword').value,
+      profilePicBase64: document.getElementById('addUserPhotoBase64') ? document.getElementById('addUserPhotoBase64').value : '',
       phone: '-',
       email: '-'
     };
@@ -12596,14 +12605,3 @@ Terima kasih dan selamat berlatih!`;
 <!-- End of added missing features -->
 
 </body>
-
-
-
-
-
-
-
-
-
-
-
