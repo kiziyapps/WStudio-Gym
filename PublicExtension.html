@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,8 +8,8 @@
   <!-- Browser Update Notification -->
   <script>
     var $buoop = {
-      required: {e:-3, f:-3, o:-3, s:-1, c:-3},
-      insecure: true,a
+      required: { e: -3, f: -3, o: -3, s: -1, c: -3 },
+      insecure: true,
       api: 2026.06,
       text: {
         "msg": "Browser Anda ({browser_name}) sudah terlalu usang atau memerlukan pembaruan.",
@@ -17,69 +18,75 @@
         "bno": "Abaikan"
       }
     };
-    function $buo_f(){
+    function $buo_f() {
       var e = document.createElement("script");
       e.src = "//browser-update.org/update.min.js";
       document.body.appendChild(e);
     };
-    try {document.addEventListener("DOMContentLoaded", $buo_f, false)}
-    catch(e){window.attachEvent("onload", $buo_f)}
+    try { document.addEventListener("DOMContentLoaded", $buo_f, false) }
+    catch (e) { window.attachEvent("onload", $buo_f) }
   </script>
   <script>
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxOTUY8cVdLjGVAnqcz47fKDJXtUD7lsXVMJFqwFLsh-TjfdBT_DxaqsiAnFU4r36PcGg/exec';
     if (typeof google === 'undefined' || typeof google.script === 'undefined' || typeof google.script.run === 'undefined') {
       window.google = {
-      script: {
-        run: new Proxy({}, {
-          get: function(target, prop) {
-            let successHandler = null;
-            let failureHandler = null;
-            function createChain(propName) {
-              if (propName === 'withSuccessHandler') {
-                return function(callback) {
-                  successHandler = callback;
-                  return new Proxy({}, { get: (t, p) => createChain(p) });
+        script: {
+          run: new Proxy({}, {
+            get: function (target, prop) {
+              let successHandler = null;
+              let failureHandler = null;
+              function createChain(propName) {
+                if (propName === 'withSuccessHandler') {
+                  return function (callback) {
+                    successHandler = callback;
+                    return new Proxy({}, { get: (t, p) => createChain(p) });
+                  };
+                }
+                if (propName === 'withFailureHandler') {
+                  return function (callback) {
+                    failureHandler = callback;
+                    return new Proxy({}, { get: (t, p) => createChain(p) });
+                  };
+                }
+                return function (...args) {
+                  let branchId = document.getElementById('pubBranch')?.value || null;
+                  fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: propName, args: args, branchId: branchId }),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                  })
+                    .then(response => response.json())
+                    .then(data => {
+                      if (!data.success) {
+                        if (failureHandler) failureHandler(new Error(data.message));
+                        else console.error('Backend Error:', data.message);
+                      } else {
+                        if (successHandler) successHandler(data.result);
+                      }
+                    })
+                    .catch(err => {
+                      if (failureHandler) failureHandler(err);
+                      else console.error('Network Error:', err);
+                    });
                 };
               }
-              if (propName === 'withFailureHandler') {
-                return function(callback) {
-                  failureHandler = callback;
-                  return new Proxy({}, { get: (t, p) => createChain(p) });
-                };
-              }
-              return function(...args) {
-                let branchId = document.getElementById('pubBranch')?.value || null;
-                fetch(SCRIPT_URL, {
-                  method: 'POST',
-                  body: JSON.stringify({ action: propName, args: args, branchId: branchId }),
-                  headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-                })
-                .then(response => response.json())
-                .then(data => {
-                  if (!data.success) {
-                    if (failureHandler) failureHandler(new Error(data.message));
-                    else console.error('Backend Error:', data.message);
-                  } else {
-                    if (successHandler) successHandler(data.result);
-                  }
-                })
-                .catch(err => {
-                  if (failureHandler) failureHandler(err);
-                  else console.error('Network Error:', err);
-                });
-              };
+              return createChain(prop);
             }
-            return createChain(prop);
-          }
-        })
-      }
+          })
+        }
       };
     }
   </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-    body { 
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
       background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
       min-height: 100vh;
       display: flex;
@@ -87,49 +94,70 @@
       justify-content: center;
       padding: 20px;
     }
+
     .extension-container {
       max-width: 600px;
       width: 100%;
       background: white;
       border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
       overflow: hidden;
       animation: slideUp 0.5s ease;
     }
+
     .header {
       background: linear-gradient(135deg, #000000, #333333);
       color: white;
       padding: 30px;
       text-align: center;
     }
-    .header h1 { font-size: 28px; margin-bottom: 8px; }
-    .header p { opacity: 0.9; font-size: 14px; }
-    .content { padding: 30px; }
-    .form-group { margin-bottom: 20px; }
-    .form-label { 
-      display: block; 
-      margin-bottom: 8px; 
-      font-weight: 600; 
-      font-size: 14px; 
-      color: #334155; 
+
+    .header h1 {
+      font-size: 28px;
+      margin-bottom: 8px;
     }
-    .form-input { 
-      width: 100%; 
-      padding: 12px 16px; 
-      border: 2px solid #e2e8f0; 
-      border-radius: 10px; 
-      font-size: 15px; 
-      transition: 0.2s; 
+
+    .header p {
+      opacity: 0.9;
+      font-size: 14px;
     }
-    .form-input:focus { 
-      outline: none; 
-      border-color: #d4af37; 
-      box-shadow: 0 0 0 3px rgba(102,126,234,0.1); 
+
+    .content {
+      padding: 30px;
     }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      color: #334155;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 15px;
+      transition: 0.2s;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #d4af37;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
     .form-input:read-only {
       background: #f8fafc;
       color: #475569;
     }
+
     .btn {
       padding: 14px 24px;
       border: none;
@@ -144,15 +172,22 @@
       transition: 0.2s;
       width: 100%;
     }
-    .btn-primary { 
-      background: linear-gradient(135deg, #000000, #333333); 
-      color: white; 
+
+    .btn-primary {
+      background: linear-gradient(135deg, #000000, #333333);
+      color: white;
     }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(102,126,234,0.3); }
-    .btn-success { 
-      background: linear-gradient(135deg, #22c55e, #16a34a); 
-      color: white; 
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
     }
+
+    .btn-success {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+    }
+
     .alert {
       padding: 14px 16px;
       border-radius: 10px;
@@ -161,10 +196,31 @@
       align-items: flex-start;
       gap: 12px;
     }
-    .alert-success { background: #f0fdf4; border: 1px solid #86efac; color: #166534; }
-    .alert-error { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
-    .alert-warning { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
-    .alert-info { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
+
+    .alert-success {
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #166534;
+    }
+
+    .alert-error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+    }
+
+    .alert-warning {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      color: #92400e;
+    }
+
+    .alert-info {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1e40af;
+    }
+
     .member-info {
       background: #fdf8e7;
       border: 1px solid #d4af37;
@@ -175,27 +231,42 @@
       gap: 20px;
       align-items: center;
     }
+
     .member-photo {
       width: 100px;
       height: 100px;
       border-radius: 12px;
       object-fit: cover;
       border: 3px solid white;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       background: #f8fafc;
     }
+
     .member-details-grid {
       flex: 1;
     }
+
     .info-row {
       display: flex;
       justify-content: space-between;
       padding: 8px 0;
       border-bottom: 1px dashed #cbd5e1;
     }
-    .info-row:last-child { border-bottom: none; }
-    .info-label { color: #64748b; font-size: 13px; }
-    .info-value { font-weight: 600; color: #000000; }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    .info-value {
+      font-weight: 600;
+      color: #000000;
+    }
+
     .badge {
       display: inline-block;
       padding: 4px 12px;
@@ -203,9 +274,25 @@
       font-size: 12px;
       font-weight: 600;
     }
-    .badge-success { background: #f0fdf4; color: #166534; border: 1px solid #86efac; }
-    .badge-warning { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
-    .badge-danger { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+
+    .badge-success {
+      background: #f0fdf4;
+      color: #166534;
+      border: 1px solid #86efac;
+    }
+
+    .badge-warning {
+      background: #fffbeb;
+      color: #92400e;
+      border: 1px solid #fde68a;
+    }
+
+    .badge-danger {
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+
     .package-card {
       background: #f8fafc;
       border: 1px solid #e2e8f0;
@@ -215,19 +302,36 @@
       cursor: pointer;
       transition: 0.2s;
     }
-    .package-card:hover { border-color: #d4af37; background: #f1f5f9; }
-    .package-card.selected { 
-      border: 2px solid #d4af37; 
-      background: #fdf8e7; 
-      box-shadow: 0 4px 12px rgba(102,126,234,0.2);
+
+    .package-card:hover {
+      border-color: #d4af37;
+      background: #f1f5f9;
     }
-    .package-name { font-weight: 700; font-size: 16px; color: #000000; }
-    .package-price { color: #d4af37; font-weight: 700; font-size: 18px; }
+
+    .package-card.selected {
+      border: 2px solid #d4af37;
+      background: #fdf8e7;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    }
+
+    .package-name {
+      font-weight: 700;
+      font-size: 16px;
+      color: #000000;
+    }
+
+    .package-price {
+      color: #d4af37;
+      font-weight: 700;
+      font-size: 18px;
+    }
+
     .file-upload {
       position: relative;
       display: inline-block;
       width: 100%;
     }
+
     .file-upload-label {
       display: flex;
       align-items: center;
@@ -239,7 +343,12 @@
       cursor: pointer;
       transition: 0.2s;
     }
-    .file-upload-label:hover { border-color: #d4af37; background: #f1f5f9; }
+
+    .file-upload-label:hover {
+      border-color: #d4af37;
+      background: #f1f5f9;
+    }
+
     .file-upload-input {
       position: absolute;
       width: 0.1px;
@@ -248,11 +357,13 @@
       overflow: hidden;
       z-index: -1;
     }
+
     .file-name {
       margin-top: 8px;
       font-size: 13px;
       color: #475569;
     }
+
     .bank-info {
       background: #f1f5f9;
       border-radius: 10px;
@@ -261,6 +372,7 @@
       font-size: 14px;
       border-left: 4px solid #d4af37;
     }
+
     .total-section {
       background: linear-gradient(135deg, #000000, #000000);
       color: white;
@@ -269,11 +381,13 @@
       margin: 20px 0;
       text-align: center;
     }
+
     .total-amount {
       font-size: 28px;
       font-weight: 800;
       color: #fbbf24;
     }
+
     .footer {
       text-align: center;
       padding: 20px;
@@ -282,18 +396,20 @@
       font-size: 13px;
       color: #64748b;
     }
+
     .loading-overlay {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(255,255,255,0.9);
+      background: rgba(255, 255, 255, 0.9);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 9999;
     }
+
     .spinner {
       width: 40px;
       height: 40px;
@@ -302,10 +418,31 @@
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
   </style>
 </head>
+
 <body>
   <div id="loadingOverlay" class="loading-overlay" style="display:none">
     <div style="text-align:center">
@@ -316,11 +453,13 @@
 
   <div class="extension-container">
     <div class="header">
-      <img id="gymLogoHeader" src="https://i.imgur.com/PAB0dhW.png" style="width:80px;height:80px;border-radius:50%;margin-bottom:16px;border:3px solid rgba(255,255,255,0.3);object-fit:cover">
+      <img id="gymLogoHeader" src="https://i.imgur.com/PAB0dhW.png"
+        style="width:80px;height:80px;border-radius:50%;margin-bottom:16px;border:3px solid rgba(255,255,255,0.3);object-fit:cover">
       <h1 id="gymNameHeader">🔄 Perpanjangan Member UGYM</h1>
       <p>Form perpanjangan keanggotaan online</p>
       <div style="max-width: 320px; margin: 16px auto 0;">
-        <select id="pubBranch" class="form-input" style="text-align: center; text-align-last: center; background: rgba(255,255,255,0.95); border: none; border-radius: 12px; font-weight: 600; color: #1e293b;">
+        <select id="pubBranch" class="form-input"
+          style="text-align: center; text-align-last: center; background: rgba(255,255,255,0.95); border: none; border-radius: 12px; font-weight: 600; color: #1e293b;">
           <option value="">Memuat lokasi cabang...</option>
         </select>
       </div>
@@ -331,9 +470,11 @@
 
       <div id="memberInfoSection" style="display:none">
         <div class="member-info">
-          <img id="memberPhotoDisplay" class="member-photo" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='1.5'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E">
+          <img id="memberPhotoDisplay" class="member-photo"
+            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='1.5'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E">
           <div class="member-details-grid">
-            <h4 style="margin-bottom:12px;color:#000000"><i class="fas fa-user-circle" style="color:#d4af37"></i> Informasi Member</h4>
+            <h4 style="margin-bottom:12px;color:#000000"><i class="fas fa-user-circle" style="color:#d4af37"></i>
+              Informasi Member</h4>
             <div class="info-row">
               <span class="info-label">Member ID</span>
               <span class="info-value" id="memberIdDisplay">-</span>
@@ -365,7 +506,7 @@
       <div id="searchSection">
         <div class="form-group">
           <label class="form-label"><i class="fas fa-id-card"></i> Member ID</label>
-          <input type="text" id="memberIdInput" class="form-input" placeholder="Masukkan Member ID Anda" 
+          <input type="text" id="memberIdInput" class="form-input" placeholder="Masukkan Member ID Anda"
             onkeydown="if(event.key==='Enter') loadMemberInfo()">
           <small style="color:#94a3b8">Contoh: M2301001</small>
         </div>
@@ -378,12 +519,13 @@
         <div class="bank-info">
           <i class="fas fa-university" style="color:#d4af37;margin-right:8px"></i>
           <strong>Transfer Pembayaran ke:</strong><br>
-      BCA 0379889788 a.n. EDY SETYO SUTRESNO<br>
+          BCA 0379889788 a.n. EDY SETYO SUTRESNO<br>
           <small style="color:#64748b">*Upload bukti transfer setelah pembayaran</small>
         </div>
 
         <div class="form-group">
-          <label class="form-label"><i class="fas fa-tag"></i> Pilih Paket Perpanjangan <span style="color:#ef4444">*</span></label>
+          <label class="form-label"><i class="fas fa-tag"></i> Pilih Paket Perpanjangan <span
+              style="color:#ef4444">*</span></label>
           <div id="packageList"></div>
         </div>
 
@@ -393,7 +535,8 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label"><i class="fas fa-image"></i> Upload Bukti Pembayaran <span style="color:#ef4444">*</span></label>
+          <label class="form-label"><i class="fas fa-image"></i> Upload Bukti Pembayaran <span
+              style="color:#ef4444">*</span></label>
           <div class="file-upload">
             <label for="paymentProof" class="file-upload-label" id="fileUploadLabel">
               <i class="fas fa-cloud-upload-alt fa-2x" style="color:#d4af37"></i>
@@ -402,7 +545,8 @@
                 <span style="font-size:12px;color:#64748b">Format: JPG, PNG (max 5MB)</span>
               </div>
             </label>
-            <input type="file" id="paymentProof" class="file-upload-input" accept=".jpg,.jpeg,.png" onchange="updateFileName(this)">
+            <input type="file" id="paymentProof" class="file-upload-input" accept=".jpg,.jpeg,.png"
+              onchange="updateFileName(this)">
           </div>
           <div id="fileName" class="file-name"></div>
         </div>
@@ -412,7 +556,8 @@
         </button>
 
         <div style="margin-top:16px;padding:12px;background:#f0f9ff;border-radius:8px;font-size:13px;color:#0369a1">
-          <i class="fas fa-info-circle"></i> Permintaan akan diproses oleh admin setelah verifikasi bukti pembayaran. Status perpanjangan akan dikirim via email.
+          <i class="fas fa-info-circle"></i> Permintaan akan diproses oleh admin setelah verifikasi bukti pembayaran.
+          Status perpanjangan akan dikirim via email.
         </div>
       </div>
     </div>
@@ -421,12 +566,20 @@
       <div style="margin-bottom: 15px;">
         <i class="fas fa-phone"></i> 08158905889 | <i class="fas fa-envelope"></i> ugymindonesia@gmail.com
       </div>
-      
+
       <!-- Developer Branding -->
-      <div class="developer-branding" style="text-align: center; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 15px; cursor: pointer; opacity: 0.8; transition: opacity 0.2s;" onclick="window.open('https://wa.me/6285777723458', '_blank')" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">
-        <img src="https://i.imgur.com/NO5dVfb.png" alt="KIZIY Logo" style="width: 36px; height: 36px; margin-bottom: 4px; object-fit: contain;">
-        <div style="font-weight: bold; color: #1e293b; font-size: 13px; letter-spacing: 1px; text-transform: uppercase;">KIZIY</div>
-        <div style="font-family: 'Comic Sans MS', 'Comic Sans', cursive; font-size: 11px; color: #64748b; margin-top: 2px;">key to easy</div>
+      <div class="developer-branding"
+        style="text-align: center; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 15px; cursor: pointer; opacity: 0.8; transition: opacity 0.2s;"
+        onclick="window.open('https://wa.me/6285777723458', '_blank')" onmouseover="this.style.opacity='1'"
+        onmouseout="this.style.opacity='0.8'">
+        <img src="https://i.imgur.com/NO5dVfb.png" alt="KIZIY Logo"
+          style="width: 36px; height: 36px; margin-bottom: 4px; object-fit: contain;">
+        <div
+          style="font-weight: bold; color: #1e293b; font-size: 13px; letter-spacing: 1px; text-transform: uppercase;">
+          KIZIY</div>
+        <div
+          style="font-family: 'Comic Sans MS', 'Comic Sans', cursive; font-size: 11px; color: #64748b; margin-top: 2px;">
+          key to easy</div>
       </div>
     </div>
   </div>
@@ -442,10 +595,10 @@
       return new Promise((resolve) => {
         const img = new Image();
         img.src = base64Str;
-        img.onload = function() {
+        img.onload = function () {
           let width = img.width;
           let height = img.height;
-          
+
           if (width > height) {
             if (width > maxWidth) {
               height = Math.round((height * maxWidth) / width);
@@ -457,17 +610,17 @@
               height = maxHeight;
             }
           }
-          
+
           const canvas = document.createElement('canvas');
           canvas.width = width;
           canvas.height = height;
-          
+
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
-          
+
           resolve(canvas.toDataURL('image/jpeg', quality));
         };
-        img.onerror = function() {
+        img.onerror = function () {
           resolve(base64Str);
         };
       });
@@ -482,43 +635,43 @@
 
     function updateBrandingUI(branchKey) {
       const config = branchRebrandingConfig[branchKey] || branchRebrandingConfig.branch_1;
-      
+
       const logoEl = document.getElementById('gymLogoHeader');
       if (logoEl) logoEl.src = config.logo;
-      
+
       const nameEl = document.getElementById('gymNameHeader');
       if (nameEl) nameEl.textContent = config.name;
-      
+
       document.documentElement.style.setProperty('--primary', config.color);
     }
 
     function initBranchSelection() {
-      google.script.run.withSuccessHandler(function(backendBranches) {
+      google.script.run.withSuccessHandler(function (backendBranches) {
         const select = document.getElementById('pubBranch');
         if (select) {
           const realId = (backendBranches && backendBranches.length > 0) ? backendBranches[0].id : 'dummy_id';
-          
+
           const customBranches = [
             { id: realId, key: 'branch_1', name: 'UGYM Utama' },
             { id: realId, key: 'branch_2', name: 'UGYM Premium (Cabang 2)' },
             { id: realId, key: 'branch_3', name: 'UGYM Express (Cabang 3)' }
           ];
-          
+
           select.innerHTML = customBranches.map(b => `<option value="${b.id}" data-key="${b.key}">${b.name}</option>`).join('');
-          
-          select.addEventListener('change', function(e) {
+
+          select.addEventListener('change', function (e) {
             const selectedOption = e.target.options[e.target.selectedIndex];
             const key = selectedOption.getAttribute('data-key');
             updateBrandingUI(key);
             if (typeof loadPackages === 'function') loadPackages();
           });
-          
+
           updateBrandingUI('branch_1');
         }
       }).getActiveBranches();
     }
 
-    window.onload = function() {
+    window.onload = function () {
       initBranchSelection();
       loadPackages();
       restoreDraft();
@@ -542,32 +695,32 @@
       const cacheExpiryKey = 'ugym_pub_packages_expiry';
       const cachedData = localStorage.getItem(cacheKey);
       const cacheExpiry = localStorage.getItem(cacheExpiryKey);
-      
+
       const isCacheValid = cachedData && cacheExpiry && (Date.now() < parseInt(cacheExpiry));
-      
+
       if (isCacheValid) {
         try {
           const res = JSON.parse(cachedData);
           packages = filterPackages(res.packages);
           if (currentMember) renderPackages();
           console.log('⚡ Loaded packages from Client-Side Cache in Extension');
-        } catch(e) {
+        } catch (e) {
           localStorage.removeItem(cacheKey);
           localStorage.removeItem(cacheExpiryKey);
         }
       }
-      
+
       google.script.run
-        .withSuccessHandler(function(res) {
+        .withSuccessHandler(function (res) {
           if (res && res.success && res.packages) {
             localStorage.setItem(cacheKey, JSON.stringify(res));
             localStorage.setItem(cacheExpiryKey, (Date.now() + 2 * 60 * 60 * 1000).toString());
-            
+
             packages = filterPackages(res.packages);
             if (currentMember) renderPackages();
           }
         })
-        .withFailureHandler(function(err) {
+        .withFailureHandler(function (err) {
           console.error('Gagal memperbarui paket dari server:', err);
         })
         .getPackages();
@@ -586,7 +739,7 @@
       showLoading();
 
       google.script.run
-        .withSuccessHandler(function(res) {
+        .withSuccessHandler(function (res) {
           hideLoading();
           btn.innerHTML = '<i class="fas fa-search"></i> Cari Data Member';
           btn.disabled = false;
@@ -602,7 +755,7 @@
             showAlert('Member tidak ditemukan: ' + (res?.message || 'ID tidak valid'), 'error');
           }
         })
-        .withFailureHandler(function(err) {
+        .withFailureHandler(function (err) {
           hideLoading();
           btn.innerHTML = '<i class="fas fa-search"></i> Cari Data Member';
           btn.disabled = false;
@@ -619,7 +772,7 @@
       document.getElementById('memberEmailDisplay').textContent = currentMember.email || '-';
       document.getElementById('memberPackageDisplay').textContent = currentMember.package || '-';
       document.getElementById('memberExpiryDisplay').textContent = formatDate(currentMember.expiry);
-      
+
       const statusEl = document.getElementById('memberStatusDisplay');
       statusEl.textContent = currentMember.status;
       statusEl.className = `badge ${currentMember.status === 'Aktif' ? 'badge-success' : 'badge-warning'}`;
@@ -638,7 +791,7 @@
       if (!url) return '';
       if (url.startsWith('http://')) url = url.replace('http://', 'https://');
       if (!url.includes('.google.com')) return url;
-      
+
       let fileId = '';
       const patterns = [/\/d\/([a-zA-Z0-9_-]+)/, /id=([a-zA-Z0-9_-]+)/, /\/file\/d\/([a-zA-Z0-9_-]+)/, /open\?id=([a-zA-Z0-9_-]+)/];
       for (let p of patterns) {
@@ -682,7 +835,7 @@
       if (selectedEl) selectedEl.classList.add('selected');
 
       selectedPackage = packages.find(p => p.id === pkgId);
-      
+
       if (selectedPackage) {
         document.getElementById('totalAmount').textContent = formatCurrency(selectedPackage.total);
         document.getElementById('totalSection').style.display = 'block';
@@ -707,133 +860,133 @@
       }
     }
 
-function submitExtensionRequest() {
-  if (!selectedPackage) {
-    showAlert('Pilih paket perpanjangan', 'warning');
-    return;
-  }
+    function submitExtensionRequest() {
+      if (!selectedPackage) {
+        showAlert('Pilih paket perpanjangan', 'warning');
+        return;
+      }
 
-  if (!selectedFile) {
-    showAlert('Upload bukti pembayaran', 'warning');
-    return;
-  }
+      if (!selectedFile) {
+        showAlert('Upload bukti pembayaran', 'warning');
+        return;
+      }
 
-  const btn = document.getElementById('submitBtn');
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
-  btn.disabled = true;
-  showLoading();
+      const btn = document.getElementById('submitBtn');
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
+      btn.disabled = true;
+      showLoading();
 
-  // Convert file to base64
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    compressImage(e.target.result, 1000, 1000, 0.8).then(function(compressed) {
-      const base64Data = compressed.split(',')[1];
-      
-      google.script.run
-        .withSuccessHandler(function(res) {
-          hideLoading();
-          btn.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Permintaan Perpanjangan';
-          btn.disabled = false;
+      // Convert file to base64
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        compressImage(e.target.result, 1000, 1000, 0.8).then(function (compressed) {
+          const base64Data = compressed.split(',')[1];
 
-          if (res && res.success) {
-            // Bersihkan draft perpanjangan karena sukses
-            clearDraft();
+          google.script.run
+            .withSuccessHandler(function (res) {
+              hideLoading();
+              btn.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Permintaan Perpanjangan';
+              btn.disabled = false;
 
-            showAlert(
-              `✅ PERMINTAAN PERPANJANGAN TERKIRIM!\n\n` +
-              `No. Request: ${res.requestId}\n` +
-              `Member     : ${currentMember.name}\n` +
-              `Paket      : ${selectedPackage.name}\n` +
-              `Total      : ${formatCurrency(res.totalAmount || selectedPackage.total)}\n\n` +
-              `Permintaan Anda sedang menunggu persetujuan admin.\n` +
-              `${res.emailSent ? '📧 Email konfirmasi telah dikirim ke ' + currentMember.email : ''}`,
-              'success'
-            );
-            
-            // Reset form
-            selectedPackage = null;
-            document.getElementById('totalSection').style.display = 'none';
-            document.getElementById('paymentProof').value = '';
-            document.getElementById('fileName').innerHTML = '';
-            
-            // Remove selected class
-            packages.forEach(p => {
-              const el = document.getElementById(`pkg-${p.id}`);
-              if (el) el.classList.remove('selected');
+              if (res && res.success) {
+                // Bersihkan draft perpanjangan karena sukses
+                clearDraft();
+
+                showAlert(
+                  `✅ PERMINTAAN PERPANJANGAN TERKIRIM!\n\n` +
+                  `No. Request: ${res.requestId}\n` +
+                  `Member     : ${currentMember.name}\n` +
+                  `Paket      : ${selectedPackage.name}\n` +
+                  `Total      : ${formatCurrency(res.totalAmount || selectedPackage.total)}\n\n` +
+                  `Permintaan Anda sedang menunggu persetujuan admin.\n` +
+                  `${res.emailSent ? '📧 Email konfirmasi telah dikirim ke ' + currentMember.email : ''}`,
+                  'success'
+                );
+
+                // Reset form
+                selectedPackage = null;
+                document.getElementById('totalSection').style.display = 'none';
+                document.getElementById('paymentProof').value = '';
+                document.getElementById('fileName').innerHTML = '';
+
+                // Remove selected class
+                packages.forEach(p => {
+                  const el = document.getElementById(`pkg-${p.id}`);
+                  if (el) el.classList.remove('selected');
+                });
+              } else {
+                showAlert('❌ ' + (res?.message || 'Gagal mengirim permintaan'), 'error');
+              }
+            })
+            .withFailureHandler(function (err) {
+              hideLoading();
+              btn.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Permintaan Perpanjangan';
+              btn.disabled = false;
+              showAlert('Error: ' + err.message, 'error');
+            })
+            .submitExtensionRequest({
+              memberId: currentMember.id,
+              packageId: selectedPackage.id,
+              paymentProof: base64Data
             });
-          } else {
-            showAlert('❌ ' + (res?.message || 'Gagal mengirim permintaan'), 'error');
-          }
-        })
-        .withFailureHandler(function(err) {
-          hideLoading();
-          btn.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Permintaan Perpanjangan';
-          btn.disabled = false;
-          showAlert('Error: ' + err.message, 'error');
-        })
-        .submitExtensionRequest({
-          memberId: currentMember.id,
-          packageId: selectedPackage.id,
-          paymentProof: base64Data
         });
-    });
-  };
-  reader.readAsDataURL(selectedFile);
-}
-
-// ================ AUTOSAVE DRAFT FORM ================
-function saveDraft() {
-  const memberId = document.getElementById('memberIdInput')?.value || '';
-  localStorage.setItem('ugym_pub_ext_draft', memberId);
-}
-
-function restoreDraft() {
-  try {
-    const urlParams = new URLSearchParams(window.location.search);
-    const memberIdUrl = urlParams.get('id') || urlParams.get('memberId');
-    if (memberIdUrl) {
-      document.getElementById('memberIdInput').value = memberIdUrl;
-      loadMemberInfo();
-      return;
+      };
+      reader.readAsDataURL(selectedFile);
     }
 
-    const savedMemberId = localStorage.getItem('ugym_pub_ext_draft');
-    if (savedMemberId) {
-      document.getElementById('memberIdInput').value = savedMemberId;
+    // ================ AUTOSAVE DRAFT FORM ================
+    function saveDraft() {
+      const memberId = document.getElementById('memberIdInput')?.value || '';
+      localStorage.setItem('ugym_pub_ext_draft', memberId);
     }
-  } catch(e) {
-    console.warn('Gagal memulihkan draft perpanjangan:', e);
-  }
-}
 
-function clearDraft() {
-  localStorage.removeItem('ugym_pub_ext_draft');
-}
+    function restoreDraft() {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const memberIdUrl = urlParams.get('id') || urlParams.get('memberId');
+        if (memberIdUrl) {
+          document.getElementById('memberIdInput').value = memberIdUrl;
+          loadMemberInfo();
+          return;
+        }
 
-function setupAutosave() {
-  const el = document.getElementById('memberIdInput');
-  if (el) {
-    el.addEventListener('input', saveDraft);
-    el.addEventListener('change', saveDraft);
-  }
-}
+        const savedMemberId = localStorage.getItem('ugym_pub_ext_draft');
+        if (savedMemberId) {
+          document.getElementById('memberIdInput').value = savedMemberId;
+        }
+      } catch (e) {
+        console.warn('Gagal memulihkan draft perpanjangan:', e);
+      }
+    }
+
+    function clearDraft() {
+      localStorage.removeItem('ugym_pub_ext_draft');
+    }
+
+    function setupAutosave() {
+      const el = document.getElementById('memberIdInput');
+      if (el) {
+        el.addEventListener('input', saveDraft);
+        el.addEventListener('change', saveDraft);
+      }
+    }
 
     function showAlert(message, type = 'info') {
       const alert = document.getElementById('alertMessage');
-      const icons = { 
-        success: 'check-circle', 
-        error: 'exclamation-circle', 
-        warning: 'exclamation-triangle', 
-        info: 'info-circle' 
+      const icons = {
+        success: 'check-circle',
+        error: 'exclamation-circle',
+        warning: 'exclamation-triangle',
+        info: 'info-circle'
       };
       alert.className = `alert alert-${type}`;
       alert.innerHTML = `<i class="fas fa-${icons[type]}"></i><div style="white-space:pre-line">${message}</div>`;
       alert.style.display = 'flex';
-      
+
       if (type === 'success') {
         setTimeout(() => { alert.style.display = 'none'; }, 10000);
       }
-      
+
       alert.scrollIntoView({ behavior: 'smooth' });
     }
 
@@ -856,4 +1009,5 @@ function setupAutosave() {
     }
   </script>
 </body>
+
 </html>
