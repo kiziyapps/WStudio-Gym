@@ -1271,18 +1271,31 @@
       if (!container) return;
       
       if (!res || !res.success || !res.packages || !res.packages.length) {
-        container.innerHTML = '<p style="color:#ef4444;text-align:center;padding:30px">Tidak ada paket tersedia saat ini.</p>';
+        container.innerHTML = '<p style="color:#ef4444;text-align:center;padding:30px"><i class="fas fa-exclamation-circle fa-2x" style="margin-bottom:8px;display:block"></i>Tidak ada paket keanggotaan aktif yang tersedia saat ini.</p>';
         return;
       }
       
-      packages = res.packages.filter(p => p.type && p.type.toLowerCase().includes('regular'));
+      let filtered = res.packages.filter(p => p.type && p.type.toLowerCase().includes('regular'));
+      if (!filtered || filtered.length === 0) {
+        filtered = res.packages.filter(p => !p.type || (!p.type.toLowerCase().includes('pt') && !p.type.toLowerCase().includes('personal')));
+      }
+      if (!filtered || filtered.length === 0) {
+        filtered = res.packages;
+      }
+      
+      packages = filtered;
+
+      if (!packages || packages.length === 0) {
+        container.innerHTML = '<p style="color:#ef4444;text-align:center;padding:30px">Tidak ada paket keanggotaan aktif yang tersedia saat ini.</p>';
+        return;
+      }
       
       container.innerHTML = `
         <div class="packages-grid">
           ${packages.map(p => `
             <div class="package-card" id="pkg_${p.id}" onclick="selectPackage(${JSON.stringify(p).replace(/"/g,'&quot;')})">
               <div class="package-name">${p.name}</div>
-              <div class="package-price">${formatCurrency(p.price)}</div>
+              <div class="package-price">${formatCurrency(p.price || p.total)}</div>
               <div class="package-duration">
                 <i class="far fa-clock"></i> ${p.duration || '-'}
               </div>
@@ -1329,10 +1342,8 @@
             // Simpan ke cache lokal (kedaluwarsa dalam 2 jam)
             localStorage.setItem(cacheKey, JSON.stringify(res));
             localStorage.setItem(cacheExpiryKey, (Date.now() + 2 * 60 * 60 * 1000).toString());
-            
-            // Render ulang dengan data segar dari server
-            renderPackagesList(res);
           }
+          renderPackagesList(res);
         })
         .withFailureHandler(function(err) {
           console.error('Gagal memperbarui paket dari server:', err);
