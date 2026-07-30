@@ -2,7 +2,7 @@
 <html lang="id">
 
 <head>
-  <!-- UGYM Decoupled REST API Wrapper -->
+  <!-- Kiziy Decoupled REST API Wrapper -->
   <script>
     // Konfigurasi endpoint GAS Anda (Ganti dengan URL eksekusi GAS yang di-deploy)
     const GAS_REST_API_URL = 'https://script.google.com/macros/s/AKfycbxOTUY8cVdLjGVAnqcz47fKDJXtUD7lsXVMJFqwFLsh-TjfdBT_DxaqsiAnFU4r36PcGg/exec';
@@ -97,7 +97,7 @@
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UGYM Management</title>
+  <title>Kiziy Management</title>
   <!-- Browser Update Notification -->
   <script>
     var $buoop = {
@@ -1678,7 +1678,7 @@
       animation: fadeIn 0.3s ease;
     }
 
-    .modal-container {
+    .modal-container, .modal-content {
       background: var(--bg-light);
       border-radius: 24px;
       max-width: 600px;
@@ -1696,7 +1696,7 @@
         align-items: center;
       }
 
-      .modal-container {
+      .modal-container, .modal-content {
         border-radius: 24px;
       }
     }
@@ -3251,7 +3251,7 @@
               <div id="userName" style="font-size:13px; font-weight:700; color:var(--text-main)">-</div>
               <div id="userRole" style="font-size:10px; color:var(--text-secondary)">-</div>
             </div>
-            <img id="userPic" src="https://i.imgur.com/PAB0dhW.png"
+            <img id="userPic" src="https://i.imgur.com/NO5dVfb.png"
               style="width:38px; height:38px; border-radius:50%; object-fit:cover; border:2px solid var(--primary-light)">
           </div>
 
@@ -3421,7 +3421,7 @@
       const now = formatDateTime(new Date());
       let text = '';
       if (type === 'registration') {
-        text = `*RECEIPT REGISTRASI UGYM*
+        text = `*RECEIPT REGISTRASI Kiziy*
 --------------------------------
 Waktu: ${now}
 Member ID: ${data.memberId}
@@ -3443,7 +3443,7 @@ ${data.qr}
 
 Terima kasih telah bergabung!`;
       } else if (type === 'extension') {
-        text = `*RECEIPT PERPANJANGAN UGYM*
+        text = `*RECEIPT PERPANJANGAN Kiziy*
 --------------------------------
 Waktu: ${now}
 Member ID: ${data.memberId}
@@ -3461,7 +3461,7 @@ Metode: ${data.payment}
 --------------------------------
 Terima kasih!`;
       } else if (type === 'pt') {
-        text = `*RECEIPT REGISTRASI PT UGYM*
+        text = `*RECEIPT REGISTRASI PT Kiziy*
 --------------------------------
 Waktu: ${now}
 Member: ${data.name}
@@ -3479,7 +3479,7 @@ Metode: ${data.payment}
 --------------------------------
 Selamat berlatih!`;
       } else if (type === 'visit') {
-        text = `*RECEIPT VISIT HARIAN UGYM*
+        text = `*RECEIPT VISIT HARIAN Kiziy*
 --------------------------------
 Waktu: ${now}
 Customer: ${data.name}
@@ -3599,7 +3599,7 @@ Terima kasih dan selamat berlatih!`;
       
       // Update logo
       const logoEl = document.querySelector('.auth-header img');
-      if (logoEl) logoEl.src = config.logoUrl || "https://i.imgur.com/PAB0dhW.png";
+      if (logoEl) logoEl.src = config.logoUrl || "https://i.imgur.com/NO5dVfb.png";
       
       // Update nama
       const nameEl = document.querySelector('.auth-header h2');
@@ -3803,7 +3803,7 @@ Terima kasih dan selamat berlatih!`;
             if (selectedBranch) {
               const sbLogo = document.getElementById('sidebarLogo');
               const sbName = document.getElementById('sidebarBrandName');
-              if (sbLogo) sbLogo.src = selectedBranch.logoUrl || "https://i.imgur.com/PAB0dhW.png";
+              if (sbLogo) sbLogo.src = selectedBranch.logoUrl || "https://i.imgur.com/NO5dVfb.png";
               if (sbName) sbName.textContent = selectedBranch.name || "Kiziy";
             }
 
@@ -3860,7 +3860,7 @@ Terima kasih dan selamat berlatih!`;
       };
 
       document.getElementById('pageTitle').textContent = titles[view] || view;
-      document.getElementById('pageSubtitle').textContent = 'UGYM Management System';
+      document.getElementById('pageSubtitle').textContent = 'Kiziy Management System';
 
       stopScanner();
 
@@ -3894,7 +3894,7 @@ Terima kasih dan selamat berlatih!`;
         <div class="view-header dashboard-header-flex">
           <div>
             <h2 class="view-title"><i class="fas fa-chart-line"></i> Dashboard Analytics</h2>
-            <p class="view-subtitle">Ringkasan performa operasional dan keuangan UGYM</p>
+            <p class="view-subtitle">Ringkasan performa operasional dan keuangan Kiziy</p>
           </div>
           <div style="display:flex; flex-wrap:wrap; gap:12px">
             <div class="filter-group" style="display:flex; align-items:center; gap:8px; background:white; padding:4px 12px; border-radius:10px; border:1px solid var(--border-color)">
@@ -5225,7 +5225,7 @@ Terima kasih dan selamat berlatih!`;
                       <div class="card-right">
                         <div>
                           <div class="header">
-                            <div class="gym-name">UGYM</div>
+                            <div class="gym-name">Kiziy</div>
                             <div class="tagline">Power 💪 Fitness 🏃 Health</div>
                           </div>
                           <div class="member-info">
@@ -6305,7 +6305,7 @@ Terima kasih dan selamat berlatih!`;
           hideLoading();
           if (res.success) {
             let itemsText = data.items.map(it => ` ${it.name} x${it.qty}`).join('\n');
-            let text = `*STRUK PENJUALAN - UGYM*\n` +
+            let text = `*STRUK PENJUALAN - Kiziy*\n` +
               `--------------------------------\n` +
               `ID Trx: ${trxId}\n` +
               `Tanggal: ${new Date().toLocaleString('id-ID')}\n` +
@@ -6318,7 +6318,7 @@ Terima kasih dan selamat berlatih!`;
               `*Total: ${formatCurrency(data.total)}*\n` +
               `Pembayaran: ${data.paymentMethod}\n\n` +
               `Download Struk PDF:\n${res.url}\n\n` +
-              `Terima kasih telah berbelanja di UGYM!`;
+              `Terima kasih telah berbelanja di Kiziy!`;
 
             const waNumber = data.whatsapp || '';
             if (waNumber) {
@@ -9027,7 +9027,7 @@ Terima kasih dan selamat berlatih!`;
                 if (approval) {
                   const data = approval.data || {};
                   const receiptNumber = res.receiptNumber || '-';
-                  const waText = `*PEMBAYARAN DITERIMA - UGYM*\n` +
+                  const waText = `*PEMBAYARAN DITERIMA - Kiziy*\n` +
                     `--------------------------------\n` +
                     `Halo *${approval.memberName || 'Member'}*,\n\n` +
                     `Pembayaran Anda telah kami terima dan diverifikasi.\n\n` +
@@ -9038,7 +9038,7 @@ Terima kasih dan selamat berlatih!`;
                     `--------------------------------\n` +
                     ` *📌 Langkah Selanjutnya:*\n` +
                     `Akun Anda sedang dalam proses *Aktivasi* oleh Admin. Anda akan menerima pemberitahuan berikutnya beserta Kode QR setelah masa berlaku diaktifkan.\n\n` +
-                    `Terima kasih telah bergabung dengan UGYM! `;
+                    `Terima kasih telah bergabung dengan Kiziy! `;
 
                   setTimeout(() => {
                     showConfirm('Pembayaran berhasil disetujui! Apakah Anda ingin mengirim pesan konfirmasi WhatsApp ke member?', function (waOk) {
@@ -9139,7 +9139,7 @@ Terima kasih dan selamat berlatih!`;
 
       // Jika statusnya masih 'Pending' (belum di-approve bayar), buat pesan konfirmasi
       if (approval.status === 'Pending') {
-        const text = `*KONFIRMASI PENDAFTARAN - UGYM*\n` +
+        const text = `*KONFIRMASI PENDAFTARAN - Kiziy*\n` +
           `--------------------------------\n` +
           `Halo *${approval.memberName || 'Member'}*,\n\n` +
           `Kami menerima pengajuan ${approval.type === 'Registration' ? 'pendaftaran' : 'perpanjangan'} Anda.\n\n` +
@@ -9148,7 +9148,7 @@ Terima kasih dan selamat berlatih!`;
           ` Total Pembayaran: ${formatCurrency(data.amount || 0)}\n` +
           ` Status: Menunggu Verifikasi Pembayaran\n\n` +
           `Jika Anda sudah melakukan transfer, mohon kirimkan kembali bukti transfer yang valid agar dapat kami verifikasi segera.\n\n` +
-          `Terima kasih! UGYM `;
+          `Terima kasih! Kiziy `;
         shareToWhatsApp(phone, text);
         return;
       }
@@ -11131,7 +11131,7 @@ Terima kasih dan selamat berlatih!`;
 
           if (res.success) {
             const summary = res.summary;
-            const text = `*LAPORAN HARIAN KASIR - UGYM*\n` +
+            const text = `*LAPORAN HARIAN KASIR - Kiziy*\n` +
               `--------------------------------\n` +
               `Tanggal: ${res.fileName.replace('Laporan_Kasir_', '').replace('.pdf', '').replace(/_/g, ' ')}\n` +
               `--------------------------------\n` +
@@ -11148,7 +11148,7 @@ Terima kasih dan selamat berlatih!`;
               `--------------------------------\n` +
               `Detail Lengkap (PDF):\n` +
               `${res.url}\n\n` +
-              `_Laporan dikirim otomatis dari System UGYM_`;
+              `_Laporan dikirim otomatis dari System Kiziy_`;
 
             // Kirim ke nomor owner/manager
             shareToWhatsApp('082221923200', text);
@@ -11923,7 +11923,7 @@ Terima kasih dan selamat berlatih!`;
     <div class="modal-body">
       <form id="addBranchForm" onsubmit="submitAddBranch(event)">
         <label class="form-label">Nama Cabang Baru</label>
-        <input type="text" id="newBranchName" class="form-input" required placeholder="Contoh: UGYM Jakarta">
+        <input type="text" id="newBranchName" class="form-input" required placeholder="Contoh: Kiziy Jakarta">
         
         <label class="form-label">Warna Tema (Opsional)</label>
         <input type="color" id="newBranchThemeColor" class="form-input" style="height:40px; padding:0" value="#4f46e5">
@@ -11958,7 +11958,7 @@ Terima kasih dan selamat berlatih!`;
         <input type="email" id="editBranchEmail" class="form-input" placeholder="Contoh: info@ugym.com">
         
         <label class="form-label">Nomor Rekening</label>
-        <input type="text" id="editBranchBankAccount" class="form-input" placeholder="BCA 12345678 a/n UGYM">
+        <input type="text" id="editBranchBankAccount" class="form-input" placeholder="BCA 12345678 a/n Kiziy">
         
         <label class="form-label">Alamat Lengkap</label>
         <textarea id="editBranchAddress" class="form-input" rows="3" placeholder="Jl. Sudirman No 1..."></textarea>
@@ -12396,7 +12396,7 @@ Terima kasih dan selamat berlatih!`;
       const expiry = m.expiryDate ? formatDate(m.expiryDate) : '-';
       csv += `${id},${name},${phone},${gender},${joinDate},${expiry}\n`;
     });
-    downloadCSV(csv, 'Data_Member_UGYM_' + new Date().toISOString().slice(0,10) + '.csv');
+    downloadCSV(csv, 'Data_Member_Kiziy_' + new Date().toISOString().slice(0,10) + '.csv');
   }
 
   function exportTableToCSV() {
@@ -12416,7 +12416,7 @@ Terima kasih dan selamat berlatih!`;
       }
       csv.push(row.join(','));
     }
-    downloadCSV(csv.join('\n'), 'Laporan_UGYM_' + new Date().toISOString().slice(0,10) + '.csv');
+    downloadCSV(csv.join('\n'), 'Laporan_Kiziy_' + new Date().toISOString().slice(0,10) + '.csv');
   }
 </script>
 <!-- End of added missing features -->
