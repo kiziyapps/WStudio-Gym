@@ -870,12 +870,9 @@
             <!-- Bank Info -->
             <div class="bank-info">
               <h4><i class="fas fa-university"></i> Transfer Pembayaran ke:</h4>
-              <div class="bank-detail">
-                <p><strong>Bank:</strong> BCA</p>
-                <p><strong>No. Rekening:</strong> <span class="bank-account">0379889788</span></p>
-                <p><strong>Atas Nama:</strong> EDY SETYO SUTRESNO</p>
-                <p style="margin-top:12px;color:#64748b;font-size:13px">
-                  <i class="fas fa-info-circle"></i> Upload bukti transfer setelah pembayaran
+              <div class="bank-detail" style="padding: 12px; text-align: center;">
+                <p id="dynamicBankDetail" style="font-weight:700; font-size:16px; margin:0; color:var(--text-main);">
+                  BCA 0379889788 a.n. EDY SETYO SUTRESNO
                 </p>
               </div>
             </div>
@@ -1538,47 +1535,62 @@
       });
     }
 
-    // ================ KONFIGURASI CABANG (REBRANDING) ================
-    const branchRebrandingConfig = {
-      branch_1: { name: "UGYM Utama", logo: "https://i.imgur.com/PAB0dhW.png", color: "#d4af37" },
-      branch_2: { name: "UGYM Premium (Cabang 2)", logo: "https://i.imgur.com/PAB0dhW.png", color: "#3b82f6" },
-      branch_3: { name: "UGYM Express (Cabang 3)", logo: "https://i.imgur.com/PAB0dhW.png", color: "#10b981" }
-    };
+    // ================ KONFIGURASI CABANG (DINAMIS DARI DB) ================
+    let currentPublicBranches = [];
 
-    function updateBrandingUI(branchKey) {
-      const config = branchRebrandingConfig[branchKey] || branchRebrandingConfig.branch_1;
+    function updateBrandingUI(branchId) {
+      const config = currentPublicBranches.find(b => b.id === branchId);
+      if (!config) return;
       
       const logoEl = document.getElementById('gymLogoHeader');
-      if (logoEl) logoEl.src = config.logo;
+      if (logoEl) logoEl.src = config.logoUrl || "https://i.imgur.com/PAB0dhW.png";
       
       const nameEl = document.getElementById('gymNameHeader');
       if (nameEl) nameEl.textContent = config.name;
       
-      document.documentElement.style.setProperty('--primary', config.color);
+      if (config.themeColor) {
+        document.documentElement.style.setProperty('--primary', config.themeColor);
+      }
+
+      const bankEl = document.getElementById('dynamicBankDetail');
+      if (bankEl && config.rekening) {
+        bankEl.textContent = config.rekening;
+      }
+      
+      const footerEl = document.getElementById('dynamicFooterContact');
+      if (footerEl) {
+        let contactText = '© ' + (config.name || 'Kiziy');
+        if (config.phone) {
+          contactText += ' · Hubungi: ' + config.phone;
+        }
+        footerEl.textContent = contactText;
+      }
     }
+
 
     function initBranchSelection() {
       google.script.run.withSuccessHandler(function(backendBranches) {
         const select = document.getElementById('pubBranch');
-        if (select) {
-          const realId = (backendBranches && backendBranches.length > 0) ? backendBranches[0].id : 'dummy_id';
+        if (select && backendBranches && backendBranches.length > 0) {
+          currentPublicBranches = backendBranches;
           
-          const customBranches = [
-            { id: realId, key: 'branch_1', name: branchRebrandingConfig.branch_1.name },
-            { id: realId, key: 'branch_2', name: branchRebrandingConfig.branch_2.name },
-            { id: realId, key: 'branch_3', name: branchRebrandingConfig.branch_3.name }
-          ];
+          select.innerHTML = backendBranches.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
           
-          select.innerHTML = customBranches.map(b => `<option value="${b.id}" data-key="${b.key}">${b.name}</option>`).join('');
+          // Dapatkan branchId dari URL parameter (jika ada)
+          const urlParams = new URLSearchParams(window.location.search);
+          const urlBranchId = urlParams.get('branchId');
+          if (urlBranchId && backendBranches.find(b => b.id === urlBranchId)) {
+            select.value = urlBranchId;
+          }
           
           select.addEventListener('change', function(e) {
-            const selectedOption = e.target.options[e.target.selectedIndex];
-            const key = selectedOption.getAttribute('data-key');
-            updateBrandingUI(key);
+            updateBrandingUI(e.target.value);
             if (typeof loadPackages === 'function') loadPackages();
           });
           
-          updateBrandingUI('branch_1');
+          updateBrandingUI(select.value);
+        } else if (select) {
+          select.innerHTML = '<option value="">Tidak ada cabang tersedia</option>';
         }
       }).getActiveBranches();
     }
@@ -1606,4 +1618,3 @@
   </script>
 </body>
 </html>
-
