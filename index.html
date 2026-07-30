@@ -9382,6 +9382,7 @@ Terima kasih dan selamat berlatih!`;
           const el = document.getElementById('adminDataView');
           if (!el) return;
           let list = (res && res.success) ? res.members : [];
+          window.currentMemberList = list;
 
           // MERGE PENDING REGISTRATIONS (OPTIMISTIC)
           const queue = SyncQueue.get();
@@ -9406,8 +9407,11 @@ Terima kasih dan selamat berlatih!`;
 
           el.innerHTML = `
             <div class="table-container">
-              <div style="padding:16px;background:#f8fafc;border-bottom:1px solid #e2e8f0">
-                <h4 style="font-weight:600">Daftar Member (${list.length})</h4>
+              <div style="padding:16px;background:#f8fafc;border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center">
+                <h4 style="font-weight:600; margin:0">Daftar Member (${list.length})</h4>
+                <button class="btn btn-sm btn-outline" onclick="exportMembersToCSV()">
+                  <i class="fas fa-file-csv"></i> Export CSV
+                </button>
               </div>
               <div style="overflow-x:auto">
                 <table class="data-table">
@@ -9704,8 +9708,13 @@ Terima kasih dan selamat berlatih!`;
             el.innerHTML = `
               <div class="table-container">
                 <div style="padding:16px;background:#f8fafc;border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center">
-                  <h4 style="font-weight:600">Daftar Pengguna Sistem (${list.length})</h4>
-                  <small style="color:#64748b">Hanya Super Admin yang dapat melihat & mengelola akun.</small>
+                  <div>
+                    <h4 style="font-weight:600; margin:0">Daftar Pengguna Sistem (${list.length})</h4>
+                    <small style="color:#64748b">Hanya Super Admin yang dapat melihat & mengelola akun.</small>
+                  </div>
+                  <button class="btn btn-sm btn-primary" onclick="openAddUserModal()">
+                    <i class="fas fa-plus"></i> Tambah User Baru
+                  </button>
                 </div>
                 <div style="overflow-x:auto">
                   <table class="data-table">
@@ -9729,7 +9738,10 @@ Terima kasih dan selamat berlatih!`;
                           <td><small>${u.lastLogin ? format.date(new Date(u.lastLogin), true) : '-'}</small></td>
                           <td>
                             ${u.username !== 'superadmin' ? `
-                              <button class="btn btn-sm btn-danger" onclick="confirmDeleteUser('${u.id}', '${u.username}')">
+                              <button class="btn btn-sm btn-warning" onclick="openResetPasswordModal('${u.id}', '${u.username}')" title="Reset Password" style="margin-right:4px; color:white;">
+                                <i class="fas fa-key"></i>
+                              </button>
+                              <button class="btn btn-sm btn-danger" onclick="confirmDeleteUser('${u.id}', '${u.username}')" title="Hapus User">
                                 <i class="fas fa-trash"></i>
                               </button>
                             ` : '-'}
@@ -10149,7 +10161,14 @@ Terima kasih dan selamat berlatih!`;
         'pos_transactions': 'Rincian Transaksi POS/Retail Shop'
       };
 
-      title.textContent = titles[type] || 'Detail Data';
+      title.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; width:100%; padding-right:20px;">
+          <span>${titles[type] || 'Detail Data'}</span>
+          <button class="btn btn-sm btn-outline" onclick="exportTableToCSV()" style="font-size:12px">
+            <i class="fas fa-file-csv"></i> Export CSV
+          </button>
+        </div>
+      `;
       container.innerHTML = '<div style="text-align:center;padding:40px"><i class="fas fa-spinner fa-spin fa-2x"></i><br>Memuat data...</div>';
       modal.style.display = 'flex';
 
@@ -11857,7 +11876,50 @@ Terima kasih dan selamat berlatih!`;
   </div>
 </div>
 
+<!-- Modal Edit Identitas Cabang -->
+<div id="editBranchIdentityModal" class="modal-overlay" style="display:none;z-index:10000">
+  <div class="modal-content" style="max-width:500px; width:95%">
+    <div class="modal-header">
+      <h3 style="margin:0"><i class="fas fa-edit"></i> Edit Identitas Cabang</h3>
+      <button class="btn-close" onclick="closeEditBranchIdentityModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="editBranchIdentityForm" onsubmit="submitBranchIdentity(event)">
+        <input type="hidden" id="editBranchId">
+        
+        <label class="form-label">Nama Cabang</label>
+        <input type="text" id="editBranchName" class="form-input" required>
+        
+        <label class="form-label">Nomor Telepon / HP</label>
+        <input type="text" id="editBranchPhone" class="form-input" placeholder="Contoh: 08123456789">
+        
+        <label class="form-label">Email Cabang</label>
+        <input type="email" id="editBranchEmail" class="form-input" placeholder="Contoh: info@ugym.com">
+        
+        <label class="form-label">Nomor Rekening</label>
+        <input type="text" id="editBranchBankAccount" class="form-input" placeholder="BCA 12345678 a/n UGYM">
+        
+        <label class="form-label">Alamat Lengkap</label>
+        <textarea id="editBranchAddress" class="form-input" rows="3" placeholder="Jl. Sudirman No 1..."></textarea>
+        
+        <label class="form-label">Warna Tema Utama</label>
+        <input type="color" id="editBranchThemeColor" class="form-input" style="height:40px; padding:0">
+        
+        <label class="form-label">URL Foto / Logo</label>
+        <input type="text" id="editBranchLogoUrl" class="form-input" placeholder="https://link-gambar.com/logo.jpg">
+        
+        <div style="margin-top:20px; text-align:right">
+          <button type="button" class="btn btn-secondary" onclick="closeEditBranchIdentityModal()">Batal</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitBranchIdentity">Simpan Perubahan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <script>
+  let currentAdminBranches = [];
+
   function loadBranchManagement() {
     document.getElementById('branchManagementModal').style.display = 'flex';
     document.getElementById('branchManagementLoading').style.display = 'block';
@@ -11869,6 +11931,7 @@ Terima kasih dan selamat berlatih!`;
         if (res && res.success) {
           const tbody = document.getElementById('branchManagementTableBody');
           tbody.innerHTML = '';
+          currentAdminBranches = res.branches;
           res.branches.forEach(b => {
             const tr = document.createElement('tr');
             const isActive = b.status !== 'Nonaktif';
@@ -11879,8 +11942,11 @@ Terima kasih dan selamat berlatih!`;
                 <span class="badge ${isActive ? 'badge-success' : 'badge-danger'}">${b.status || 'Aktif'}</span>
               </td>
               <td>
-                <button class="btn btn-sm ${isActive ? 'btn-danger' : 'btn-success'}" onclick="toggleBranchStatusUI('${b.id}', '${isActive ? 'Nonaktif' : 'Aktif'}')">
-                  ${isActive ? '<i class="fas fa-ban"></i> Nonaktifkan' : '<i class="fas fa-check"></i> Aktifkan'}
+                <button class="btn btn-sm btn-info" onclick="openEditBranchIdentityModal('${b.id}')" title="Edit Identitas" style="margin-right:4px">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm ${isActive ? 'btn-danger' : 'btn-success'}" onclick="toggleBranchStatusUI('${b.id}', '${isActive ? 'Nonaktif' : 'Aktif'}')" title="${isActive ? 'Nonaktifkan' : 'Aktifkan'}">
+                  ${isActive ? '<i class="fas fa-ban"></i>' : '<i class="fas fa-check"></i>'}
                 </button>
               </td>
             `;
@@ -11918,6 +11984,211 @@ Terima kasih dan selamat berlatih!`;
         showToast('Error: ' + err.message, 'error');
       })
       .toggleBranchStatus(branchId, newStatus);
+  }
+
+  function openEditBranchIdentityModal(branchId) {
+    const branch = currentAdminBranches.find(b => b.id === branchId);
+    if (!branch) return;
+    
+    document.getElementById('editBranchId').value = branch.id;
+    document.getElementById('editBranchName').value = branch.name || '';
+    document.getElementById('editBranchPhone').value = branch.phone || '';
+    document.getElementById('editBranchEmail').value = branch.email || '';
+    document.getElementById('editBranchBankAccount').value = branch.bankAccount || '';
+    document.getElementById('editBranchAddress').value = branch.address || '';
+    document.getElementById('editBranchThemeColor').value = branch.themeColor || '#000000';
+    document.getElementById('editBranchLogoUrl').value = branch.logoUrl || '';
+    
+    document.getElementById('editBranchIdentityModal').style.display = 'flex';
+  }
+
+  function closeEditBranchIdentityModal() {
+    document.getElementById('editBranchIdentityModal').style.display = 'none';
+  }
+
+  function submitBranchIdentity(e) {
+    e.preventDefault();
+    const branchId = document.getElementById('editBranchId').value;
+    const data = {
+      name: document.getElementById('editBranchName').value,
+      phone: document.getElementById('editBranchPhone').value,
+      email: document.getElementById('editBranchEmail').value,
+      bankAccount: document.getElementById('editBranchBankAccount').value,
+      address: document.getElementById('editBranchAddress').value,
+      themeColor: document.getElementById('editBranchThemeColor').value,
+      logoUrl: document.getElementById('editBranchLogoUrl').value
+    };
+    
+    const btn = document.getElementById('btnSubmitBranchIdentity');
+    const origText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+    btn.disabled = true;
+    
+    google.script.run
+      .withSuccessHandler(function (res) {
+        btn.innerHTML = origText;
+        btn.disabled = false;
+        if (res && res.success) {
+          showToast('✅ Identitas Cabang berhasil diperbarui', 'success');
+          closeEditBranchIdentityModal();
+          loadBranchManagement(); // reload list
+        } else {
+          showToast('Gagal: ' + (res ? res.message : 'Unknown error'), 'error');
+        }
+      })
+      .withFailureHandler(function (err) {
+        btn.innerHTML = origText;
+        btn.disabled = false;
+        showToast('Error: ' + err.message, 'error');
+      })
+      .updateBranchIdentity(branchId, data);
+  }
+
+  // --- Modals User Management ---
+  function openAddUserModal() {
+    // Inject HTML modal if it doesn't exist yet
+    if (!document.getElementById('addUserModal')) {
+      const modalHTML = `
+        <div id="addUserModal" class="modal-overlay" style="display:none;z-index:10000">
+          <div class="modal-content" style="max-width:400px; width:95%">
+            <div class="modal-header">
+              <h3 style="margin:0"><i class="fas fa-user-plus"></i> Tambah User Baru</h3>
+              <button class="btn-close" onclick="document.getElementById('addUserModal').style.display='none'"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+              <form id="addUserForm" onsubmit="submitNewUser(event)">
+                <label class="form-label">Nama Lengkap</label>
+                <input type="text" id="addUserName" class="form-input" required>
+                
+                <label class="form-label">Role</label>
+                <select id="addUserRole" class="form-input" required>
+                  <option value="Staff">Staff</option>
+                  <option value="Admin">Admin</option>
+                  <option value="Kasir">Kasir</option>
+                  <option value="Personal Trainer">Personal Trainer</option>
+                </select>
+                
+                <label class="form-label">Username</label>
+                <input type="text" id="addUserUsername" class="form-input" required>
+                
+                <label class="form-label">Password Sementara</label>
+                <input type="text" id="addUserPassword" class="form-input" value="password123" required>
+                
+                <div style="margin-top:20px; text-align:right">
+                  <button type="button" class="btn btn-secondary" onclick="document.getElementById('addUserModal').style.display='none'">Batal</button>
+                  <button type="submit" class="btn btn-primary" id="btnSubmitAddUser">Buat Akun</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        
+        <div id="resetPasswordModal" class="modal-overlay" style="display:none;z-index:10000">
+          <div class="modal-content" style="max-width:400px; width:95%">
+            <div class="modal-header">
+              <h3 style="margin:0"><i class="fas fa-key"></i> Reset Password</h3>
+              <button class="btn-close" onclick="document.getElementById('resetPasswordModal').style.display='none'"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+              <form id="resetPasswordForm" onsubmit="submitResetPassword(event)">
+                <input type="hidden" id="resetUserId">
+                <p>Mereset password untuk: <strong id="resetUsernameDisplay"></strong></p>
+                <label class="form-label">Password Baru</label>
+                <input type="text" id="resetNewPassword" class="form-input" required>
+                
+                <div style="margin-top:20px; text-align:right">
+                  <button type="button" class="btn btn-secondary" onclick="document.getElementById('resetPasswordModal').style.display='none'">Batal</button>
+                  <button type="submit" class="btn btn-warning" id="btnSubmitResetPassword" style="color:white">Reset Password</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', modalHTML);
+    }
+    
+    document.getElementById('addUserForm').reset();
+    document.getElementById('addUserPassword').value = 'password123';
+    document.getElementById('addUserModal').style.display = 'flex';
+  }
+
+  function submitNewUser(e) {
+    e.preventDefault();
+    const data = {
+      name: document.getElementById('addUserName').value,
+      role: document.getElementById('addUserRole').value,
+      username: document.getElementById('addUserUsername').value,
+      password: document.getElementById('addUserPassword').value,
+      phone: '-',
+      email: '-'
+    };
+    
+    const btn = document.getElementById('btnSubmitAddUser');
+    const origText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+    btn.disabled = true;
+    
+    google.script.run
+      .withSuccessHandler(function (res) {
+        btn.innerHTML = origText;
+        btn.disabled = false;
+        if (res && res.success) {
+          showToast('✅ Akun berhasil dibuat', 'success');
+          document.getElementById('addUserModal').style.display='none';
+          loadUserList(); // reload list
+        } else {
+          showToast('Gagal: ' + (res ? res.message : 'Unknown error'), 'error');
+        }
+      })
+      .withFailureHandler(function (err) {
+        btn.innerHTML = origText;
+        btn.disabled = false;
+        showToast('Error: ' + err.message, 'error');
+      })
+      .addNewUserAccount(currentUser.username, data);
+  }
+
+  function openResetPasswordModal(userId, username) {
+    // Inject HTML modal if it doesn't exist yet (in case it wasn't rendered via openAddUserModal)
+    if (!document.getElementById('resetPasswordModal')) {
+      openAddUserModal(); 
+      document.getElementById('addUserModal').style.display = 'none';
+    }
+    
+    document.getElementById('resetUserId').value = userId;
+    document.getElementById('resetUsernameDisplay').textContent = username;
+    document.getElementById('resetNewPassword').value = '';
+    document.getElementById('resetPasswordModal').style.display = 'flex';
+  }
+
+  function submitResetPassword(e) {
+    e.preventDefault();
+    const userId = document.getElementById('resetUserId').value;
+    const newPass = document.getElementById('resetNewPassword').value;
+    
+    const btn = document.getElementById('btnSubmitResetPassword');
+    const origText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mereset...';
+    btn.disabled = true;
+    
+    google.script.run
+      .withSuccessHandler(function (res) {
+        btn.innerHTML = origText;
+        btn.disabled = false;
+        if (res && res.success) {
+          showToast('✅ Password berhasil direset', 'success');
+          document.getElementById('resetPasswordModal').style.display='none';
+        } else {
+          showToast('Gagal: ' + (res ? res.message : 'Unknown error'), 'error');
+        }
+      })
+      .withFailureHandler(function (err) {
+        btn.innerHTML = origText;
+        btn.disabled = false;
+        showToast('Error: ' + err.message, 'error');
+      })
+      .resetUserPassword(currentUser.username, userId, newPass);
   }
 
   function viewMemberDetail(memberId) {
@@ -11960,33 +12231,93 @@ Terima kasih dan selamat berlatih!`;
   }
 
   function showPOSReceiptDetail(transactionId) {
-    const transactions = LocalCache.get('recent_transactions') || [];
-    const trx = transactions.find(t => t['ID Transaksi'] === transactionId || t.id === transactionId);
-    if (!trx) {
-      showToast('Transaksi tidak ditemukan di histori saat ini', 'error');
+    const trxData = LocalCache.get('pos_transactions') || [];
+    const t = trxData.find(x => x.transactionId === transactionId || x[0] === transactionId);
+    if (!t) {
+      showToast('Transaksi POS tidak ditemukan', 'error');
       return;
     }
     
-    let items = [];
-    try {
-      items = typeof trx.Items === 'string' ? JSON.parse(trx.Items) : (trx.Items || []);
-    } catch(e) {
-      items = [];
+    // Normalisasi data dari array sheet ke object
+    let obj = t;
+    if (Array.isArray(t)) {
+      obj = {
+        transactionId: t[0],
+        date: t[1],
+        cashier: t[2],
+        customerName: t[3],
+        memberId: t[4],
+        totalAmount: t[5],
+        paymentMethod: t[6],
+        items: t[7]
+      };
     }
-
-    const data = {
-      receiptNumber: trx['ID Transaksi'] || trx.id,
-      customerName: trx['Nama Pembeli'] || trx.customerName || 'Pelanggan',
-      total: trx.Total || trx.total,
-      paymentMethod: trx['Metode Bayar'] || trx.paymentMethod || 'Cash',
-      items: items
-    };
+    
+    try {
+      if (typeof obj.items === 'string') {
+        obj.items = JSON.parse(obj.items);
+      }
+    } catch(e) {}
     
     if (typeof ReceiptGenerator !== 'undefined' && ReceiptGenerator.showPreview) {
-      ReceiptGenerator.showPreview(data, 'pos');
+      ReceiptGenerator.showPreview(obj, 'pos');
     } else {
       showToast('Modul Resi tidak tersedia', 'error');
     }
+  }
+
+  // --- Utility: Export CSV ---
+  function downloadCSV(csvContent, filename) {
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }
+
+  function exportMembersToCSV() {
+    const list = window.currentMemberList;
+    if (!list || list.length === 0) {
+      showToast('Tidak ada data untuk diekspor', 'warning');
+      return;
+    }
+    let csv = 'ID Member,Nama Lengkap,No HP,Gender,Join Date,Expiry Date\n';
+    list.forEach(m => {
+      const id = m.memberId || '-';
+      const name = (m.fullName || m.name || '-').replace(/,/g, '');
+      const phone = m.phone || '-';
+      const gender = m.gender || '-';
+      const joinDate = m.joinDate ? formatDate(m.joinDate) : '-';
+      const expiry = m.expiryDate ? formatDate(m.expiryDate) : '-';
+      csv += `${id},${name},${phone},${gender},${joinDate},${expiry}\n`;
+    });
+    downloadCSV(csv, 'Data_Member_UGYM_' + new Date().toISOString().slice(0,10) + '.csv');
+  }
+
+  function exportTableToCSV() {
+    const table = document.querySelector('#detailModalBody table');
+    if (!table) {
+      showToast('Tidak ada tabel data untuk diekspor', 'warning');
+      return;
+    }
+    let csv = [];
+    const rows = table.querySelectorAll('tr');
+    for (let i = 0; i < rows.length; i++) {
+      let row = [], cols = rows[i].querySelectorAll('td, th');
+      for (let j = 0; j < cols.length; j++) {
+        let text = cols[j].innerText.replace(/"/g, '""');
+        text = text.replace(/(\r\n|\n|\r)/gm, " ");
+        row.push('"' + text + '"');
+      }
+      csv.push(row.join(','));
+    }
+    downloadCSV(csv.join('\n'), 'Laporan_UGYM_' + new Date().toISOString().slice(0,10) + '.csv');
   }
 </script>
 <!-- End of added missing features -->
