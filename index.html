@@ -10108,8 +10108,13 @@ Terima kasih dan selamat berlatih!`;
       if (!currentUser) return;
 
       const role = currentUser.role;
-      document.getElementById('userName').textContent = currentUser.name;
-      document.getElementById('userRole').textContent = role;
+      document.getElementById('userFullName').textContent = currentUser.name;
+      document.getElementById('userRoleBadge').textContent = role;
+      
+      const userPic = document.getElementById('userPic');
+      if (userPic) {
+        userPic.src = currentUser.profilePic ? getDirectLink(currentUser.profilePic) : "https://i.imgur.com/vHEx3jR.png";
+      }
 
       // Sidebar visibility
       const menuItems = document.querySelectorAll('.menu-item[data-view]');
