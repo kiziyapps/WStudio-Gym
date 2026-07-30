@@ -1275,10 +1275,11 @@
         return;
       }
       
-      let filtered = res.packages.filter(p => p.type && p.type.toLowerCase().includes('regular'));
-      if (!filtered || filtered.length === 0) {
-        filtered = res.packages.filter(p => !p.type || (!p.type.toLowerCase().includes('pt') && !p.type.toLowerCase().includes('personal')));
-      }
+      // Standarisasi filter: Tampilkan seluruh paket keanggotaan publik (REGULAR, PROMO, VISIT, dll kecuali PT)
+      let filtered = res.packages.filter(p => {
+        const t = (p.type || '').toString().toUpperCase();
+        return t !== 'PT';
+      });
       if (!filtered || filtered.length === 0) {
         filtered = res.packages;
       }
