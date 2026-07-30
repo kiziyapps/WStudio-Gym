@@ -12190,6 +12190,7 @@ Terima kasih dan selamat berlatih!`;
       const reader = new FileReader();
       reader.onload = function(e) {
         document.getElementById(previewId).src = e.target.result;
+        document.getElementById(base64Id).value = e.target.result;
         const img = new Image();
         img.onload = function() {
           const canvas = document.createElement('canvas');
