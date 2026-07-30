@@ -655,7 +655,9 @@
                 self.remove(item.id);
 
                 if (res && res.success) {
-
+                  if (item.action === 'processPOSTransaction' && typeof loadTodayPOSTransactions === 'function') {
+                    loadTodayPOSTransactions();
+                  }
                 } else {
                   console.warn(' Queue Action Handled with Logic Error:', item.action, res?.message);
                 }
@@ -6305,6 +6307,7 @@ Terima kasih dan selamat berlatih!`;
       if (document.getElementById('pos_wa_number')) document.getElementById('pos_wa_number').value = '';
       updateCartUI();
       loadPOSProducts();
+      loadTodayPOSTransactions();
     }
 
     function sendPOSReceiptToWA(trxId, data) {
@@ -7024,6 +7027,7 @@ Terima kasih dan selamat berlatih!`;
           const filtered = list.filter(p => p.id !== id);
           posProducts = filtered;
           _renderProductTable(filtered);
+          if (typeof renderPOSProducts === 'function') renderPOSProducts();
           return filtered;
         });
 
