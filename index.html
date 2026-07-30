@@ -3590,60 +3590,51 @@ Terima kasih dan selamat berlatih!`;
       }
     }
 
-    // ================ KONFIGURASI CABANG (REBRANDING) ================
-    const branchRebrandingConfig = {
-      // Anda bisa mengganti nama, logo, dan warna utama untuk masing-masing cabang di sini
-      branch_1: { name: "UGYM Utama", logo: "https://i.imgur.com/PAB0dhW.png", color: "#d4af37" },
-      branch_2: { name: "UGYM Premium (Cabang 2)", logo: "https://i.imgur.com/PAB0dhW.png", color: "#3b82f6" },
-      branch_3: { name: "UGYM Express (Cabang 3)", logo: "https://i.imgur.com/PAB0dhW.png", color: "#10b981" }
-    };
+    // ================ KONFIGURASI CABANG (DINAMIS DARI DB) ================
+    let currentLoginBranches = [];
 
-    function updateBrandingUI(branchKey) {
-      const config = branchRebrandingConfig[branchKey] || branchRebrandingConfig.branch_1;
+    function updateBrandingUI(branchId) {
+      const config = currentLoginBranches.find(b => b.id === branchId);
+      if (!config) return;
       
       // Update logo
       const logoEl = document.querySelector('.auth-header img');
-      if (logoEl) logoEl.src = config.logo;
+      if (logoEl && config.logoUrl) logoEl.src = config.logoUrl;
       
       // Update nama
       const nameEl = document.querySelector('.auth-header h2');
       if (nameEl) nameEl.textContent = config.name;
       
       // Update warna dominan (primary)
-      document.documentElement.style.setProperty('--primary', config.color);
-      const iconBg = document.querySelector('.auth-header div');
-      if (iconBg) iconBg.style.background = config.color;
+      if (config.themeColor) {
+        document.documentElement.style.setProperty('--primary', config.themeColor);
+        const iconBg = document.querySelector('.auth-header div');
+        if (iconBg) iconBg.style.background = config.themeColor;
+      }
     }
 
     function renderLoginForm() {
       setTimeout(() => {
         google.script.run.withSuccessHandler(function(backendBranches) {
           const select = document.getElementById('loginBranch');
-          if (select) {
-            // Gunakan ID dari backend pertama agar login tetap berhasil ke database yang ada
-            const realId = (backendBranches && backendBranches.length > 0) ? backendBranches[0].id : 'dummy_id';
+          if (select && backendBranches && backendBranches.length > 0) {
+            currentLoginBranches = backendBranches;
             
-            // Menyiapkan tepat 3 cabang yang bisa direbranding
-            const customBranches = [
-              { id: realId, key: 'branch_1', name: branchRebrandingConfig.branch_1.name },
-              { id: realId, key: 'branch_2', name: branchRebrandingConfig.branch_2.name },
-              { id: realId, key: 'branch_3', name: branchRebrandingConfig.branch_3.name }
-            ];
-            
-            select.innerHTML = customBranches.map(b => `<option value="${b.id}" data-key="${b.key}">${b.name}</option>`).join('');
+            select.innerHTML = backendBranches.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
             
             // Event listener untuk ganti identitas secara dinamis
             select.addEventListener('change', function(e) {
-              const selectedOption = e.target.options[e.target.selectedIndex];
-              const key = selectedOption.getAttribute('data-key');
-              updateBrandingUI(key);
+              updateBrandingUI(e.target.value);
             });
             
-            // Trigger inisialisasi branding
-            updateBrandingUI('branch_1');
+            // Trigger branding awal
+            updateBrandingUI(backendBranches[0].id);
+          } else if (select) {
+            select.innerHTML = '<option value="">Tidak ada cabang aktif</option>';
           }
         }).getActiveBranches();
-      }, 100);
+      }, 500);
+
       document.getElementById('authCard').innerHTML = `
         <div class="auth-header" style="text-align: center; margin-bottom: 32px;">
           <div style="background: var(--primary); width: 80px; height: 80px; border-radius: 24px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(88, 86, 214, 0.2);">
