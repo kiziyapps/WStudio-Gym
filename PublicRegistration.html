@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registrasi Member - UGYM</title>
+  <title>Registrasi Member - KIZIY</title>
   <!-- Browser Update Notification -->
   <script>
     var $buoop = {
-      required: {e:-3, f:-3, o:-3, s:-1, c:-3},
+      required: { e: -3, f: -3, o: -3, s: -1, c: -3 },
       insecure: true,
       api: 2026.06,
       text: {
@@ -17,68 +18,68 @@
         "bno": "Abaikan"
       }
     };
-    function $buo_f(){
+    function $buo_f() {
       var e = document.createElement("script");
       e.src = "//browser-update.org/update.min.js";
       document.body.appendChild(e);
     };
-    try {document.addEventListener("DOMContentLoaded", $buo_f, false)}
-    catch(e){window.attachEvent("onload", $buo_f)}
+    try { document.addEventListener("DOMContentLoaded", $buo_f, false) }
+    catch (e) { window.attachEvent("onload", $buo_f) }
   </script>
   <script>
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxOTUY8cVdLjGVAnqcz47fKDJXtUD7lsXVMJFqwFLsh-TjfdBT_DxaqsiAnFU4r36PcGg/exec';
     if (typeof google === 'undefined' || typeof google.script === 'undefined' || typeof google.script.run === 'undefined') {
       window.google = {
-      script: {
-        run: new Proxy({}, {
-          get: function(target, prop) {
-            let successHandler = null;
-            let failureHandler = null;
-            function createChain(propName) {
-              if (propName === 'withSuccessHandler') {
-                return function(callback) {
-                  successHandler = callback;
-                  return new Proxy({}, { get: (t, p) => createChain(p) });
+        script: {
+          run: new Proxy({}, {
+            get: function (target, prop) {
+              let successHandler = null;
+              let failureHandler = null;
+              function createChain(propName) {
+                if (propName === 'withSuccessHandler') {
+                  return function (callback) {
+                    successHandler = callback;
+                    return new Proxy({}, { get: (t, p) => createChain(p) });
+                  };
+                }
+                if (propName === 'withFailureHandler') {
+                  return function (callback) {
+                    failureHandler = callback;
+                    return new Proxy({}, { get: (t, p) => createChain(p) });
+                  };
+                }
+                return function (...args) {
+                  let branchId = document.getElementById('pubBranch')?.value || null;
+                  fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: propName, args: args, branchId: branchId }),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                  })
+                    .then(response => response.json())
+                    .then(data => {
+                      if (!data.success) {
+                        if (failureHandler) failureHandler(new Error(data.message));
+                        else console.error('Backend Error:', data.message);
+                      } else {
+                        if (successHandler) successHandler(data.result);
+                      }
+                    })
+                    .catch(err => {
+                      if (failureHandler) failureHandler(err);
+                      else console.error('Network Error:', err);
+                    });
                 };
               }
-              if (propName === 'withFailureHandler') {
-                return function(callback) {
-                  failureHandler = callback;
-                  return new Proxy({}, { get: (t, p) => createChain(p) });
-                };
-              }
-              return function(...args) {
-                let branchId = document.getElementById('pubBranch')?.value || null;
-                fetch(SCRIPT_URL, {
-                  method: 'POST',
-                  body: JSON.stringify({ action: propName, args: args, branchId: branchId }),
-                  headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-                })
-                .then(response => response.json())
-                .then(data => {
-                  if (!data.success) {
-                    if (failureHandler) failureHandler(new Error(data.message));
-                    else console.error('Backend Error:', data.message);
-                  } else {
-                    if (successHandler) successHandler(data.result);
-                  }
-                })
-                .catch(err => {
-                  if (failureHandler) failureHandler(err);
-                  else console.error('Network Error:', err);
-                });
-              };
+              return createChain(prop);
             }
-            return createChain(prop);
-          }
-        })
-      }
+          })
+        }
       };
     }
   </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-        :root {
+    :root {
       --primary: #d4af37;
       --primary-dark: #b5952f;
       --accent: #000000;
@@ -87,58 +88,70 @@
       --card-header-gradient: linear-gradient(135deg, #000000, #333333);
     }
 
-    * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
-    body { 
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
       background: var(--bg-gradient);
       min-height: 100vh;
       padding: 20px;
     }
-    .container { 
-      max-width: 800px; 
-      margin: 0 auto; 
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
     }
-    
+
     /* Header */
-    .header { 
-      text-align: center; 
-      color: white; 
-      padding: 30px 20px; 
+    .header {
+      text-align: center;
+      color: white;
+      padding: 30px 20px;
     }
-    .header h1 { 
-      font-size: 32px; 
-      font-weight: 700; 
-      margin-bottom: 8px; 
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+
+    .header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
     }
-    .header p { 
-      opacity: 0.95; 
-      font-size: 16px; 
+
+    .header p {
+      opacity: 0.95;
+      font-size: 16px;
     }
-    
+
     /* Cards */
-    .card { 
-      background: white; 
-      border-radius: 20px; 
-      box-shadow: 0 20px 40px rgba(0,0,0,0.2); 
-      overflow: hidden; 
-      margin-bottom: 24px; 
+    .card {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+      margin-bottom: 24px;
       animation: slideUp 0.5s ease;
     }
-    .card-header { 
-      background: var(--card-header-gradient); 
-      color: white; 
-      padding: 20px 24px; 
+
+    .card-header {
+      background: var(--card-header-gradient);
+      color: white;
+      padding: 20px 24px;
     }
-    .card-header h3 { 
-      display: flex; 
-      align-items: center; 
-      gap: 10px; 
-      font-size: 18px; 
+
+    .card-header h3 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 18px;
     }
-    .card-body { 
-      padding: 30px; 
+
+    .card-body {
+      padding: 30px;
     }
-    
+
     /* Steps */
     .steps-container {
       display: flex;
@@ -146,6 +159,7 @@
       margin-bottom: 30px;
       position: relative;
     }
+
     .steps-container::before {
       content: '';
       position: absolute;
@@ -156,6 +170,7 @@
       background: #e2e8f0;
       z-index: 1;
     }
+
     .step {
       position: relative;
       z-index: 2;
@@ -163,6 +178,7 @@
       text-align: center;
       flex: 1;
     }
+
     .step-circle {
       width: 48px;
       height: 48px;
@@ -177,265 +193,286 @@
       color: #64748b;
       transition: 0.3s;
     }
+
     .step.active .step-circle {
       background: var(--primary);
       border-color: var(--primary);
       color: white;
     }
+
     .step.completed .step-circle {
       background: #22c55e;
       border-color: #22c55e;
       color: white;
     }
+
     .step-label {
       font-size: 12px;
       font-weight: 600;
       color: #64748b;
     }
+
     .step.active .step-label {
       color: var(--primary);
     }
-    
+
     /* Form Elements */
-    .form-group { 
-      margin-bottom: 24px; 
+    .form-group {
+      margin-bottom: 24px;
     }
-    .form-label { 
-      display: block; 
-      margin-bottom: 8px; 
-      font-weight: 600; 
-      font-size: 14px; 
-      color: #334155; 
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      color: #334155;
     }
-    .form-input { 
-      width: 100%; 
-      padding: 14px; 
-      border: 2px solid #e2e8f0; 
-      border-radius: 12px; 
-      font-size: 15px; 
-      transition: 0.2s; 
-      background: white; 
+
+    .form-input {
+      width: 100%;
+      padding: 14px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 15px;
+      transition: 0.2s;
+      background: white;
     }
-    .form-input:focus { 
-      outline: none; 
-      border-color: var(--primary); 
-      box-shadow: 0 0 0 3px rgba(102,126,234,0.1); 
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
+
     .form-input.error {
       border-color: #ef4444;
     }
+
     .form-input[readonly] {
       background: #f8fafc;
       color: #1e293b;
       font-weight: 600;
     }
-    .form-row { 
-      display: grid; 
-      grid-template-columns: 1fr 1fr; 
-      gap: 20px; 
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
     }
 
     .photo-upload-container {
-    text-align: center;
-    padding: 20px;
-    border: 2px dashed #cbd5e1;
-    border-radius: 12px;
-    background: #f8fafc;
-    transition: all 0.3s ease;
-    margin-bottom: 15px;
+      text-align: center;
+      padding: 20px;
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      background: #f8fafc;
+      transition: all 0.3s ease;
+      margin-bottom: 15px;
     }
 
     .photo-upload-container:hover {
-        border-color: var(--primary);
-        background: #f3e8ff;
+      border-color: var(--primary);
+      background: #f3e8ff;
     }
 
     .photo-preview {
-        width: 120px;
-        height: 120px;
-        margin: 0 auto 15px;
-        border-radius: 50%;
-        overflow: hidden;
-        background: #fff;
-        border: 3px solid var(--primary);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        position: relative;
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 15px;
+      border-radius: 50%;
+      overflow: hidden;
+      background: #fff;
+      border: 3px solid var(--primary);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      position: relative;
     }
 
     .photo-preview img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     .photo-buttons {
-        display: flex;
-        gap: 10px;
-        justify-content: center;
-        flex-wrap: wrap;
-        margin-bottom: 10px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
     }
 
     .btn-photo {
-        padding: 8px 16px;
-        background: #f1f5f9;
-        color: #334155;
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 13px;
-        transition: all 0.2s;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        font-weight: 500;
+      padding: 8px 16px;
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 500;
     }
 
     .btn-photo:hover {
-        background: #e2e8f0;
-        border-color: #94a3b8;
-        transform: translateY(-1px);
+      background: #e2e8f0;
+      border-color: #94a3b8;
+      transform: translateY(-1px);
     }
 
     .btn-photo:active {
-        transform: translateY(0);
+      transform: translateY(0);
     }
 
     .photo-info {
-        display: block;
-        margin-top: 10px;
-        color: #64748b;
-        font-size: 12px;
+      display: block;
+      margin-top: 10px;
+      color: #64748b;
+      font-size: 12px;
     }
 
     .photo-info i {
-        margin-right: 4px;
+      margin-right: 4px;
     }
-    
+
     /* Buttons */
-    .btn { 
-      padding: 14px 28px; 
-      border: none; 
-      border-radius: 12px; 
-      font-size: 16px; 
-      font-weight: 600; 
-      cursor: pointer; 
-      display: inline-flex; 
-      align-items: center; 
-      justify-content: center; 
-      gap: 8px; 
-      transition: 0.3s; 
-      width: 100%; 
+    .btn {
+      padding: 14px 28px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: 0.3s;
+      width: 100%;
     }
-    .btn:hover { 
-      transform: translateY(-2px); 
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1); 
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
     }
-    .btn:disabled { 
-      opacity: 0.6; 
-      cursor: not-allowed; 
-      transform: none; 
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
     }
-    .btn-primary { 
-      background: var(--primary); 
-      color: white; 
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
     }
-    .btn-success { 
-      background: linear-gradient(135deg, #22c55e, #16a34a); 
-      color: white; 
+
+    .btn-success {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
     }
-    
+
     /* Alerts */
-    .alert { 
-      padding: 16px 20px; 
-      border-radius: 12px; 
-      margin-bottom: 24px; 
-      display: flex; 
-      align-items: flex-start; 
-      gap: 12px; 
-      white-space: pre-line; 
+    .alert {
+      padding: 16px 20px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      white-space: pre-line;
       animation: slideIn 0.3s ease;
     }
+
     .alert-success {
-    background-color: #d1fae5;
-    color: #065f46;
-    border: 1px solid #86efac;
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 15px;
+      background-color: #d1fae5;
+      color: #065f46;
+      border: 1px solid #86efac;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 15px;
     }
 
     .alert-error {
-        background-color: #fee2e2;
-        color: #991b1b;
-        border: 1px solid #fecaca;
-        padding: 12px;
-        border-radius: 8px;
-        margin-bottom: 15px;
+      background-color: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 15px;
     }
 
     .alert-warning {
-        background-color: #fed7aa;
-        color: #9a3412;
-        border: 1px solid #fdba74;
-        padding: 12px;
-        border-radius: 8px;
-        margin-bottom: 15px;
+      background-color: #fed7aa;
+      color: #9a3412;
+      border: 1px solid #fdba74;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 15px;
     }
 
-    .alert-info { 
-      background: #f3e8ff; 
-      border: 1px solid #bfdbfe; 
-      color: #1e40af; 
+    .alert-info {
+      background: #f3e8ff;
+      border: 1px solid #bfdbfe;
+      color: #1e40af;
     }
-    
+
     /* Package Cards */
-    .packages-grid { 
-      display: grid; 
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
-      gap: 16px; 
+    .packages-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
       margin-bottom: 24px;
     }
-    .package-card { 
-      border: 2px solid #e2e8f0; 
-      border-radius: 16px; 
-      padding: 20px; 
-      cursor: pointer; 
-      transition: 0.3s; 
-      text-align: center; 
+
+    .package-card {
+      border: 2px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 20px;
+      cursor: pointer;
+      transition: 0.3s;
+      text-align: center;
       background: white;
     }
-    .package-card:hover { 
-      border-color: var(--primary); 
+
+    .package-card:hover {
+      border-color: var(--primary);
       transform: translateY(-4px);
-      box-shadow: 0 10px 20px rgba(102,126,234,0.1);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.1);
     }
-    .package-card.selected { 
-      border-color: var(--primary); 
+
+    .package-card.selected {
+      border-color: var(--primary);
       background: linear-gradient(135deg, #f3e8ff, #ffffff);
-      box-shadow: 0 0 0 3px rgba(102,126,234,0.2);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
     }
-    .package-name { 
-      font-weight: 700; 
-      font-size: 18px; 
-      margin-bottom: 8px; 
+
+    .package-name {
+      font-weight: 700;
+      font-size: 18px;
+      margin-bottom: 8px;
       color: #1e293b;
     }
-    .package-price { 
-      color: var(--primary); 
-      font-weight: 800; 
-      font-size: 24px; 
-      margin-bottom: 8px; 
+
+    .package-price {
+      color: var(--primary);
+      font-weight: 800;
+      font-size: 24px;
+      margin-bottom: 8px;
     }
-    .package-duration { 
-      color: #64748b; 
-      font-size: 13px; 
+
+    .package-duration {
+      color: #64748b;
+      font-size: 13px;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 4px;
     }
-    
+
     /* Payment Info */
     .payment-summary {
       background: linear-gradient(135deg, #f8fafc, #f1f5f9);
@@ -444,6 +481,7 @@
       margin: 24px 0;
       border: 1px solid #e2e8f0;
     }
+
     .payment-row {
       display: flex;
       justify-content: space-between;
@@ -451,9 +489,11 @@
       border-bottom: 1px dashed #cbd5e1;
       font-size: 16px;
     }
+
     .payment-row:last-child {
       border-bottom: none;
     }
+
     .payment-total {
       font-size: 20px;
       font-weight: 700;
@@ -462,11 +502,12 @@
       margin-top: 8px;
       border-top: 2px solid var(--primary);
     }
+
     .payment-total .amount {
       color: #22c55e;
       font-size: 24px;
     }
-    
+
     /* Bank Info */
     .bank-info {
       background: #f3e8ff;
@@ -476,6 +517,7 @@
       margin: 24px 0;
       font-size: 15px;
     }
+
     .bank-info h4 {
       color: #1e293b;
       margin-bottom: 12px;
@@ -483,51 +525,59 @@
       align-items: center;
       gap: 8px;
     }
+
     .bank-detail {
       background: white;
       border-radius: 8px;
       padding: 16px;
       margin-top: 12px;
     }
+
     .bank-detail p {
       margin: 8px 0;
     }
+
     .bank-account {
       font-size: 20px;
       font-weight: 700;
       color: var(--primary);
       letter-spacing: 1px;
     }
-    
+
     /* File Upload */
-    .upload-area { 
-      border: 2px dashed #cbd5e1; 
-      border-radius: 16px; 
-      padding: 30px; 
-      text-align: center; 
-      cursor: pointer; 
-      transition: 0.3s; 
+    .upload-area {
+      border: 2px dashed #cbd5e1;
+      border-radius: 16px;
+      padding: 30px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.3s;
       background: #f8fafc;
     }
-    .upload-area:hover { 
-      border-color: var(--primary); 
-      background: #f3e8ff; 
+
+    .upload-area:hover {
+      border-color: var(--primary);
+      background: #f3e8ff;
     }
+
     .upload-area.has-file {
       border-color: #22c55e;
       background: #f0fdf4;
     }
-    .upload-preview { 
-      max-width: 100%; 
-      max-height: 200px; 
-      border-radius: 12px; 
-      margin-top: 16px; 
-      display: none; 
+
+    .upload-preview {
+      max-width: 100%;
+      max-height: 200px;
+      border-radius: 12px;
+      margin-top: 16px;
+      display: none;
       border: 2px solid #e2e8f0;
     }
+
     .upload-preview.show {
       display: block;
     }
+
     .file-name {
       margin-top: 12px;
       font-size: 14px;
@@ -537,36 +587,39 @@
       justify-content: center;
       gap: 8px;
     }
-    
+
     /* Loading */
-    .spinner { 
-      display: inline-block; 
-      width: 20px; 
-      height: 20px; 
-      border: 3px solid rgba(255,255,255,0.3); 
-      border-top-color: white; 
-      border-radius: 50%; 
-      animation: spin 0.8s linear infinite; 
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
     }
+
     .loading-overlay {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(255,255,255,0.9);
+      background: rgba(255, 255, 255, 0.9);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 9999;
     }
+
     .loading-content {
       text-align: center;
       background: white;
       padding: 30px;
       border-radius: 20px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
     }
+
     .loading-spinner {
       width: 50px;
       height: 50px;
@@ -576,104 +629,221 @@
       animation: spin 1s linear infinite;
       margin: 0 auto 16px;
     }
-    
+
     /* Footer */
     .footer {
       text-align: center;
-      color: rgba(255,255,255,0.8);
+      color: rgba(255, 255, 255, 0.8);
       font-size: 14px;
       padding: 20px;
     }
-    
+
     /* ===== Webcam Modal (Public) ===== */
     .pub-webcam-overlay {
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.88); display: flex;
-      align-items: center; justify-content: center; z-index: 9999;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.88);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
       backdrop-filter: blur(6px);
     }
+
     .pub-webcam-box {
-      background: #0f172a; border-radius: 22px; overflow: hidden;
-      max-width: 520px; width: 94%; box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+      background: #0f172a;
+      border-radius: 22px;
+      overflow: hidden;
+      max-width: 520px;
+      width: 94%;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
       animation: slideUp 0.3s ease;
     }
+
     .pub-webcam-hdr {
       padding: 16px 20px;
       background: var(--primary);
-      color: white; display: flex; justify-content: space-between; align-items: center;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    .pub-webcam-hdr h4 { font-size: 16px; display: flex; align-items: center; gap: 8px; }
+
+    .pub-webcam-hdr h4 {
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     .pub-webcam-close {
-      background: rgba(255,255,255,0.2); border: none; color: white;
-      width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
-      display: flex; align-items: center; justify-content: center; font-size: 16px;
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
       transition: background 0.2s;
     }
-    .pub-webcam-close:hover { background: rgba(255,255,255,0.35); }
-    .pub-webcam-video-wrap { position: relative; background: #000; }
-    .pub-webcam-video { width: 100%; display: block; max-height: 340px; object-fit: cover; }
+
+    .pub-webcam-close:hover {
+      background: rgba(255, 255, 255, 0.35);
+    }
+
+    .pub-webcam-video-wrap {
+      position: relative;
+      background: #000;
+    }
+
+    .pub-webcam-video {
+      width: 100%;
+      display: block;
+      max-height: 340px;
+      object-fit: cover;
+    }
+
     .pub-webcam-ring {
-      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
-      width: 180px; height: 180px; border: 3px solid rgba(102,126,234,0.85);
-      border-radius: 50%; pointer-events: none;
-      box-shadow: 0 0 0 9999px rgba(0,0,0,0.35);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 180px;
+      height: 180px;
+      border: 3px solid rgba(102, 126, 234, 0.85);
+      border-radius: 50%;
+      pointer-events: none;
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.35);
     }
+
     .pub-webcam-footer {
-      padding: 16px 20px; background: #1e293b;
-      display: flex; gap: 10px; justify-content: center; align-items: center;
+      padding: 16px 20px;
+      background: #1e293b;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
     }
+
     .pub-webcam-snap {
-      width: 60px; height: 60px; border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
       background: var(--primary);
-      border: 4px solid white; color: white; cursor: pointer;
-      font-size: 22px; display: flex; align-items: center; justify-content: center;
+      border: 4px solid white;
+      color: white;
+      cursor: pointer;
+      font-size: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: transform 0.15s, box-shadow 0.15s;
-      box-shadow: 0 4px 12px rgba(102,126,234,0.5);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
     }
-    .pub-webcam-snap:hover { transform: scale(1.08); }
-    .pub-webcam-snap:active { transform: scale(0.95); }
+
+    .pub-webcam-snap:hover {
+      transform: scale(1.08);
+    }
+
+    .pub-webcam-snap:active {
+      transform: scale(0.95);
+    }
+
     .pub-webcam-side-btn {
-      padding: 8px 16px; border-radius: 8px; border: 1.5px solid rgba(255,255,255,0.25);
-      background: transparent; color: rgba(255,255,255,0.8); cursor: pointer;
-      font-size: 13px; display: flex; align-items: center; gap: 6px; transition: all 0.2s;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1.5px solid rgba(255, 255, 255, 0.25);
+      background: transparent;
+      color: rgba(255, 255, 255, 0.8);
+      cursor: pointer;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
     }
-    .pub-webcam-side-btn:hover { background: rgba(255,255,255,0.1); color: white; }
-    #pubWebcamCanvas { display: none; }
+
+    .pub-webcam-side-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+
+    #pubWebcamCanvas {
+      display: none;
+    }
+
     /* ===== End Webcam Modal ===== */
 
     /* Animations */
-    @keyframes spin { to { transform: rotate(360deg); } }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
-    
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
     /* Responsive */
-    @media (max-width: 640px) { 
-      .form-row { 
-        grid-template-columns: 1fr; 
-      } 
-      .packages-grid { 
-        grid-template-columns: 1fr; 
-      } 
+    @media (max-width: 640px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .packages-grid {
+        grid-template-columns: 1fr;
+      }
+
       .steps-container::before {
         left: 30px;
         right: 30px;
       }
+
       .photo-preview {
         width: 100px;
         height: 100px;
       }
-      
+
       .btn-photo {
-          padding: 6px 12px;
-          font-size: 12px;
+        padding: 6px 12px;
+        font-size: 12px;
       }
-      
+
       .photo-upload-container {
-          padding: 15px;
+        padding: 15px;
       }
     }
   </style>
 </head>
+
 <body>
   <!-- Loading Overlay -->
   <div id="loadingOverlay" class="loading-overlay" style="display:none">
@@ -712,12 +882,13 @@
   <div class="container">
     <!-- Header -->
     <div class="header">
-      <img id="gymLogoHeader" src="https://i.imgur.com/PAB0dhW.png" 
-           style="width:100px;height:100px;border-radius:50%;margin:0 auto 20px;display:block;border:4px solid rgba(255,255,255,0.3);object-fit:cover">
-      <h1 id="gymNameHeader">UGYM</h1>
+      <img id="gymLogoHeader" src="https://i.imgur.com/NO5dVfb.png"
+        style="width:100px;height:100px;border-radius:50%;margin:0 auto 20px;display:block;border:4px solid rgba(255,255,255,0.3);object-fit:cover">
+      <h1 id="gymNameHeader">KIZIY</h1>
       <p>Daftar Membership Online — Cepat, Mudah, dan Aman</p>
       <div style="max-width: 320px; margin: 16px auto 0;">
-        <select id="pubBranch" class="form-input" style="text-align: center; text-align-last: center; background: rgba(255,255,255,0.95); border: none; border-radius: 12px; font-weight: 600; color: #1e293b;">
+        <select id="pubBranch" class="form-input"
+          style="text-align: center; text-align-last: center; background: rgba(255,255,255,0.95); border: none; border-radius: 12px; font-weight: 600; color: #1e293b;">
           <option value="">Memuat lokasi cabang...</option>
         </select>
       </div>
@@ -793,7 +964,8 @@
               </div>
             </div>
             <div class="form-group">
-              <label class="form-label"><i class="fas fa-camera" style="color:var(--primary)"></i> Foto Member <span style="color:#ef4444">*</span></label>
+              <label class="form-label"><i class="fas fa-camera" style="color:var(--primary)"></i> Foto Member <span
+                  style="color:#ef4444">*</span></label>
               <div class="photo-upload-container" id="regPhotoContainer">
                 <div class="photo-preview">
                   <img id="regPhotoPreview"
@@ -804,14 +976,17 @@
                   <button type="button" class="btn-photo" onclick="document.getElementById('regPhotoFile').click()">
                     <i class="fas fa-folder-open"></i> Upload File
                   </button>
-                  <button type="button" class="btn-photo" style="border-color:#3b82f6;color:#3b82f6" onclick="captureRegPhoto()">
+                  <button type="button" class="btn-photo" style="border-color:#3b82f6;color:#3b82f6"
+                    onclick="captureRegPhoto()">
                     <i class="fas fa-camera"></i> Buka Kamera
                   </button>
-                  <button type="button" class="btn-photo" style="border-color:#ef4444;color:#ef4444;display:none" id="regPhotoClearBtn" onclick="resetRegPhotoForm()">
+                  <button type="button" class="btn-photo" style="border-color:#ef4444;color:#ef4444;display:none"
+                    id="regPhotoClearBtn" onclick="resetRegPhotoForm()">
                     <i class="fas fa-trash"></i> Hapus
                   </button>
                 </div>
-                <input type="file" id="regPhotoFile" accept="image/*" style="display:none" onchange="previewRegPhoto(this)">
+                <input type="file" id="regPhotoFile" accept="image/*" style="display:none"
+                  onchange="previewRegPhoto(this)">
                 <input type="hidden" id="regPhotoBase64">
                 <span class="photo-info" id="regPhotoLabel">
                   <i class="fas fa-info-circle"></i> Format: JPG, PNG, WEBP (Maks 2MB)
@@ -834,7 +1009,7 @@
                 <p style="margin-top:12px">Memuat paket...</p>
               </div>
             </div>
-            
+
             <!-- Package Summary -->
             <div id="packageSummary" class="payment-summary" style="display:none">
               <div class="payment-row">
@@ -860,7 +1035,7 @@
               </button>
             </div>
           </div>
-          
+
           <!-- Pembayaran (Hidden Awal) -->
           <div id="paymentSection" style="display:none">
             <h4 style="margin-bottom:20px;color:#334155;display:flex;align-items:center;gap:8px">
@@ -921,7 +1096,8 @@
                 <img id="uploadPreview" class="upload-preview">
                 <div id="fileName" class="file-name"></div>
               </div>
-              <input type="file" id="paymentProof" accept="image/png,image/jpeg,image/jpg" style="display:none" onchange="handleFileUpload(this)">
+              <input type="file" id="paymentProof" accept="image/png,image/jpeg,image/jpg" style="display:none"
+                onchange="handleFileUpload(this)">
             </div>
 
             <div style="display:flex;gap:12px;margin-top:24px">
@@ -939,15 +1115,23 @@
 
     <!-- Footer -->
     <div class="footer">
-      <i class="fas fa-phone"></i> 08158905889 | 
-      <i class="fas fa-envelope"></i> ugymindonesia@gmail.com
-      <p style="margin-top:8px; margin-bottom: 20px;">© UGYM · Pertanyaan? Hubungi admin kami</p>
-      
+      <i class="fas fa-phone"></i> 08158905889 |
+      <i class="fas fa-envelope"></i> kiziyindonesia@gmail.com
+      <p id="dynamicFooterContact" style="margin-top:8px; margin-bottom: 20px;">© KIZIY · Pertanyaan? Hubungi admin kami</p>
+
       <!-- Developer Branding -->
-      <div class="developer-branding" style="text-align: center; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 20px; cursor: pointer; opacity: 0.8; transition: opacity 0.2s;" onclick="window.open('https://wa.me/6285777723458', '_blank')" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">
-        <img src="https://i.imgur.com/NO5dVfb.png" alt="KIZIY Logo" style="width: 36px; height: 36px; margin-bottom: 4px; object-fit: contain;">
-        <div style="font-weight: bold; color: #1e293b; font-size: 13px; letter-spacing: 1px; text-transform: uppercase;">KIZIY</div>
-        <div style="font-family: 'Comic Sans MS', 'Comic Sans', cursive; font-size: 11px; color: #64748b; margin-top: 2px;">key to easy</div>
+      <div class="developer-branding"
+        style="text-align: center; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 20px; cursor: pointer; opacity: 0.8; transition: opacity 0.2s;"
+        onclick="window.open('https://wa.me/6285777723458', '_blank')" onmouseover="this.style.opacity='1'"
+        onmouseout="this.style.opacity='0.8'">
+        <img src="https://i.imgur.com/NO5dVfb.png" alt="KIZIY Logo"
+          style="width: 36px; height: 36px; margin-bottom: 4px; object-fit: contain;">
+        <div
+          style="font-weight: bold; color: #1e293b; font-size: 13px; letter-spacing: 1px; text-transform: uppercase;">
+          KIZIY</div>
+        <div
+          style="font-family: 'Comic Sans MS', 'Comic Sans', cursive; font-size: 11px; color: #64748b; margin-top: 2px;">
+          key to easy</div>
       </div>
     </div>
   </div>
@@ -970,10 +1154,10 @@
       return new Promise((resolve) => {
         const img = new Image();
         img.src = base64Str;
-        img.onload = function() {
+        img.onload = function () {
           let width = img.width;
           let height = img.height;
-          
+
           if (width > height) {
             if (width > maxWidth) {
               height = Math.round((height * maxWidth) / width);
@@ -985,44 +1169,44 @@
               height = maxHeight;
             }
           }
-          
+
           const canvas = document.createElement('canvas');
           canvas.width = width;
           canvas.height = height;
-          
+
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
-          
+
           resolve(canvas.toDataURL('image/jpeg', quality));
         };
-        img.onerror = function() {
+        img.onerror = function () {
           resolve(base64Str);
         };
       });
     }
 
-    function showLoading() { 
-      document.getElementById('loadingOverlay').style.display = 'flex'; 
-    }
-    
-    function hideLoading() { 
-      document.getElementById('loadingOverlay').style.display = 'none'; 
+    function showLoading() {
+      document.getElementById('loadingOverlay').style.display = 'flex';
     }
 
-    function formatCurrency(n) { 
-      return 'Rp ' + (Number(n) || 0).toLocaleString('id-ID'); 
+    function hideLoading() {
+      document.getElementById('loadingOverlay').style.display = 'none';
+    }
+
+    function formatCurrency(n) {
+      return 'Rp ' + (Number(n) || 0).toLocaleString('id-ID');
     }
 
     function showAlert(message, type = 'info') {
-      const icons = { 
-        success: 'check-circle', 
-        error: 'times-circle', 
-        warning: 'exclamation-triangle', 
-        info: 'info-circle' 
+      const icons = {
+        success: 'check-circle',
+        error: 'times-circle',
+        warning: 'exclamation-triangle',
+        info: 'info-circle'
       };
       const el = document.getElementById('mainAlert');
       el.className = 'alert alert-' + type;
-      el.innerHTML = `<i class="fas fa-${icons[type]||'info-circle'} fa-lg"></i><div style="white-space:pre-line">${message}</div>`;
+      el.innerHTML = `<i class="fas fa-${icons[type] || 'info-circle'} fa-lg"></i><div style="white-space:pre-line">${message}</div>`;
       el.style.display = 'flex';
       el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
@@ -1041,22 +1225,22 @@
     function previewRegPhoto(input) {
       if (input.files && input.files[0]) {
         var file = input.files[0];
-        
-        if (file.size > 2 * 1024 * 1024) { 
-          showAlert('Ukuran file terlalu besar! Maksimal 2MB.', 'error'); 
-          return; 
+
+        if (file.size > 2 * 1024 * 1024) {
+          showAlert('Ukuran file terlalu besar! Maksimal 2MB.', 'error');
+          return;
         }
-        
+
         var allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
         if (!allowedTypes.includes(file.type)) {
           showAlert('Format file tidak didukung! Gunakan JPG, PNG, GIF, atau WEBP.', 'error');
           return;
         }
-        
+
         var reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = function (e) {
           showLoading();
-          compressImage(e.target.result, 600, 600, 0.8).then(function(compressed) {
+          compressImage(e.target.result, 600, 600, 0.8).then(function (compressed) {
             hideLoading();
             _setRegPhoto(compressed);
             showAlert('Foto profil berhasil diunggah dan dioptimalkan!', 'success');
@@ -1069,13 +1253,13 @@
     function _setRegPhoto(dataUrl) {
       regPhotoBase64 = dataUrl;
       var prev = document.getElementById('regPhotoPreview');
-      var hid  = document.getElementById('regPhotoBase64');
-      var lbl  = document.getElementById('regPhotoLabel');
-      var clr  = document.getElementById('regPhotoClearBtn');
+      var hid = document.getElementById('regPhotoBase64');
+      var lbl = document.getElementById('regPhotoLabel');
+      var clr = document.getElementById('regPhotoClearBtn');
       if (prev) prev.src = dataUrl;
-      if (hid)  hid.value = dataUrl;
-      if (lbl)  lbl.innerHTML = '<i class="fas fa-check-circle" style="color:#22c55e"></i> Foto sudah dipilih';
-      if (clr)  clr.style.display = 'inline-flex';
+      if (hid) hid.value = dataUrl;
+      if (lbl) lbl.innerHTML = '<i class="fas fa-check-circle" style="color:#22c55e"></i> Foto sudah dipilih';
+      if (clr) clr.style.display = 'inline-flex';
       var container = document.getElementById('regPhotoContainer');
       if (container) container.style.borderColor = '#22c55e';
     }
@@ -1089,7 +1273,7 @@
         // Fallback untuk mobile atau browser lama
         var inp = document.createElement('input');
         inp.type = 'file'; inp.accept = 'image/*'; inp.capture = 'environment';
-        inp.onchange = function() {
+        inp.onchange = function () {
           if (inp.files && inp.files[0]) previewRegPhoto(inp);
         };
         inp.click(); return;
@@ -1102,7 +1286,7 @@
         var video = document.getElementById('pubWebcamVideo');
         video.srcObject = pubWebcamStream;
         document.getElementById('pubWebcamModal').style.display = 'flex';
-      } catch(e) {
+      } catch (e) {
         showAlert('Kamera tidak dapat diakses: ' + (e.message || e) + '\nCoba upload file foto.', 'warning');
         document.getElementById('regPhotoFile').click();
       }
@@ -1110,28 +1294,28 @@
 
     async function pubFlipCamera() {
       pubCameraFacing = pubCameraFacing === 'user' ? 'environment' : 'user';
-      if (pubWebcamStream) { pubWebcamStream.getTracks().forEach(function(t){ t.stop(); }); pubWebcamStream = null; }
+      if (pubWebcamStream) { pubWebcamStream.getTracks().forEach(function (t) { t.stop(); }); pubWebcamStream = null; }
       var video = document.getElementById('pubWebcamVideo');
       try {
         pubWebcamStream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: pubCameraFacing, width: { ideal: 640 }, height: { ideal: 480 } }, audio: false
         });
         video.srcObject = pubWebcamStream;
-      } catch(e) {
+      } catch (e) {
         showAlert('Gagal mengganti kamera.', 'warning');
         pubCloseWebcam();
       }
     }
 
     function pubSnapPhoto() {
-      var video  = document.getElementById('pubWebcamVideo');
+      var video = document.getElementById('pubWebcamVideo');
       var canvas = document.getElementById('pubWebcamCanvas');
       if (!video || !canvas) return;
-      
+
       var maxDim = 600;
-      var w = video.videoWidth  || 640;
+      var w = video.videoWidth || 640;
       var h = video.videoHeight || 480;
-      
+
       if (w > h) {
         if (w > maxDim) {
           h = Math.round((h * maxDim) / w);
@@ -1143,8 +1327,8 @@
           h = maxDim;
         }
       }
-      
-      canvas.width  = w;
+
+      canvas.width = w;
       canvas.height = h;
       var ctx = canvas.getContext('2d');
       if (pubCameraFacing === 'user') { ctx.translate(canvas.width, 0); ctx.scale(-1, 1); }
@@ -1156,7 +1340,7 @@
     }
 
     function pubCloseWebcam() {
-      if (pubWebcamStream) { pubWebcamStream.getTracks().forEach(function(t){ t.stop(); }); pubWebcamStream = null; }
+      if (pubWebcamStream) { pubWebcamStream.getTracks().forEach(function (t) { t.stop(); }); pubWebcamStream = null; }
       var modal = document.getElementById('pubWebcamModal');
       var video = document.getElementById('pubWebcamVideo');
       if (modal) modal.style.display = 'none';
@@ -1168,16 +1352,16 @@
       regPhotoBase64 = null;
       var BLANK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='1.5'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'%3E%3C/path%3E%3Ccircle cx='12' cy='7' r='4'%3E%3C/circle%3E%3C/svg%3E";
       var prev = document.getElementById('regPhotoPreview');
-      var hid  = document.getElementById('regPhotoBase64');
-      var lbl  = document.getElementById('regPhotoLabel');
-      var clr  = document.getElementById('regPhotoClearBtn');
-      var inp  = document.getElementById('regPhotoFile');
+      var hid = document.getElementById('regPhotoBase64');
+      var lbl = document.getElementById('regPhotoLabel');
+      var clr = document.getElementById('regPhotoClearBtn');
+      var inp = document.getElementById('regPhotoFile');
       var cont = document.getElementById('regPhotoContainer');
       if (prev) prev.src = BLANK;
-      if (hid)  hid.value = '';
-      if (lbl)  lbl.innerHTML = '<i class="fas fa-info-circle"></i> Format: JPG, PNG, WEBP (Maks 2MB)';
-      if (clr)  clr.style.display = 'none';
-      if (inp)  inp.value = '';
+      if (hid) hid.value = '';
+      if (lbl) lbl.innerHTML = '<i class="fas fa-info-circle"></i> Format: JPG, PNG, WEBP (Maks 2MB)';
+      if (clr) clr.style.display = 'none';
+      if (inp) inp.value = '';
       if (cont) cont.style.borderColor = '';
     }
 
@@ -1248,7 +1432,7 @@
       document.getElementById('summaryName').textContent = formData.fullName;
       document.getElementById('summaryPackage').textContent = selectedPackage.name;
       document.getElementById('summaryPackagePrice').textContent = formatCurrency(selectedPackage.price);
-      
+
       const total = selectedPackage.price + 50000;
       document.getElementById('summaryTotal').textContent = formatCurrency(total);
 
@@ -1269,12 +1453,12 @@
     function renderPackagesList(res) {
       const container = document.getElementById('packagesContainer');
       if (!container) return;
-      
+
       if (!res || !res.success || !res.packages || !res.packages.length) {
         container.innerHTML = '<p style="color:#ef4444;text-align:center;padding:30px"><i class="fas fa-exclamation-circle fa-2x" style="margin-bottom:8px;display:block"></i>Tidak ada paket keanggotaan aktif yang tersedia saat ini.</p>';
         return;
       }
-      
+
       // Standarisasi filter: Tampilkan seluruh paket keanggotaan publik (REGULAR, PROMO, VISIT, dll kecuali PT)
       let filtered = res.packages.filter(p => {
         const t = (p.type || '').toString().toUpperCase();
@@ -1283,18 +1467,18 @@
       if (!filtered || filtered.length === 0) {
         filtered = res.packages;
       }
-      
+
       packages = filtered;
 
       if (!packages || packages.length === 0) {
         container.innerHTML = '<p style="color:#ef4444;text-align:center;padding:30px">Tidak ada paket keanggotaan aktif yang tersedia saat ini.</p>';
         return;
       }
-      
+
       container.innerHTML = `
         <div class="packages-grid">
           ${packages.map(p => `
-            <div class="package-card" id="pkg_${p.id}" onclick="selectPackage(${JSON.stringify(p).replace(/"/g,'&quot;')})">
+            <div class="package-card" id="pkg_${p.id}" onclick="selectPackage(${JSON.stringify(p).replace(/"/g, '&quot;')})">
               <div class="package-name">${p.name}</div>
               <div class="package-price">${formatCurrency(p.price || p.total)}</div>
               <div class="package-duration">
@@ -1323,22 +1507,22 @@
       const cacheExpiryKey = 'ugym_pub_packages_expiry';
       const cachedData = localStorage.getItem(cacheKey);
       const cacheExpiry = localStorage.getItem(cacheExpiryKey);
-      
+
       const isCacheValid = cachedData && cacheExpiry && (Date.now() < parseInt(cacheExpiry));
-      
+
       if (isCacheValid) {
         try {
           const res = JSON.parse(cachedData);
           renderPackagesList(res);
           console.log('⚡ Loaded packages from Client-Side Cache');
-        } catch(e) {
+        } catch (e) {
           localStorage.removeItem(cacheKey);
           localStorage.removeItem(cacheExpiryKey);
         }
       }
-      
+
       google.script.run
-        .withSuccessHandler(function(res) {
+        .withSuccessHandler(function (res) {
           if (res && res.success && res.packages && res.packages.length) {
             // Simpan ke cache lokal (kedaluwarsa dalam 2 jam)
             localStorage.setItem(cacheKey, JSON.stringify(res));
@@ -1346,10 +1530,10 @@
           }
           renderPackagesList(res);
         })
-        .withFailureHandler(function(err) {
+        .withFailureHandler(function (err) {
           console.error('Gagal memperbarui paket dari server:', err);
           if (!isCacheValid) {
-            document.getElementById('packagesContainer').innerHTML = 
+            document.getElementById('packagesContainer').innerHTML =
               '<p style="color:#ef4444;text-align:center;padding:30px">Gagal memuat paket: ' + err.message + '</p>';
           }
         })
@@ -1358,18 +1542,18 @@
 
     function selectPackage(pkg) {
       selectedPackage = pkg;
-      
+
       // Update UI
       document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
       const el = document.getElementById('pkg_' + pkg.id);
       if (el) el.classList.add('selected');
-      
+
       // Update summary
       document.getElementById('packageSummary').style.display = 'block';
       document.getElementById('selectedPackageName').textContent = pkg.name;
       document.getElementById('selectedPackageDuration').textContent = pkg.duration || '-';
       document.getElementById('selectedPackagePrice').textContent = formatCurrency(pkg.price);
-      
+
       // Enable next button
       document.getElementById('btnNextToPayment').disabled = false;
 
@@ -1381,43 +1565,43 @@
     function handleFileUpload(input) {
       const file = input.files[0];
       if (!file) return;
-      
+
       // Validate file size (5MB max)
-      if (file.size > 5 * 1024 * 1024) { 
-        showAlert('Ukuran file maksimal 5MB', 'warning'); 
-        input.value = ''; 
-        return; 
+      if (file.size > 5 * 1024 * 1024) {
+        showAlert('Ukuran file maksimal 5MB', 'warning');
+        input.value = '';
+        return;
       }
-      
+
       // Validate file type
       if (!file.type.match('image.*')) {
         showAlert('File harus berupa gambar (JPG/PNG)', 'warning');
         input.value = '';
         return;
       }
-      
+
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = function (e) {
         const result = e.target.result;
         showLoading();
-        compressImage(result, 1000, 1000, 0.8).then(function(compressed) {
+        compressImage(result, 1000, 1000, 0.8).then(function (compressed) {
           hideLoading();
           paymentProofBase64 = compressed.split(',')[1]; // Remove data:image/...;base64,
-          
+
           // Update UI
           const preview = document.getElementById('uploadPreview');
           preview.src = compressed;
           preview.classList.add('show');
-          
+
           const fileName = document.getElementById('fileName');
           fileName.innerHTML = `<i class="fas fa-check-circle" style="color:#22c55e"></i> ${file.name} (dioptimalkan)`;
-          
+
           const uploadArea = document.getElementById('uploadArea');
           uploadArea.classList.add('has-file');
         });
       };
-      reader.onerror = function() { 
-        showAlert('Gagal membaca file', 'error'); 
+      reader.onerror = function () {
+        showAlert('Gagal membaca file', 'error');
       };
       reader.readAsDataURL(file);
     }
@@ -1428,19 +1612,19 @@
       const memberPhoto = document.getElementById('regPhotoBase64')?.value || null;
 
       // Validasi
-      if (!paymentMethod) { 
-        showAlert('Pilih metode pembayaran', 'warning'); 
-        return; 
+      if (!paymentMethod) {
+        showAlert('Pilih metode pembayaran', 'warning');
+        return;
       }
-      if (!paymentProofBase64) { 
-        showAlert('Upload bukti pembayaran terlebih dahulu', 'warning'); 
-        return; 
+      if (!paymentProofBase64) {
+        showAlert('Upload bukti pembayaran terlebih dahulu', 'warning');
+        return;
       }
 
       const totalAmount = selectedPackage.price + 50000;
 
       const btn = document.getElementById('btnSubmit');
-      btn.innerHTML = '<span class="spinner"></span> Mengirim...'; 
+      btn.innerHTML = '<span class="spinner"></span> Mengirim...';
       btn.disabled = true;
       showLoading();
 
@@ -1457,15 +1641,15 @@
       };
 
       google.script.run
-        .withSuccessHandler(function(res) {
+        .withSuccessHandler(function (res) {
           hideLoading();
-          btn.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Pendaftaran'; 
+          btn.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Pendaftaran';
           btn.disabled = false;
-          
+
           if (res && res.success) {
             // Update step to completed
             updateStep(4);
-            
+
             showAlert(
               `✅ PENDAFTARAN BERHASIL DIKIRIM!\n\n` +
               `Registration ID : ${res.registrationId || '-'}\n` +
@@ -1479,20 +1663,20 @@
               `📧 Cek email ${formData.email} untuk konfirmasi.`,
               'success'
             );
-            
+
             // Bersihkan draft formulir karena registrasi sukses
             clearDraft();
-            
+
             // Hide payment form
             document.getElementById('paymentSection').style.display = 'none';
-            
+
           } else {
             showAlert('❌ ' + (res?.message || 'Pendaftaran gagal. Coba lagi.'), 'error');
           }
         })
-        .withFailureHandler(function(err) {
+        .withFailureHandler(function (err) {
           hideLoading();
-          btn.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Pendaftaran'; 
+          btn.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Pendaftaran';
           btn.disabled = false;
           showAlert('Error: ' + err.message, 'error');
         })
@@ -1517,17 +1701,17 @@
         const draftStr = localStorage.getItem('ugym_pub_reg_draft');
         if (!draftStr) return;
         const draft = JSON.parse(draftStr);
-        
+
         if (draft.fullName) document.getElementById('fullName').value = draft.fullName;
         if (draft.dob) document.getElementById('dob').value = draft.dob;
         if (draft.phone) document.getElementById('phone').value = draft.phone;
         if (draft.email) document.getElementById('email').value = draft.email;
         if (draft.paymentMethod) document.getElementById('paymentMethod').value = draft.paymentMethod;
-        
+
         if (draft.selectedPackage) {
           selectPackage(draft.selectedPackage);
         }
-      } catch(e) {
+      } catch (e) {
         console.warn('Gagal memulihkan draft:', e);
       }
     }
@@ -1553,13 +1737,13 @@
     function updateBrandingUI(branchId) {
       const config = currentPublicBranches.find(b => b.id === branchId);
       if (!config) return;
-      
+
       const logoEl = document.getElementById('gymLogoHeader');
-      if (logoEl) logoEl.src = config.logoUrl || "https://i.imgur.com/PAB0dhW.png";
-      
+      if (logoEl) logoEl.src = config.logoUrl || "https://i.imgur.com/NO5dVfb.png";
+
       const nameEl = document.getElementById('gymNameHeader');
       if (nameEl) nameEl.textContent = config.name;
-      
+
       if (config.themeColor) {
         document.documentElement.style.setProperty('--primary', config.themeColor);
       }
@@ -1568,7 +1752,7 @@
       if (bankEl && config.rekening) {
         bankEl.textContent = config.rekening;
       }
-      
+
       const footerEl = document.getElementById('dynamicFooterContact');
       if (footerEl) {
         let contactText = '© ' + (config.name || 'Kiziy');
@@ -1581,25 +1765,25 @@
 
 
     function initBranchSelection() {
-      google.script.run.withSuccessHandler(function(backendBranches) {
+      google.script.run.withSuccessHandler(function (backendBranches) {
         const select = document.getElementById('pubBranch');
         if (select && backendBranches && backendBranches.length > 0) {
           currentPublicBranches = backendBranches;
-          
+
           select.innerHTML = backendBranches.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
-          
+
           // Dapatkan branchId dari URL parameter (jika ada)
           const urlParams = new URLSearchParams(window.location.search);
           const urlBranchId = urlParams.get('branchId');
           if (urlBranchId && backendBranches.find(b => b.id === urlBranchId)) {
             select.value = urlBranchId;
           }
-          
-          select.addEventListener('change', function(e) {
+
+          select.addEventListener('change', function (e) {
             updateBrandingUI(e.target.value);
             if (typeof loadPackages === 'function') loadPackages();
           });
-          
+
           updateBrandingUI(select.value);
         } else if (select) {
           select.innerHTML = '<option value="">Tidak ada cabang tersedia</option>';
@@ -1608,7 +1792,7 @@
     }
 
     // Initialize
-    window.onload = function() {
+    window.onload = function () {
       initBranchSelection();
       loadPackages();
       restoreDraft();
@@ -1618,7 +1802,7 @@
       if (!url) return '';
       if (url.startsWith('http://')) url = url.replace('http://', 'https://');
       if (!url.includes('.google.com')) return url;
-      
+
       let fileId = '';
       const patterns = [/\/d\/([a-zA-Z0-9_-]+)/, /id=([a-zA-Z0-9_-]+)/, /\/file\/d\/([a-zA-Z0-9_-]+)/, /open\?id=([a-zA-Z0-9_-]+)/];
       for (let p of patterns) {
@@ -1629,4 +1813,5 @@
     }
   </script>
 </body>
+
 </html>
