@@ -6,61 +6,61 @@
   <script>
     // Konfigurasi endpoint GAS Anda (Ganti dengan URL eksekusi GAS yang di-deploy)
     const GAS_REST_API_URL = 'https://script.google.com/macros/s/AKfycbxOTUY8cVdLjGVAnqcz47fKDJXtUD7lsXVMJFqwFLsh-TjfdBT_DxaqsiAnFU4r36PcGg/exec';
-    
+
     // Polyfill & Proxy untuk google.script.run
     window.google = window.google || {};
     window.google.script = window.google.script || {};
-    
+
     window.google.script.run = new Proxy({}, {
-      get: function(target, prop) {
+      get: function (target, prop) {
         if (prop === 'withSuccessHandler') {
-          return function(successCallback) {
+          return function (successCallback) {
             return new Proxy({}, {
-              get: function(t, method) {
+              get: function (t, method) {
                 if (method === 'withFailureHandler') {
-                    return function(failureCallback) {
-                       return new Proxy({}, {
-                          get: function(t2, method2) {
-                              return function(...args) {
-                                  executeApi(method2, args, successCallback, failureCallback);
-                              }
-                          }
-                       });
-                    }
+                  return function (failureCallback) {
+                    return new Proxy({}, {
+                      get: function (t2, method2) {
+                        return function (...args) {
+                          executeApi(method2, args, successCallback, failureCallback);
+                        }
+                      }
+                    });
+                  }
                 }
-                return function(...args) {
+                return function (...args) {
                   executeApi(method, args, successCallback, null);
                 }
               }
             });
           }
         }
-        
+
         if (prop === 'withFailureHandler') {
-          return function(failureCallback) {
-             return new Proxy({}, {
-                get: function(t, method) {
-                   if (method === 'withSuccessHandler') {
-                       return function(successCallback) {
-                           return new Proxy({}, {
-                               get: function(t2, method2) {
-                                   return function(...args) {
-                                       executeApi(method2, args, successCallback, failureCallback);
-                                   }
-                               }
-                           });
-                       }
-                   }
-                   return function(...args) {
-                     executeApi(method, args, null, failureCallback);
-                   }
+          return function (failureCallback) {
+            return new Proxy({}, {
+              get: function (t, method) {
+                if (method === 'withSuccessHandler') {
+                  return function (successCallback) {
+                    return new Proxy({}, {
+                      get: function (t2, method2) {
+                        return function (...args) {
+                          executeApi(method2, args, successCallback, failureCallback);
+                        }
+                      }
+                    });
+                  }
                 }
-             });
+                return function (...args) {
+                  executeApi(method, args, null, failureCallback);
+                }
+              }
+            });
           }
         }
 
         // Direct call without handlers
-        return function(...args) {
+        return function (...args) {
           executeApi(prop, args, null, null);
         }
       }
@@ -70,29 +70,29 @@
       let branchId = null;
       const branchSelect = document.getElementById('loginBranch');
       if (branchSelect && branchSelect.value) {
-          branchId = branchSelect.value;
+        branchId = branchSelect.value;
       }
-      
+
       const payload = { method: method, args: args, branchId: branchId };
-      
+
       fetch(GAS_REST_API_URL, {
         method: 'POST',
         body: JSON.stringify(payload),
         headers: { 'Content-Type': 'text/plain;charset=utf-8' }
       })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          if (onSuccess) onSuccess(data.result);
-        } else {
-          console.error('API Error:', data.error);
-          if (onFailure) onFailure(new Error(data.error));
-        }
-      })
-      .catch(error => {
-        console.error('Network/Fetch Error:', error);
-        if (onFailure) onFailure(error);
-      });
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            if (onSuccess) onSuccess(data.result);
+          } else {
+            console.error('API Error:', data.error);
+            if (onFailure) onFailure(new Error(data.error));
+          }
+        })
+        .catch(error => {
+          console.error('Network/Fetch Error:', error);
+          if (onFailure) onFailure(error);
+        });
     }
   </script>
   <meta charset="UTF-8">
@@ -125,78 +125,78 @@
     // ================ IMPROVED PROXY FOR google.script.run ================
     if (typeof google === 'undefined' || typeof google.script === 'undefined' || typeof google.script.run === 'undefined') {
       window.google = {
-      script: {
-        run: new Proxy({}, {
-          get: function (target, methodName) {
-            // Untuk method seperti withSuccessHandler / withFailureHandler
-            if (methodName === 'withSuccessHandler') {
-              return function (successCallback) {
-                return new Proxy({}, {
-                  get: function (t, nextMethod) {
-                    if (nextMethod === 'withFailureHandler') {
-                      return function (failureCallback) {
-                        return new Proxy({}, {
-                          get: function (tt, finalMethod) {
-                            return function (...args) {
-                              // Kirim request dengan kedua handler
-                              fetch(SCRIPT_URL, {
-                                method: 'POST',
-                                body: JSON.stringify({ action: finalMethod, args: args }),
-                                headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-                              })
-                                .then(response => response.json())
-                                .then(data => {
-                                  if (!data.success) {
-                                    if (failureCallback) failureCallback(new Error(data.message));
-                                    else console.error('Backend Error:', data.message);
-                                  } else {
-                                    if (successCallback) successCallback(data.result);
-                                  }
+        script: {
+          run: new Proxy({}, {
+            get: function (target, methodName) {
+              // Untuk method seperti withSuccessHandler / withFailureHandler
+              if (methodName === 'withSuccessHandler') {
+                return function (successCallback) {
+                  return new Proxy({}, {
+                    get: function (t, nextMethod) {
+                      if (nextMethod === 'withFailureHandler') {
+                        return function (failureCallback) {
+                          return new Proxy({}, {
+                            get: function (tt, finalMethod) {
+                              return function (...args) {
+                                // Kirim request dengan kedua handler
+                                fetch(SCRIPT_URL, {
+                                  method: 'POST',
+                                  body: JSON.stringify({ action: finalMethod, args: args }),
+                                  headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                                 })
-                                .catch(err => {
-                                  if (failureCallback) failureCallback(err);
-                                  else console.error('Network Error:', err);
-                                });
-                            };
-                          }
-                        });
+                                  .then(response => response.json())
+                                  .then(data => {
+                                    if (!data.success) {
+                                      if (failureCallback) failureCallback(new Error(data.message));
+                                      else console.error('Backend Error:', data.message);
+                                    } else {
+                                      if (successCallback) successCallback(data.result);
+                                    }
+                                  })
+                                  .catch(err => {
+                                    if (failureCallback) failureCallback(err);
+                                    else console.error('Network Error:', err);
+                                  });
+                              };
+                            }
+                          });
+                        };
+                      }
+                      // Jika hanya withSuccessHandler tanpa withFailureHandler
+                      return function (...args) {
+                        fetch(SCRIPT_URL, {
+                          method: 'POST',
+                          body: JSON.stringify({ action: nextMethod, args: args }),
+                          headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                        })
+                          .then(response => response.json())
+                          .then(data => {
+                            if (!data.success) console.error('Backend Error:', data.message);
+                            else if (successCallback) successCallback(data.result);
+                          })
+                          .catch(err => console.error('Network Error:', err));
                       };
                     }
-                    // Jika hanya withSuccessHandler tanpa withFailureHandler
-                    return function (...args) {
-                      fetch(SCRIPT_URL, {
-                        method: 'POST',
-                        body: JSON.stringify({ action: nextMethod, args: args }),
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-                      })
-                        .then(response => response.json())
-                        .then(data => {
-                          if (!data.success) console.error('Backend Error:', data.message);
-                          else if (successCallback) successCallback(data.result);
-                        })
-                        .catch(err => console.error('Network Error:', err));
-                    };
-                  }
-                });
+                  });
+                };
+              }
+              // Jika langsung memanggil fungsi tanpa handler (misal untuk testing)
+              return function (...args) {
+                fetch(SCRIPT_URL, {
+                  method: 'POST',
+                  body: JSON.stringify({ action: methodName, args: args }),
+                  headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                })
+                  .then(response => response.json())
+                  .then(data => {
+                    if (!data.success) console.error('Backend Error:', data.message);
+                    else console.log('Result:', data.result);
+                  })
+                  .catch(err => console.error('Network Error:', err));
               };
             }
-            // Jika langsung memanggil fungsi tanpa handler (misal untuk testing)
-            return function (...args) {
-              fetch(SCRIPT_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: methodName, args: args }),
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-              })
-                .then(response => response.json())
-                .then(data => {
-                  if (!data.success) console.error('Backend Error:', data.message);
-                  else console.log('Result:', data.result);
-                })
-                .catch(err => console.error('Network Error:', err));
-            };
-          }
-        })
-      }
+          })
+        }
       };
     }
 
@@ -308,7 +308,7 @@
         const self = this;
 
         google.script.run
-        .withSuccessHandler(function (res) {
+          .withSuccessHandler(function (res) {
             self.isSyncing = false;
             if (res && res.success) {
 
@@ -667,7 +667,7 @@
               })
               .withFailureHandler(err => {
                 console.warn(' Queue Network/System Failure:', item.action, err);
-                
+
                 // Tambahkan retry counter untuk menghindari infinite loop
                 item.retries = (item.retries || 0) + 1;
                 if (item.retries >= 3 || String(err).includes("not found") || String(err).includes("tidak ditemukan")) {
@@ -745,7 +745,7 @@
       --text-main: #f8fafc;
       --text-secondary: #94a3b8;
       --sidebar-bg: rgba(15, 23, 42, 0.95);
-      --border-color:var(--text-main);
+      --border-color: var(--text-main);
       --shadow-premium: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
       --shadow-widget: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
       --glass-bg: rgba(30, 41, 59, 0.7);
@@ -824,7 +824,7 @@
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
       width: 100%;
       max-width: 420px;
-      border:1px solid var(--border-color);
+      border: 1px solid var(--border-color);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1036,7 +1036,9 @@
     }
 
     @media (max-width: 768px) {
-      .desktop-only { display: none !important; }
+      .desktop-only {
+        display: none !important;
+      }
 
       .btn-nav-helper {
         bottom: 20px;
@@ -1393,14 +1395,14 @@
       border-radius: 24px;
       overflow: hidden;
       box-shadow: var(--shadow-premium);
-      border:1px solid var(--border-color);
+      border: 1px solid var(--border-color);
       margin-bottom: 24px;
     }
 
     .form-card-header {
       padding: 24px 32px;
-      background:var(--bg-light);
-      border-bottom:1px solid var(--border-color);
+      background: var(--bg-light);
+      border-bottom: 1px solid var(--border-color);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -1409,7 +1411,7 @@
     .form-card-header h3 {
       font-size: 18px;
       font-weight: 700;
-      color:var(--text-main);
+      color: var(--text-main);
       margin: 0;
       display: flex;
       align-items: center;
@@ -1514,7 +1516,7 @@
 
     .list-item.contacted .list-item-title {
       text-decoration: line-through;
-      color:var(--text-secondary);
+      color: var(--text-secondary);
     }
 
     .followup-checkbox {
@@ -1578,7 +1580,7 @@
       border-radius: 16px;
       padding: 16px 20px;
       margin-bottom: 24px;
-      background:var(--glass-bg);
+      background: var(--glass-bg);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       box-shadow: var(--shadow-premium);
@@ -1684,7 +1686,8 @@
       animation: fadeIn 0.3s ease;
     }
 
-    .modal-container, .modal-content {
+    .modal-container,
+    .modal-content {
       background: var(--bg-light);
       border-radius: 24px;
       max-width: 600px;
@@ -1702,14 +1705,15 @@
         align-items: center;
       }
 
-      .modal-container, .modal-content {
+      .modal-container,
+      .modal-content {
         border-radius: 24px;
       }
     }
 
     .modal-header {
       padding: 16px 20px;
-      background:var(--glass-bg);
+      background: var(--glass-bg);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       color: var(--text-main);
@@ -1755,7 +1759,7 @@
 
     .modal-footer {
       padding: 16px 24px;
-      background:var(--glass-bg);
+      background: var(--glass-bg);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       display: flex;
@@ -1882,7 +1886,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background:var(--glass-bg);
+      background: var(--glass-bg);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1892,7 +1896,7 @@
     .spinner {
       width: 40px;
       height: 40px;
-      border:4px solid var(--border-color);
+      border: 4px solid var(--border-color);
       border-top: 4px solid var(--primary);
       border-radius: 50%;
       animation: spin 1s linear infinite;
@@ -1900,7 +1904,7 @@
 
     /* Package Cards */
     .pkg-card {
-      border:2px solid var(--border-color);
+      border: 2px solid var(--border-color);
       border-radius: 10px;
       padding: 14px;
       cursor: pointer;
@@ -1934,8 +1938,8 @@
     }
 
     .admin-card {
-      background:var(--bg-light);
-      border:1px solid var(--border-color);
+      background: var(--bg-light);
+      border: 1px solid var(--border-color);
       border-radius: 12px;
       padding: 20px;
     }
@@ -1945,7 +1949,7 @@
       display: flex;
       align-items: center;
       margin: 20px 0;
-      color:var(--text-secondary);
+      color: var(--text-secondary);
       font-size: 13px;
     }
 
@@ -1963,7 +1967,7 @@
 
     /* Text utilities */
     .text-muted {
-      color:var(--text-secondary);
+      color: var(--text-secondary);
     }
 
     /* Payment Info */
@@ -1994,7 +1998,7 @@
 
     /* Info Box */
     .info-box {
-      background:var(--bg-light);
+      background: var(--bg-light);
       border-radius: 8px;
       padding: 16px;
       margin: 12px 0;
@@ -2008,7 +2012,7 @@
       padding: 16px;
       border: 2px dashed #cbd5e1;
       border-radius: 12px;
-      background:var(--bg-light);
+      background: var(--bg-light);
       transition: border-color 0.2s, background 0.2s;
       margin-bottom: 4px;
     }
@@ -2044,7 +2048,7 @@
 
     .admin-photo-actions p {
       font-size: 13px;
-      color:var(--text-secondary);
+      color: var(--text-secondary);
       margin-bottom: 10px;
     }
 
@@ -2117,7 +2121,7 @@
       border-radius: 8px;
       border: 1.5px solid #cbd5e1;
       background: white;
-      color:var(--text-main);
+      color: var(--text-main);
       cursor: pointer;
       display: inline-flex;
       align-items: center;
@@ -2583,7 +2587,7 @@
     .product-image {
       width: 100%;
       aspect-ratio: 1 / 1;
-      background:var(--bg-light);
+      background: var(--bg-light);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -2735,7 +2739,7 @@
       justify-content: space-between;
       margin-bottom: 8px;
       font-size: 14px;
-      color:var(--text-secondary);
+      color: var(--text-secondary);
     }
 
     .cart-total {
@@ -2744,7 +2748,7 @@
       padding-top: 10px;
       font-size: 18px;
       font-weight: 700;
-      color:var(--text-main);
+      color: var(--text-main);
     }
 
     /* Report Table Footer Styles */
@@ -2762,14 +2766,14 @@
       padding: 12px;
       text-align: left;
       font-size: 12px;
-      color:var(--text-main);
+      color: var(--text-main);
       border-bottom: 2px solid #E5E5EA;
     }
 
     .report-footer-table td {
       padding: 12px;
       font-size: 13px;
-      border-bottom:1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
     }
 
     .report-footer-table .total-row {
@@ -2796,7 +2800,7 @@
       right: 0;
       top: 100%;
       background: white;
-      border:1px solid var(--border-color);
+      border: 1px solid var(--border-color);
       border-radius: 10px;
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
       z-index: 1000;
@@ -2818,17 +2822,17 @@
     }
 
     .search-item:hover {
-      background:var(--bg-light);
+      background: var(--bg-light);
     }
 
     .search-item b {
-      color:var(--text-main);
+      color: var(--text-main);
       display: block;
       font-size: 14px;
     }
 
     .search-item small {
-      color:var(--text-secondary);
+      color: var(--text-secondary);
       font-size: 12px;
     }
 
@@ -2841,11 +2845,11 @@
       align-items: center;
       gap: 10px;
       padding-bottom: 8px;
-      border-bottom:2px solid var(--border-color);
+      border-bottom: 2px solid var(--border-color);
     }
 
     .filter-container {
-      background:var(--glass-bg);
+      background: var(--glass-bg);
       padding: 16px 20px;
       border-radius: 16px;
       backdrop-filter: blur(20px);
@@ -2880,7 +2884,7 @@
       outline: none;
       transition: 0.2s;
       background: rgba(142, 142, 147, 0.12);
-      color:var(--text-main);
+      color: var(--text-main);
       -webkit-appearance: none;
       appearance: none;
     }
@@ -2928,12 +2932,18 @@
         border: 1px solid #ddd !important;
       }
     }
-  
+
     /* Skeleton Loading UI */
     @keyframes shimmer {
-      0% { background-position: -1000px 0; }
-      100% { background-position: 1000px 0; }
+      0% {
+        background-position: -1000px 0;
+      }
+
+      100% {
+        background-position: 1000px 0;
+      }
     }
+
     .skeleton {
       background: #f6f7f8;
       background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
@@ -2946,10 +2956,25 @@
       animation-timing-function: linear;
       border-radius: 8px;
     }
-    .skeleton-text { height: 20px; width: 100%; margin-bottom: 8px; }
-    .skeleton-title { height: 32px; width: 60%; margin-bottom: 16px; }
-    .skeleton-avatar { height: 50px; width: 50px; border-radius: 50%; }
-</style>
+
+    .skeleton-text {
+      height: 20px;
+      width: 100%;
+      margin-bottom: 8px;
+    }
+
+    .skeleton-title {
+      height: 32px;
+      width: 60%;
+      margin-bottom: 16px;
+    }
+
+    .skeleton-avatar {
+      height: 50px;
+      width: 50px;
+      border-radius: 50%;
+    }
+  </style>
 </head>
 
 <body>
@@ -3235,7 +3260,8 @@
           <button class="hamburger-btn" onclick="toggleSidebar()">
             <i class="fas fa-bars"></i>
           </button>
-          <img id="topbarLogo" src="https://i.imgur.com/NO5dVfb.png" style="width:32px;height:32px;object-fit:contain; border-radius:4px;">
+          <img id="topbarLogo" src="https://i.imgur.com/NO5dVfb.png"
+            style="width:32px;height:32px;object-fit:contain; border-radius:4px;">
           <div>
             <div style="display:flex; align-items:center; gap:8px">
               <h1 id="pageTitle" style="font-size:18px;color:var(--text-main);font-weight:700;margin:0">Dashboard</h1>
@@ -3605,15 +3631,15 @@ Terima kasih dan selamat berlatih!`;
     function updateBrandingUI(branchId) {
       const config = currentLoginBranches.find(b => b.id === branchId);
       if (!config) return;
-      
+
       // Update logo
       const logoEl = document.querySelector('.auth-header img');
       if (logoEl) logoEl.src = config.logoUrl || "https://i.imgur.com/NO5dVfb.png";
-      
+
       // Update nama
       const nameEl = document.querySelector('.auth-header h2');
       if (nameEl) nameEl.textContent = config.name;
-      
+
       // Update warna dominan (primary)
       if (config.themeColor) {
         document.documentElement.style.setProperty('--primary', config.themeColor);
@@ -3624,18 +3650,18 @@ Terima kasih dan selamat berlatih!`;
 
     function renderLoginForm() {
       setTimeout(() => {
-        google.script.run.withSuccessHandler(function(backendBranches) {
+        google.script.run.withSuccessHandler(function (backendBranches) {
           const select = document.getElementById('loginBranch');
           if (select && backendBranches && backendBranches.length > 0) {
             currentLoginBranches = backendBranches;
-            
+
             select.innerHTML = backendBranches.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
-            
+
             // Event listener untuk ganti identitas secara dinamis
-            select.addEventListener('change', function(e) {
+            select.addEventListener('change', function (e) {
               updateBrandingUI(e.target.value);
             });
-            
+
             // Trigger branding awal
             updateBrandingUI(backendBranches[0].id);
           } else if (select) {
@@ -3703,7 +3729,7 @@ Terima kasih dan selamat berlatih!`;
       `;
     }
 
-    
+
     function openPublicRegistration() {
       let url = 'https://kiziyapps.github.io/WStudio-Gym/PublicRegistration.html';
       const branchSelect = document.getElementById('loginBranch');
@@ -3806,7 +3832,7 @@ Terima kasih dan selamat berlatih!`;
             document.getElementById('dashboardView').style.display = 'flex';
 
             applyRolePermissions();
-            
+
             // Update Sidebar Branding
             const selectedBranch = currentLoginBranches.find(b => String(b.id) === String(branchId));
             if (selectedBranch) {
@@ -4219,32 +4245,32 @@ Terima kasih dan selamat berlatih!`;
     function loadGlobalDashboard() {
       const start = document.getElementById('dash_start_date')?.value;
       const end = document.getElementById('dash_end_date')?.value;
-      
+
       showLoading();
-      executeApi('getGlobalDashboardStats', [start, end], function(res) {
+      executeApi('getGlobalDashboardStats', [start, end], function (res) {
         hideLoading();
-        if(res.success && res.stats) {
-          if(res.stats.isFiltered) {
+        if (res.success && res.stats) {
+          if (res.stats.isFiltered) {
             document.getElementById('dashboardPeriod').style.display = 'flex';
             document.getElementById('periodValue').textContent = res.stats.period;
           } else {
             document.getElementById('dashboardPeriod').style.display = 'none';
           }
-          
+
           const subtitleEl = document.querySelector('.view-subtitle');
           if (subtitleEl) {
             subtitleEl.innerHTML = 'Dashboard Global <span style="font-size:12px; font-weight:normal; background:#6b46c1; color:white; padding:2px 8px; border-radius:12px; margin-left:8px;">Agregat Seluruh Cabang</span>';
           }
-          
+
           animateValue('stat_total', 0, res.stats.total || 0, 1000);
           animateValue('stat_active', 0, res.stats.active || 0, 1000);
           animateValue('stat_revenue', 0, res.stats.revenue || 0, 1000, true);
           animateValue('stat_checkins', 0, res.stats.checkins || 0, 1000);
-          
+
           document.getElementById('stat_pos_revenue').textContent = formatCurrency(res.stats.posRevenue || 0);
           document.getElementById('stat_expenses').textContent = formatCurrency(res.stats.expenses || 0);
           document.getElementById('stat_net_profit').textContent = formatCurrency(res.stats.netProfit || 0);
-          
+
           // Fitness Metrics
           document.getElementById('stat_new_reg_count').textContent = (res.stats.newRegistrationsCount || 0) + ' Member';
           document.getElementById('stat_new_reg_rev').textContent = formatCurrency(res.stats.newRegistrationsRevenue || 0);
@@ -4254,14 +4280,14 @@ Terima kasih dan selamat berlatih!`;
           document.getElementById('stat_pt_rev').textContent = formatCurrency(res.stats.ptSalesRevenue || 0);
           document.getElementById('stat_visit_count').textContent = (res.stats.visitSalesCount || 0) + ' Kunjungan';
           document.getElementById('stat_visit_rev').textContent = formatCurrency(res.stats.visitSalesRevenue || 0);
-          
+
           document.getElementById('stat_total_fitness_profit').textContent = formatCurrency(res.stats.fitnessNetProfit || 0);
           document.getElementById('stat_total_pos_profit').textContent = formatCurrency(res.stats.posNetProfit || 0);
-          
+
           // Render table if available
           if (typeof renderCheckinTable === 'function') renderCheckinTable(res.stats.todayCheckinList || []);
           if (typeof renderLowStockTable === 'function') renderLowStockTable(res.stats.lowStock || []);
-          
+
           showAlert('Berhasil memuat Dashboard Global', 'success');
         } else {
           showAlert('Gagal memuat Dashboard Global: ' + (res.message || 'Error'), 'error');
@@ -4724,7 +4750,7 @@ Terima kasih dan selamat berlatih!`;
       const reader = new FileReader();
       reader.onload = function (e) {
         const img = new Image();
-        img.onload = function() {
+        img.onload = function () {
           const canvas = document.createElement('canvas');
           let width = img.width;
           let height = img.height;
@@ -4930,7 +4956,7 @@ Terima kasih dan selamat berlatih!`;
           }, 30000);
 
           google.script.run
-        .withSuccessHandler(function (res) {
+            .withSuccessHandler(function (res) {
               clearTimeout(timeoutId);
               hideLoading();
               btn.innerHTML = originalText;
@@ -5386,7 +5412,7 @@ Terima kasih dan selamat berlatih!`;
 
       window.trxSearchTimeout = setTimeout(function () {
         google.script.run
-        .withSuccessHandler(function (res) {
+          .withSuccessHandler(function (res) {
             if (res && res.success && res.members) {
               // Update local cache if this is a broad search or we got new data
               renderMemberSearchResults(res.members, 'memberSearchResults', 'selectMemberForTrx');
@@ -5470,7 +5496,7 @@ Terima kasih dan selamat berlatih!`;
 
       window.posSearchTimeout = setTimeout(function () {
         google.script.run
-        .withSuccessHandler(function (res) {
+          .withSuccessHandler(function (res) {
             if (res && res.success && res.members) {
               renderMemberSearchResults(res.members, 'posMemberResults', 'selectMemberForPOS');
             }
@@ -6774,7 +6800,7 @@ Terima kasih dan selamat berlatih!`;
         // Jika tidak ada di cache, ambil dari server
         showLoading();
         google.script.run
-        .withSuccessHandler(function (res) {
+          .withSuccessHandler(function (res) {
             hideLoading();
             if (res.success) {
               const found = res.products.find(x => x.id == id);
@@ -7096,7 +7122,7 @@ Terima kasih dan selamat berlatih!`;
         document.getElementById('packageModalTitle').textContent = 'Edit Paket';
         showLoading();
         google.script.run
-        .withSuccessHandler(function (res) {
+          .withSuccessHandler(function (res) {
             hideLoading();
             if (res.success) {
               const p = res.packages.find(x => x['ID Paket'] == id);
@@ -7238,7 +7264,7 @@ Terima kasih dan selamat berlatih!`;
         } else {
           showLoading();
           google.script.run
-        .withSuccessHandler(function (res) {
+            .withSuccessHandler(function (res) {
               hideLoading();
               if (res.success) {
                 __productsCache = res.products;
@@ -8137,7 +8163,7 @@ Terima kasih dan selamat berlatih!`;
       document.getElementById('visitSearchResults').innerHTML = '<div style="text-align:center;padding:10px;color:var(--text-secondary)"><i class="fas fa-spinner fa-spin"></i></div>';
       window.visitSearchTimeout = setTimeout(function () {
         google.script.run
-        .withSuccessHandler(function (res) {
+          .withSuccessHandler(function (res) {
             const el = document.getElementById('visitSearchResults');
             if (!el) return;
             if (res && res.success && res.visitors && res.visitors.length > 0) {
@@ -8499,7 +8525,7 @@ Terima kasih dan selamat berlatih!`;
       window.ptSearchTimeout = setTimeout(function () {
 
         google.script.run
-        .withSuccessHandler(function (res) {
+          .withSuccessHandler(function (res) {
 
             if (!resultsEl) return;
 
@@ -9029,7 +9055,7 @@ Terima kasih dan selamat berlatih!`;
 
           showLoading('Menyetujui pembayaran...');
           google.script.run
-        .withSuccessHandler(function (res) {
+            .withSuccessHandler(function (res) {
               hideLoading();
               if (res && res.success) {
                 showToast(res.message, 'success');
@@ -9086,7 +9112,7 @@ Terima kasih dan selamat berlatih!`;
 
           showLoading('Mengaktivasi member...');
           google.script.run
-        .withSuccessHandler(function (res) {
+            .withSuccessHandler(function (res) {
               hideLoading();
               if (res && res.success) {
                 showToast(res.message, 'success');
@@ -9310,7 +9336,7 @@ Terima kasih dan selamat berlatih!`;
         if (!ok) return;
         showLoading();
         google.script.run
-        .withSuccessHandler(function (res) {
+          .withSuccessHandler(function (res) {
             hideLoading();
             if (res.success) {
               showToast(' ' + res.message, 'success');
@@ -9330,7 +9356,7 @@ Terima kasih dan selamat berlatih!`;
         function () {
           showLoading();
           google.script.run
-        .withSuccessHandler(function (res) {
+            .withSuccessHandler(function (res) {
               hideLoading();
               if (res && res.success) {
                 showToast(' ' + res.message, 'success');
@@ -9362,7 +9388,7 @@ Terima kasih dan selamat berlatih!`;
         function () {
           showLoading();
           google.script.run
-        .withSuccessHandler(function (res) {
+            .withSuccessHandler(function (res) {
               hideLoading();
               if (res && res.success) {
                 showToast(' ' + res.message, 'success');
@@ -9386,7 +9412,7 @@ Terima kasih dan selamat berlatih!`;
       if (typeof LocalCache !== 'undefined') {
         LocalCache.clear();
       }
-      
+
       google.script.run
         .withSuccessHandler(function (res) {
           hideLoading();
@@ -9778,13 +9804,13 @@ Terima kasih dan selamat berlatih!`;
                       </thead>
                       <tbody>
                         ${list.map(u => {
-                          const pic = u.profilePic ? getDirectLink(u.profilePic) : "https://i.imgur.com/vHEx3jR.png";
-                          let branchName = "Semua Cabang";
-                          if (u.branchId !== "ALL" && typeof currentLoginBranches !== 'undefined') {
-                            const b = currentLoginBranches.find(cb => cb.id === u.branchId);
-                            if (b) branchName = b.name;
-                          }
-                          return `
+              const pic = u.profilePic ? getDirectLink(u.profilePic) : "https://i.imgur.com/vHEx3jR.png";
+              let branchName = "Semua Cabang";
+              if (u.branchId !== "ALL" && typeof currentLoginBranches !== 'undefined') {
+                const b = currentLoginBranches.find(cb => cb.id === u.branchId);
+                if (b) branchName = b.name;
+              }
+              return `
                           <tr>
                             <td>
                               <img src="${pic}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid #e2e8f0;display:block;margin:auto;">
@@ -9828,7 +9854,7 @@ Terima kasih dan selamat berlatih!`;
         function () {
           showLoading();
           google.script.run
-        .withSuccessHandler(function (res) {
+            .withSuccessHandler(function (res) {
               hideLoading();
               if (res.success) {
                 showToast(' ' + res.message, 'success');
@@ -10108,7 +10134,7 @@ Terima kasih dan selamat berlatih!`;
         function () {
           showLoading();
           google.script.run
-        .withSuccessHandler(function (res) {
+            .withSuccessHandler(function (res) {
               hideLoading();
               if (res && res.success) {
                 showToast('✅  Pengeluaran dihapus', 'success');
@@ -10132,7 +10158,7 @@ Terima kasih dan selamat berlatih!`;
       const role = currentUser.role;
       document.getElementById('userFullName').textContent = currentUser.name;
       document.getElementById('userRoleBadge').textContent = role;
-      
+
       const userPic = document.getElementById('userPic');
       if (userPic) {
         userPic.src = currentUser.profilePic ? getDirectLink(currentUser.profilePic) : "https://i.imgur.com/vHEx3jR.png";
@@ -10243,7 +10269,7 @@ Terima kasih dan selamat berlatih!`;
 
       if (type === 'deleted_transactions') {
         google.script.run
-        .withSuccessHandler(function (res) {
+          .withSuccessHandler(function (res) {
             if (res && res.success) {
               if (!res.data || res.data.length === 0) {
                 container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-secondary)">Tidak ada data riwayat penghapusan.</div>';
@@ -10283,7 +10309,7 @@ Terima kasih dan selamat berlatih!`;
           .getDeletedTransactions();
       } else {
         google.script.run
-        .withSuccessHandler(function (res) {
+          .withSuccessHandler(function (res) {
             if (res && res.success) {
               if (!res.data || res.data.length === 0) {
                 container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-secondary)">Tidak ada data untuk periode ini.</div>';
@@ -11329,7 +11355,7 @@ Terima kasih dan selamat berlatih!`;
 
         showLoading('Menghapus transaksi...');
         google.script.run
-        .withSuccessHandler(function (res) {
+          .withSuccessHandler(function (res) {
             hideLoading();
             if (res.success) {
               showToast(res.message, 'success');
@@ -11370,7 +11396,7 @@ Terima kasih dan selamat berlatih!`;
 
         showLoading('Menghapus check-in...');
         google.script.run
-        .withSuccessHandler(function (res) {
+          .withSuccessHandler(function (res) {
             hideLoading();
             if (res.success) {
               showToast(res.message, 'success');
@@ -11397,7 +11423,7 @@ Terima kasih dan selamat berlatih!`;
 
         showLoading('Menghapus riwayat stok...');
         google.script.run
-        .withSuccessHandler(function (res) {
+          .withSuccessHandler(function (res) {
             hideLoading();
             if (res.success) {
               showToast(res.message, 'success');
@@ -11913,160 +11939,163 @@ Terima kasih dan selamat berlatih!`;
 
   </script>
 
-<!-- Added by Antigravity for missing features -->
-<div id="branchManagementModal" class="modal-overlay" style="display:none;z-index:9999">
-  <div class="modal-content" style="max-width:800px; width:95%">
-    <div class="modal-header" style="justify-content: space-between;">
-      <h3 style="margin:0"><i class="fas fa-code-branch"></i> Manajemen Cabang</h3>
-      <div style="display: flex; gap: 10px; align-items: center;">
-        <button class="btn btn-sm btn-primary" onclick="openAddBranchModal()"><i class="fas fa-plus"></i> Tambah Cabang</button>
-        <button class="btn-close" onclick="closeBranchManagementModal()" style="position: static;"><i class="fas fa-times"></i></button>
-      </div>
-    </div>
-    <div class="modal-body" style="max-height:70vh; overflow-y:auto">
-      <div id="branchManagementLoading" style="text-align:center; padding:20px;">
-        <i class="fas fa-spinner fa-spin fa-2x"></i><br>Memuat data cabang...
-      </div>
-      <div id="branchManagementContent" style="display:none;">
-        <table class="table" style="width:100%">
-          <thead>
-            <tr>
-              <th>ID Cabang</th>
-              <th>Nama Cabang</th>
-              <th>Status</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody id="branchManagementTableBody">
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal Tambah Cabang Baru -->
-<div id="addBranchModal" class="modal-overlay" style="display:none;z-index:10000">
-  <div class="modal-content" style="max-width:500px; width:95%">
-    <div class="modal-header">
-      <h3 style="margin:0"><i class="fas fa-plus-circle"></i> Tambah Cabang Baru</h3>
-      <button class="btn-close" onclick="closeAddBranchModal()"><i class="fas fa-times"></i></button>
-    </div>
-    <div class="modal-body">
-      <form id="addBranchForm" onsubmit="submitAddBranch(event)">
-        <label class="form-label">Nama Cabang Baru</label>
-        <input type="text" id="newBranchName" class="form-input" required placeholder="Contoh: Kiziy Jakarta">
-        
-        <label class="form-label">Warna Tema (Opsional)</label>
-        <input type="color" id="newBranchThemeColor" class="form-input" style="height:40px; padding:0" value="#4f46e5">
-        
-        <div style="margin-top:20px; text-align:right">
-          <button type="button" class="btn btn-secondary" onclick="closeAddBranchModal()">Batal</button>
-          <button type="submit" class="btn btn-primary" id="btnSubmitAddBranch">Buat Cabang</button>
+  <!-- Added by Antigravity for missing features -->
+  <div id="branchManagementModal" class="modal-overlay" style="display:none;z-index:9999">
+    <div class="modal-content" style="max-width:800px; width:95%">
+      <div class="modal-header" style="justify-content: space-between;">
+        <h3 style="margin:0"><i class="fas fa-code-branch"></i> Manajemen Cabang</h3>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <button class="btn btn-sm btn-primary" onclick="openAddBranchModal()"><i class="fas fa-plus"></i> Tambah
+            Cabang</button>
+          <button class="btn-close" onclick="closeBranchManagementModal()" style="position: static;"><i
+              class="fas fa-times"></i></button>
         </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<!-- Modal Edit Identitas Cabang -->
-<div id="editBranchIdentityModal" class="modal-overlay" style="display:none;z-index:10000">
-  <div class="modal-content" style="max-width:500px; width:95%">
-    <div class="modal-header">
-      <h3 style="margin:0"><i class="fas fa-edit"></i> Edit Identitas Cabang</h3>
-      <button class="btn-close" onclick="closeEditBranchIdentityModal()"><i class="fas fa-times"></i></button>
-    </div>
-    <div class="modal-body">
-      <form id="editBranchIdentityForm" onsubmit="submitBranchIdentity(event)">
-        <input type="hidden" id="editBranchId">
-        
-        <label class="form-label">Nama Cabang</label>
-        <input type="text" id="editBranchName" class="form-input" required>
-        
-        <label class="form-label">Nomor Telepon / HP</label>
-        <input type="text" id="editBranchPhone" class="form-input" placeholder="Contoh: 08123456789">
-        
-        <label class="form-label">Email Cabang</label>
-        <input type="email" id="editBranchEmail" class="form-input" placeholder="Contoh: info@ugym.com">
-        
-        <label class="form-label">Nomor Rekening</label>
-        <input type="text" id="editBranchBankAccount" class="form-input" placeholder="BCA 12345678 a/n Kiziy">
-        
-        <label class="form-label">Alamat Lengkap</label>
-        <textarea id="editBranchAddress" class="form-input" rows="3" placeholder="Jl. Sudirman No 1..."></textarea>
-        
-        <label class="form-label">Warna Tema Utama</label>
-        <input type="color" id="editBranchThemeColor" class="form-input" style="height:40px; padding:0">
-        
-        <label class="form-label">URL Foto / Logo</label>
-        <input type="text" id="editBranchLogoUrl" class="form-input" placeholder="https://link-gambar.com/logo.jpg">
-        
-        <div style="margin-top:20px; text-align:right">
-          <button type="button" class="btn btn-secondary" onclick="closeEditBranchIdentityModal()">Batal</button>
-          <button type="submit" class="btn btn-primary" id="btnSubmitBranchIdentity">Simpan Perubahan</button>
+      </div>
+      <div class="modal-body" style="max-height:70vh; overflow-y:auto">
+        <div id="branchManagementLoading" style="text-align:center; padding:20px;">
+          <i class="fas fa-spinner fa-spin fa-2x"></i><br>Memuat data cabang...
         </div>
-      </form>
+        <div id="branchManagementContent" style="display:none;">
+          <table class="table" style="width:100%">
+            <thead>
+              <tr>
+                <th>ID Cabang</th>
+                <th>Nama Cabang</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="branchManagementTableBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
-</div>
 
-<script>
-  let currentAdminBranches = [];
+  <!-- Modal Tambah Cabang Baru -->
+  <div id="addBranchModal" class="modal-overlay" style="display:none;z-index:10000">
+    <div class="modal-content" style="max-width:500px; width:95%">
+      <div class="modal-header">
+        <h3 style="margin:0"><i class="fas fa-plus-circle"></i> Tambah Cabang Baru</h3>
+        <button class="btn-close" onclick="closeAddBranchModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="addBranchForm" onsubmit="submitAddBranch(event)">
+          <label class="form-label">Nama Cabang Baru</label>
+          <input type="text" id="newBranchName" class="form-input" required placeholder="Contoh: Kiziy Jakarta">
 
-  function openAddBranchModal() {
-    document.getElementById('addBranchModal').style.display = 'flex';
-    document.getElementById('newBranchName').value = '';
-  }
+          <label class="form-label">Warna Tema (Opsional)</label>
+          <input type="color" id="newBranchThemeColor" class="form-input" style="height:40px; padding:0"
+            value="#4f46e5">
 
-  function closeAddBranchModal() {
-    document.getElementById('addBranchModal').style.display = 'none';
-  }
+          <div style="margin-top:20px; text-align:right">
+            <button type="button" class="btn btn-secondary" onclick="closeAddBranchModal()">Batal</button>
+            <button type="submit" class="btn btn-primary" id="btnSubmitAddBranch">Buat Cabang</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 
-  function submitAddBranch(e) {
-    e.preventDefault();
-    const btn = document.getElementById('btnSubmitAddBranch');
-    const name = document.getElementById('newBranchName').value;
-    const theme = document.getElementById('newBranchThemeColor').value;
-    
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
-    
-    google.script.run
-      .withSuccessHandler(function (res) {
-        btn.disabled = false;
-        btn.innerHTML = 'Buat Cabang';
-        if (res && res.success) {
-          showToast('Cabang baru berhasil dibuat', 'success');
-          closeAddBranchModal();
-          loadBranchManagement(); // reload list
-        } else {
-          showToast('Gagal membuat cabang: ' + (res ? res.message : 'Unknown error'), 'error');
-        }
-      })
-      .withFailureHandler(function (err) {
-        btn.disabled = false;
-        btn.innerHTML = 'Buat Cabang';
-        showToast('Koneksi terputus', 'error');
-      })
-      .createNewBranch(currentUser.id, { name: name, themeColor: theme });
-  }
+  <!-- Modal Edit Identitas Cabang -->
+  <div id="editBranchIdentityModal" class="modal-overlay" style="display:none;z-index:10000">
+    <div class="modal-content" style="max-width:500px; width:95%">
+      <div class="modal-header">
+        <h3 style="margin:0"><i class="fas fa-edit"></i> Edit Identitas Cabang</h3>
+        <button class="btn-close" onclick="closeEditBranchIdentityModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="editBranchIdentityForm" onsubmit="submitBranchIdentity(event)">
+          <input type="hidden" id="editBranchId">
 
-  function loadBranchManagement() {
-    document.getElementById('branchManagementModal').style.display = 'flex';
-    document.getElementById('branchManagementLoading').style.display = 'block';
-    document.getElementById('branchManagementContent').style.display = 'none';
+          <label class="form-label">Nama Cabang</label>
+          <input type="text" id="editBranchName" class="form-input" required>
 
-    google.script.run
-      .withSuccessHandler(function (res) {
-        document.getElementById('branchManagementLoading').style.display = 'none';
-        if (res && res.success) {
-          const tbody = document.getElementById('branchManagementTableBody');
-          tbody.innerHTML = '';
-          currentAdminBranches = res.branches;
-          res.branches.forEach(b => {
-            const tr = document.createElement('tr');
-            const isActive = b.status !== 'Nonaktif';
-            tr.innerHTML = `
+          <label class="form-label">Nomor Telepon / HP</label>
+          <input type="text" id="editBranchPhone" class="form-input" placeholder="Contoh: 08123456789">
+
+          <label class="form-label">Email Cabang</label>
+          <input type="email" id="editBranchEmail" class="form-input" placeholder="Contoh: info@kiziy.com">
+
+          <label class="form-label">Nomor Rekening</label>
+          <input type="text" id="editBranchBankAccount" class="form-input" placeholder="BCA 12345678 a/n Kiziy">
+
+          <label class="form-label">Alamat Lengkap</label>
+          <textarea id="editBranchAddress" class="form-input" rows="3" placeholder="Jl. Sudirman No 1..."></textarea>
+
+          <label class="form-label">Warna Tema Utama</label>
+          <input type="color" id="editBranchThemeColor" class="form-input" style="height:40px; padding:0">
+
+          <label class="form-label">URL Foto / Logo</label>
+          <input type="text" id="editBranchLogoUrl" class="form-input" placeholder="https://link-gambar.com/logo.jpg">
+
+          <div style="margin-top:20px; text-align:right">
+            <button type="button" class="btn btn-secondary" onclick="closeEditBranchIdentityModal()">Batal</button>
+            <button type="submit" class="btn btn-primary" id="btnSubmitBranchIdentity">Simpan Perubahan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentAdminBranches = [];
+
+    function openAddBranchModal() {
+      document.getElementById('addBranchModal').style.display = 'flex';
+      document.getElementById('newBranchName').value = '';
+    }
+
+    function closeAddBranchModal() {
+      document.getElementById('addBranchModal').style.display = 'none';
+    }
+
+    function submitAddBranch(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnSubmitAddBranch');
+      const name = document.getElementById('newBranchName').value;
+      const theme = document.getElementById('newBranchThemeColor').value;
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+
+      google.script.run
+        .withSuccessHandler(function (res) {
+          btn.disabled = false;
+          btn.innerHTML = 'Buat Cabang';
+          if (res && res.success) {
+            showToast('Cabang baru berhasil dibuat', 'success');
+            closeAddBranchModal();
+            loadBranchManagement(); // reload list
+          } else {
+            showToast('Gagal membuat cabang: ' + (res ? res.message : 'Unknown error'), 'error');
+          }
+        })
+        .withFailureHandler(function (err) {
+          btn.disabled = false;
+          btn.innerHTML = 'Buat Cabang';
+          showToast('Koneksi terputus', 'error');
+        })
+        .createNewBranch(currentUser.id, { name: name, themeColor: theme });
+    }
+
+    function loadBranchManagement() {
+      document.getElementById('branchManagementModal').style.display = 'flex';
+      document.getElementById('branchManagementLoading').style.display = 'block';
+      document.getElementById('branchManagementContent').style.display = 'none';
+
+      google.script.run
+        .withSuccessHandler(function (res) {
+          document.getElementById('branchManagementLoading').style.display = 'none';
+          if (res && res.success) {
+            const tbody = document.getElementById('branchManagementTableBody');
+            tbody.innerHTML = '';
+            currentAdminBranches = res.branches;
+            res.branches.forEach(b => {
+              const tr = document.createElement('tr');
+              const isActive = b.status !== 'Nonaktif';
+              tr.innerHTML = `
               <td>${b.id}</td>
               <td><b>${escapeHtml(b.name)}</b></td>
               <td>
@@ -12081,141 +12110,141 @@ Terima kasih dan selamat berlatih!`;
                 </button>
               </td>
             `;
-            tbody.appendChild(tr);
-          });
-          document.getElementById('branchManagementContent').style.display = 'block';
-        } else {
-          showToast('Gagal memuat cabang: ' + (res ? res.message : ''), 'error');
-        }
-      })
-      .withFailureHandler(function (err) {
-        document.getElementById('branchManagementLoading').style.display = 'none';
-        showToast('Error: ' + err.message, 'error');
-      })
-      .getAllBranches();
-  }
-
-  function closeBranchManagementModal() {
-    document.getElementById('branchManagementModal').style.display = 'none';
-  }
-
-  function toggleBranchStatusUI(branchId, newStatus) {
-    if (!confirm('Apakah Anda yakin ingin mengubah status cabang ini menjadi ' + newStatus + '?')) return;
-    showToast('Mengubah status cabang...', 'info');
-    google.script.run
-      .withSuccessHandler(function (res) {
-        if (res && res.success) {
-          showToast('✅ Status berhasil diubah', 'success');
-          loadBranchManagement(); // reload list
-        } else {
-          showToast('Gagal: ' + (res ? res.message : ''), 'error');
-        }
-      })
-      .withFailureHandler(function (err) {
-        showToast('Error: ' + err.message, 'error');
-      })
-      .toggleBranchStatus(branchId, newStatus);
-  }
-
-  function openEditBranchIdentityModal(branchId) {
-    const branch = currentAdminBranches.find(b => b.id === branchId);
-    if (!branch) return;
-    
-    document.getElementById('editBranchId').value = branch.id;
-    document.getElementById('editBranchName').value = branch.name || '';
-    document.getElementById('editBranchPhone').value = branch.phone || '';
-    document.getElementById('editBranchEmail').value = branch.email || '';
-    document.getElementById('editBranchBankAccount').value = branch.bankAccount || '';
-    document.getElementById('editBranchAddress').value = branch.address || '';
-    document.getElementById('editBranchThemeColor').value = branch.themeColor || '#000000';
-    document.getElementById('editBranchLogoUrl').value = branch.logoUrl || '';
-    
-    document.getElementById('editBranchIdentityModal').style.display = 'flex';
-  }
-
-  function closeEditBranchIdentityModal() {
-    document.getElementById('editBranchIdentityModal').style.display = 'none';
-  }
-
-  function submitBranchIdentity(e) {
-    e.preventDefault();
-    const branchId = document.getElementById('editBranchId').value;
-    const data = {
-      name: document.getElementById('editBranchName').value,
-      phone: document.getElementById('editBranchPhone').value,
-      email: document.getElementById('editBranchEmail').value,
-      bankAccount: document.getElementById('editBranchBankAccount').value,
-      address: document.getElementById('editBranchAddress').value,
-      themeColor: document.getElementById('editBranchThemeColor').value,
-      logoUrl: document.getElementById('editBranchLogoUrl').value
-    };
-    
-    const btn = document.getElementById('btnSubmitBranchIdentity');
-    const origText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
-    btn.disabled = true;
-    
-    google.script.run
-      .withSuccessHandler(function (res) {
-        btn.innerHTML = origText;
-        btn.disabled = false;
-        if (res && res.success) {
-          showToast('✅ Identitas Cabang berhasil diperbarui', 'success');
-          closeEditBranchIdentityModal();
-          loadBranchManagement(); // reload list
-        } else {
-          showToast('Gagal: ' + (res ? res.message : 'Unknown error'), 'error');
-        }
-      })
-      .withFailureHandler(function (err) {
-        btn.innerHTML = origText;
-        btn.disabled = false;
-        showToast('Error: ' + err.message, 'error');
-      })
-      .updateBranchIdentity(branchId, data);
-  }
-
-  // --- Modals User Management ---
-  
-  function getBranchOptionsHtml(selectedVal = 'ALL') {
-    let opts = `<option value="ALL" ${selectedVal==='ALL'?'selected':''}>SEMUA CABANG (Super Admin / Akses Bebas)</option>`;
-    if (typeof currentLoginBranches !== 'undefined') {
-      currentLoginBranches.forEach(b => {
-        opts += `<option value="${b.id}" ${selectedVal===b.id?'selected':''}>${b.name}</option>`;
-      });
-    }
-    return opts;
-  }
-
-  
-  function previewUserPhoto(input, previewId, base64Id) {
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        document.getElementById(previewId).src = e.target.result;
-        document.getElementById(base64Id).value = e.target.result;
-        const img = new Image();
-        img.onload = function() {
-          const canvas = document.createElement('canvas');
-          let width = img.width, height = img.height;
-          if (width > 400 || height > 400) {
-            if (width > height) { height *= 400 / width; width = 400; }
-            else { width *= 400 / height; height = 400; }
+              tbody.appendChild(tr);
+            });
+            document.getElementById('branchManagementContent').style.display = 'block';
+          } else {
+            showToast('Gagal memuat cabang: ' + (res ? res.message : ''), 'error');
           }
-          canvas.width = width; canvas.height = height;
-          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-          document.getElementById(base64Id).value = canvas.toDataURL('image/jpeg', 0.8);
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
+        })
+        .withFailureHandler(function (err) {
+          document.getElementById('branchManagementLoading').style.display = 'none';
+          showToast('Error: ' + err.message, 'error');
+        })
+        .getAllBranches();
     }
-  }
 
-  function openEditUserModal(userObj) {
-    if (!document.getElementById('editUserModal')) {
-      const html = `
+    function closeBranchManagementModal() {
+      document.getElementById('branchManagementModal').style.display = 'none';
+    }
+
+    function toggleBranchStatusUI(branchId, newStatus) {
+      if (!confirm('Apakah Anda yakin ingin mengubah status cabang ini menjadi ' + newStatus + '?')) return;
+      showToast('Mengubah status cabang...', 'info');
+      google.script.run
+        .withSuccessHandler(function (res) {
+          if (res && res.success) {
+            showToast('✅ Status berhasil diubah', 'success');
+            loadBranchManagement(); // reload list
+          } else {
+            showToast('Gagal: ' + (res ? res.message : ''), 'error');
+          }
+        })
+        .withFailureHandler(function (err) {
+          showToast('Error: ' + err.message, 'error');
+        })
+        .toggleBranchStatus(branchId, newStatus);
+    }
+
+    function openEditBranchIdentityModal(branchId) {
+      const branch = currentAdminBranches.find(b => b.id === branchId);
+      if (!branch) return;
+
+      document.getElementById('editBranchId').value = branch.id;
+      document.getElementById('editBranchName').value = branch.name || '';
+      document.getElementById('editBranchPhone').value = branch.phone || '';
+      document.getElementById('editBranchEmail').value = branch.email || '';
+      document.getElementById('editBranchBankAccount').value = branch.bankAccount || '';
+      document.getElementById('editBranchAddress').value = branch.address || '';
+      document.getElementById('editBranchThemeColor').value = branch.themeColor || '#000000';
+      document.getElementById('editBranchLogoUrl').value = branch.logoUrl || '';
+
+      document.getElementById('editBranchIdentityModal').style.display = 'flex';
+    }
+
+    function closeEditBranchIdentityModal() {
+      document.getElementById('editBranchIdentityModal').style.display = 'none';
+    }
+
+    function submitBranchIdentity(e) {
+      e.preventDefault();
+      const branchId = document.getElementById('editBranchId').value;
+      const data = {
+        name: document.getElementById('editBranchName').value,
+        phone: document.getElementById('editBranchPhone').value,
+        email: document.getElementById('editBranchEmail').value,
+        bankAccount: document.getElementById('editBranchBankAccount').value,
+        address: document.getElementById('editBranchAddress').value,
+        themeColor: document.getElementById('editBranchThemeColor').value,
+        logoUrl: document.getElementById('editBranchLogoUrl').value
+      };
+
+      const btn = document.getElementById('btnSubmitBranchIdentity');
+      const origText = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+      btn.disabled = true;
+
+      google.script.run
+        .withSuccessHandler(function (res) {
+          btn.innerHTML = origText;
+          btn.disabled = false;
+          if (res && res.success) {
+            showToast('✅ Identitas Cabang berhasil diperbarui', 'success');
+            closeEditBranchIdentityModal();
+            loadBranchManagement(); // reload list
+          } else {
+            showToast('Gagal: ' + (res ? res.message : 'Unknown error'), 'error');
+          }
+        })
+        .withFailureHandler(function (err) {
+          btn.innerHTML = origText;
+          btn.disabled = false;
+          showToast('Error: ' + err.message, 'error');
+        })
+        .updateBranchIdentity(branchId, data);
+    }
+
+    // --- Modals User Management ---
+
+    function getBranchOptionsHtml(selectedVal = 'ALL') {
+      let opts = `<option value="ALL" ${selectedVal === 'ALL' ? 'selected' : ''}>SEMUA CABANG (Super Admin / Akses Bebas)</option>`;
+      if (typeof currentLoginBranches !== 'undefined') {
+        currentLoginBranches.forEach(b => {
+          opts += `<option value="${b.id}" ${selectedVal === b.id ? 'selected' : ''}>${b.name}</option>`;
+        });
+      }
+      return opts;
+    }
+
+
+    function previewUserPhoto(input, previewId, base64Id) {
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          document.getElementById(previewId).src = e.target.result;
+          document.getElementById(base64Id).value = e.target.result;
+          const img = new Image();
+          img.onload = function () {
+            const canvas = document.createElement('canvas');
+            let width = img.width, height = img.height;
+            if (width > 400 || height > 400) {
+              if (width > height) { height *= 400 / width; width = 400; }
+              else { width *= 400 / height; height = 400; }
+            }
+            canvas.width = width; canvas.height = height;
+            canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+            document.getElementById(base64Id).value = canvas.toDataURL('image/jpeg', 0.8);
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function openEditUserModal(userObj) {
+      if (!document.getElementById('editUserModal')) {
+        const html = `
         <div id="editUserModal" class="modal-overlay" style="display:none;z-index:10000">
           <div class="modal-container modal-content" style="max-width:400px; width:95%; box-sizing:border-box">
             <div class="modal-header">
@@ -12260,67 +12289,67 @@ Terima kasih dan selamat berlatih!`;
           </div>
         </div>
       `;
-      document.body.insertAdjacentHTML('beforeend', html);
+        document.body.insertAdjacentHTML('beforeend', html);
+      }
+
+      document.getElementById('editUserId').value = userObj.id;
+      document.getElementById('editUserName').value = userObj.name;
+      document.getElementById('editUserRole').value = userObj.role;
+      document.getElementById('editUserBranchId').innerHTML = getBranchOptionsHtml(userObj.branchId);
+      document.getElementById('editUserPassword').value = '';
+      document.getElementById('editUserPhotoBase64').value = '';
+      document.getElementById('editUserPhotoPreview').src = userObj.profilePic ? getDirectLink(userObj.profilePic) : "https://i.imgur.com/vHEx3jR.png";
+
+      document.getElementById('editUserModal').style.display = 'flex';
     }
-    
-    document.getElementById('editUserId').value = userObj.id;
-    document.getElementById('editUserName').value = userObj.name;
-    document.getElementById('editUserRole').value = userObj.role;
-    document.getElementById('editUserBranchId').innerHTML = getBranchOptionsHtml(userObj.branchId);
-    document.getElementById('editUserPassword').value = '';
-    document.getElementById('editUserPhotoBase64').value = '';
-    document.getElementById('editUserPhotoPreview').src = userObj.profilePic ? getDirectLink(userObj.profilePic) : "https://i.imgur.com/vHEx3jR.png";
-    
-    document.getElementById('editUserModal').style.display = 'flex';
-  }
 
-  function submitEditUser(e) {
-    e.preventDefault();
-    const data = {
-      id: document.getElementById('editUserId').value,
-      name: document.getElementById('editUserName').value,
-      role: document.getElementById('editUserRole').value,
-      branchId: document.getElementById('editUserBranchId').value,
-      password: document.getElementById('editUserPassword').value,
-      profilePicBase64: document.getElementById('editUserPhotoBase64').value
-    };
-    
-    const btn = document.getElementById('btnSubmitEditUser');
-    const origText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
-    btn.disabled = true;
-    
-    google.script.run
-      .withSuccessHandler(function (res) {
-        btn.innerHTML = origText;
-        btn.disabled = false;
-        if (res && res.success) {
-          showToast('✅ User berhasil diperbarui', 'success');
-          document.getElementById('editUserModal').style.display='none';
-          if (currentUser && currentUser.id === data.id) {
-            if (data.name) currentUser.name = data.name;
-            if (data.role) currentUser.role = data.role;
-            if (data.branchId) currentUser.branchId = data.branchId;
-            if (res.photoUrl) currentUser.profilePic = res.photoUrl;
-            applyRolePermissions();
+    function submitEditUser(e) {
+      e.preventDefault();
+      const data = {
+        id: document.getElementById('editUserId').value,
+        name: document.getElementById('editUserName').value,
+        role: document.getElementById('editUserRole').value,
+        branchId: document.getElementById('editUserBranchId').value,
+        password: document.getElementById('editUserPassword').value,
+        profilePicBase64: document.getElementById('editUserPhotoBase64').value
+      };
+
+      const btn = document.getElementById('btnSubmitEditUser');
+      const origText = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+      btn.disabled = true;
+
+      google.script.run
+        .withSuccessHandler(function (res) {
+          btn.innerHTML = origText;
+          btn.disabled = false;
+          if (res && res.success) {
+            showToast('✅ User berhasil diperbarui', 'success');
+            document.getElementById('editUserModal').style.display = 'none';
+            if (currentUser && currentUser.id === data.id) {
+              if (data.name) currentUser.name = data.name;
+              if (data.role) currentUser.role = data.role;
+              if (data.branchId) currentUser.branchId = data.branchId;
+              if (res.photoUrl) currentUser.profilePic = res.photoUrl;
+              applyRolePermissions();
+            }
+            loadUserList();
+          } else {
+            showToast('Gagal: ' + (res ? res.message : 'Unknown error'), 'error');
           }
-          loadUserList(); 
-        } else {
-          showToast('Gagal: ' + (res ? res.message : 'Unknown error'), 'error');
-        }
-      })
-      .withFailureHandler(function (err) {
-        btn.innerHTML = origText;
-        btn.disabled = false;
-        showToast('Error: ' + err.message, 'error');
-      })
-      .editUserAccount(currentUser.username, data);
-  }
+        })
+        .withFailureHandler(function (err) {
+          btn.innerHTML = origText;
+          btn.disabled = false;
+          showToast('Error: ' + err.message, 'error');
+        })
+        .editUserAccount(currentUser.username, data);
+    }
 
-  function openAddUserModal() {
-    // Inject HTML modal if it doesn't exist yet
-    if (!document.getElementById('addUserModal')) {
-      const modalHTML = `
+    function openAddUserModal() {
+      // Inject HTML modal if it doesn't exist yet
+      if (!document.getElementById('addUserModal')) {
+        const modalHTML = `
         <div id="addUserModal" class="modal-overlay" style="display:none;z-index:10000">
           <div class="modal-content" style="max-width:400px; width:95%">
             <div class="modal-header">
@@ -12390,117 +12419,117 @@ Terima kasih dan selamat berlatih!`;
           </div>
         </div>
       `;
-      document.body.insertAdjacentHTML('beforeend', modalHTML);
-    }
-    
-    document.getElementById('addUserForm').reset();
-    document.getElementById('addUserPassword').value = 'password123';
-    document.getElementById('addUserModal').style.display = 'flex';
-  }
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+      }
 
-  function submitNewUser(e) {
-    e.preventDefault();
-    const data = {
-      name: document.getElementById('addUserName').value,
-      role: document.getElementById('addUserRole').value,
-      branchId: document.getElementById('addUserBranchId') ? document.getElementById('addUserBranchId').value : 'ALL',
-      username: document.getElementById('addUserUsername').value,
-      password: document.getElementById('addUserPassword').value,
-      profilePicBase64: document.getElementById('addUserPhotoBase64') ? document.getElementById('addUserPhotoBase64').value : '',
-      phone: '-',
-      email: '-'
-    };
-    
-    const btn = document.getElementById('btnSubmitAddUser');
-    const origText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
-    btn.disabled = true;
-    
-    google.script.run
-      .withSuccessHandler(function (res) {
-        btn.innerHTML = origText;
-        btn.disabled = false;
-        if (res && res.success) {
-          showToast('✅ Akun berhasil dibuat', 'success');
-          document.getElementById('addUserModal').style.display='none';
-          loadUserList(); // reload list
-        } else {
-          showToast('Gagal: ' + (res ? res.message : 'Unknown error'), 'error');
-        }
-      })
-      .withFailureHandler(function (err) {
-        btn.innerHTML = origText;
-        btn.disabled = false;
-        showToast('Error: ' + err.message, 'error');
-      })
-      .addNewUserAccount(currentUser.username, data);
-  }
-
-  function openResetPasswordModal(userId, username) {
-    // Inject HTML modal if it doesn't exist yet (in case it wasn't rendered via openAddUserModal)
-    if (!document.getElementById('resetPasswordModal')) {
-      openAddUserModal(); 
-      document.getElementById('addUserModal').style.display = 'none';
-    }
-    
-    document.getElementById('resetUserId').value = userId;
-    document.getElementById('resetUsernameDisplay').textContent = username;
-    document.getElementById('resetNewPassword').value = '';
-    document.getElementById('resetPasswordModal').style.display = 'flex';
-  }
-
-  function submitResetPassword(e) {
-    e.preventDefault();
-    const userId = document.getElementById('resetUserId').value;
-    const newPass = document.getElementById('resetNewPassword').value;
-    
-    const btn = document.getElementById('btnSubmitResetPassword');
-    const origText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mereset...';
-    btn.disabled = true;
-    
-    google.script.run
-      .withSuccessHandler(function (res) {
-        btn.innerHTML = origText;
-        btn.disabled = false;
-        if (res && res.success) {
-          showToast('✅ Password berhasil direset', 'success');
-          document.getElementById('resetPasswordModal').style.display='none';
-        } else {
-          showToast('Gagal: ' + (res ? res.message : 'Unknown error'), 'error');
-        }
-      })
-      .withFailureHandler(function (err) {
-        btn.innerHTML = origText;
-        btn.disabled = false;
-        showToast('Error: ' + err.message, 'error');
-      })
-      .resetUserPassword(currentUser.username, userId, newPass);
-  }
-
-  function viewMemberDetail(memberId) {
-    const members = LocalCache.get('all_members') || [];
-    const member = members.find(m => m.memberId === memberId || m.id === memberId);
-    if (!member) {
-      showToast('Data member tidak ditemukan', 'error');
-      return;
-    }
-    
-    const modal = document.getElementById('detailModal');
-    const title = document.getElementById('detailModalTitle');
-    const container = document.getElementById('detailModalBody');
-    
-    title.innerHTML = '<i class="fas fa-id-card"></i> Detail Member';
-    
-    let photoHtml = '';
-    if (member.profilePic) {
-      let photoUrl = member.profilePic;
-      photoHtml = `<div style="text-align:center; margin-bottom:15px"><img src="${photoUrl}" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:3px solid var(--primary)"></div>`;
-    } else {
-      photoHtml = `<div style="text-align:center; margin-bottom:15px"><div style="width:100px; height:100px; border-radius:50%; background:#e2e8f0; display:inline-flex; align-items:center; justify-content:center; color:var(--text-secondary); font-size:40px; border:3px solid var(--primary)"><i class="fas fa-user"></i></div></div>`;
+      document.getElementById('addUserForm').reset();
+      document.getElementById('addUserPassword').value = 'password123';
+      document.getElementById('addUserModal').style.display = 'flex';
     }
 
-    container.innerHTML = `
+    function submitNewUser(e) {
+      e.preventDefault();
+      const data = {
+        name: document.getElementById('addUserName').value,
+        role: document.getElementById('addUserRole').value,
+        branchId: document.getElementById('addUserBranchId') ? document.getElementById('addUserBranchId').value : 'ALL',
+        username: document.getElementById('addUserUsername').value,
+        password: document.getElementById('addUserPassword').value,
+        profilePicBase64: document.getElementById('addUserPhotoBase64') ? document.getElementById('addUserPhotoBase64').value : '',
+        phone: '-',
+        email: '-'
+      };
+
+      const btn = document.getElementById('btnSubmitAddUser');
+      const origText = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+      btn.disabled = true;
+
+      google.script.run
+        .withSuccessHandler(function (res) {
+          btn.innerHTML = origText;
+          btn.disabled = false;
+          if (res && res.success) {
+            showToast('✅ Akun berhasil dibuat', 'success');
+            document.getElementById('addUserModal').style.display = 'none';
+            loadUserList(); // reload list
+          } else {
+            showToast('Gagal: ' + (res ? res.message : 'Unknown error'), 'error');
+          }
+        })
+        .withFailureHandler(function (err) {
+          btn.innerHTML = origText;
+          btn.disabled = false;
+          showToast('Error: ' + err.message, 'error');
+        })
+        .addNewUserAccount(currentUser.username, data);
+    }
+
+    function openResetPasswordModal(userId, username) {
+      // Inject HTML modal if it doesn't exist yet (in case it wasn't rendered via openAddUserModal)
+      if (!document.getElementById('resetPasswordModal')) {
+        openAddUserModal();
+        document.getElementById('addUserModal').style.display = 'none';
+      }
+
+      document.getElementById('resetUserId').value = userId;
+      document.getElementById('resetUsernameDisplay').textContent = username;
+      document.getElementById('resetNewPassword').value = '';
+      document.getElementById('resetPasswordModal').style.display = 'flex';
+    }
+
+    function submitResetPassword(e) {
+      e.preventDefault();
+      const userId = document.getElementById('resetUserId').value;
+      const newPass = document.getElementById('resetNewPassword').value;
+
+      const btn = document.getElementById('btnSubmitResetPassword');
+      const origText = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mereset...';
+      btn.disabled = true;
+
+      google.script.run
+        .withSuccessHandler(function (res) {
+          btn.innerHTML = origText;
+          btn.disabled = false;
+          if (res && res.success) {
+            showToast('✅ Password berhasil direset', 'success');
+            document.getElementById('resetPasswordModal').style.display = 'none';
+          } else {
+            showToast('Gagal: ' + (res ? res.message : 'Unknown error'), 'error');
+          }
+        })
+        .withFailureHandler(function (err) {
+          btn.innerHTML = origText;
+          btn.disabled = false;
+          showToast('Error: ' + err.message, 'error');
+        })
+        .resetUserPassword(currentUser.username, userId, newPass);
+    }
+
+    function viewMemberDetail(memberId) {
+      const members = LocalCache.get('all_members') || [];
+      const member = members.find(m => m.memberId === memberId || m.id === memberId);
+      if (!member) {
+        showToast('Data member tidak ditemukan', 'error');
+        return;
+      }
+
+      const modal = document.getElementById('detailModal');
+      const title = document.getElementById('detailModalTitle');
+      const container = document.getElementById('detailModalBody');
+
+      title.innerHTML = '<i class="fas fa-id-card"></i> Detail Member';
+
+      let photoHtml = '';
+      if (member.profilePic) {
+        let photoUrl = member.profilePic;
+        photoHtml = `<div style="text-align:center; margin-bottom:15px"><img src="${photoUrl}" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:3px solid var(--primary)"></div>`;
+      } else {
+        photoHtml = `<div style="text-align:center; margin-bottom:15px"><div style="width:100px; height:100px; border-radius:50%; background:#e2e8f0; display:inline-flex; align-items:center; justify-content:center; color:var(--text-secondary); font-size:40px; border:3px solid var(--primary)"><i class="fas fa-user"></i></div></div>`;
+      }
+
+      container.innerHTML = `
       ${photoHtml}
       <table class="table" style="width:100%; border:none">
         <tbody>
@@ -12513,100 +12542,100 @@ Terima kasih dan selamat berlatih!`;
         </tbody>
       </table>
     `;
-    
-    modal.style.display = 'flex';
-  }
 
-  function showPOSReceiptDetail(transactionId) {
-    const trxData = LocalCache.get('pos_transactions') || [];
-    const t = trxData.find(x => x.transactionId === transactionId || x[0] === transactionId);
-    if (!t) {
-      showToast('Transaksi POS tidak ditemukan', 'error');
-      return;
+      modal.style.display = 'flex';
     }
-    
-    // Normalisasi data dari array sheet ke object
-    let obj = t;
-    if (Array.isArray(t)) {
-      obj = {
-        transactionId: t[0],
-        date: t[1],
-        cashier: t[2],
-        customerName: t[3],
-        memberId: t[4],
-        totalAmount: t[5],
-        paymentMethod: t[6],
-        items: t[7]
-      };
-    }
-    
-    try {
-      if (typeof obj.items === 'string') {
-        obj.items = JSON.parse(obj.items);
+
+    function showPOSReceiptDetail(transactionId) {
+      const trxData = LocalCache.get('pos_transactions') || [];
+      const t = trxData.find(x => x.transactionId === transactionId || x[0] === transactionId);
+      if (!t) {
+        showToast('Transaksi POS tidak ditemukan', 'error');
+        return;
       }
-    } catch(e) {}
-    
-    if (typeof ReceiptGenerator !== 'undefined' && ReceiptGenerator.showPreview) {
-      ReceiptGenerator.showPreview(obj, 'pos');
-    } else {
-      showToast('Modul Resi tidak tersedia', 'error');
-    }
-  }
 
-  // --- Utility: Export CSV ---
-  function downloadCSV(csvContent, filename) {
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    if (link.download !== undefined) {
-      const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
-      link.setAttribute("download", filename);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  }
-
-  function exportMembersToCSV() {
-    const list = window.currentMemberList;
-    if (!list || list.length === 0) {
-      showToast('Tidak ada data untuk diekspor', 'warning');
-      return;
-    }
-    let csv = 'ID Member,Nama Lengkap,No HP,Gender,Join Date,Expiry Date\n';
-    list.forEach(m => {
-      const id = m.memberId || '-';
-      const name = (m.fullName || m.name || '-').replace(/,/g, '');
-      const phone = m.phone || '-';
-      const gender = m.gender || '-';
-      const joinDate = m.joinDate ? formatDate(m.joinDate) : '-';
-      const expiry = m.expiryDate ? formatDate(m.expiryDate) : '-';
-      csv += `${id},${name},${phone},${gender},${joinDate},${expiry}\n`;
-    });
-    downloadCSV(csv, 'Data_Member_Kiziy_' + new Date().toISOString().slice(0,10) + '.csv');
-  }
-
-  function exportTableToCSV() {
-    const table = document.querySelector('#detailModalBody table');
-    if (!table) {
-      showToast('Tidak ada tabel data untuk diekspor', 'warning');
-      return;
-    }
-    let csv = [];
-    const rows = table.querySelectorAll('tr');
-    for (let i = 0; i < rows.length; i++) {
-      let row = [], cols = rows[i].querySelectorAll('td, th');
-      for (let j = 0; j < cols.length; j++) {
-        let text = cols[j].innerText.replace(/"/g, '""');
-        text = text.replace(/(\r\n|\n|\r)/gm, " ");
-        row.push('"' + text + '"');
+      // Normalisasi data dari array sheet ke object
+      let obj = t;
+      if (Array.isArray(t)) {
+        obj = {
+          transactionId: t[0],
+          date: t[1],
+          cashier: t[2],
+          customerName: t[3],
+          memberId: t[4],
+          totalAmount: t[5],
+          paymentMethod: t[6],
+          items: t[7]
+        };
       }
-      csv.push(row.join(','));
+
+      try {
+        if (typeof obj.items === 'string') {
+          obj.items = JSON.parse(obj.items);
+        }
+      } catch (e) { }
+
+      if (typeof ReceiptGenerator !== 'undefined' && ReceiptGenerator.showPreview) {
+        ReceiptGenerator.showPreview(obj, 'pos');
+      } else {
+        showToast('Modul Resi tidak tersedia', 'error');
+      }
     }
-    downloadCSV(csv.join('\n'), 'Laporan_Kiziy_' + new Date().toISOString().slice(0,10) + '.csv');
-  }
-</script>
-<!-- End of added missing features -->
+
+    // --- Utility: Export CSV ---
+    function downloadCSV(csvContent, filename) {
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    }
+
+    function exportMembersToCSV() {
+      const list = window.currentMemberList;
+      if (!list || list.length === 0) {
+        showToast('Tidak ada data untuk diekspor', 'warning');
+        return;
+      }
+      let csv = 'ID Member,Nama Lengkap,No HP,Gender,Join Date,Expiry Date\n';
+      list.forEach(m => {
+        const id = m.memberId || '-';
+        const name = (m.fullName || m.name || '-').replace(/,/g, '');
+        const phone = m.phone || '-';
+        const gender = m.gender || '-';
+        const joinDate = m.joinDate ? formatDate(m.joinDate) : '-';
+        const expiry = m.expiryDate ? formatDate(m.expiryDate) : '-';
+        csv += `${id},${name},${phone},${gender},${joinDate},${expiry}\n`;
+      });
+      downloadCSV(csv, 'Data_Member_Kiziy_' + new Date().toISOString().slice(0, 10) + '.csv');
+    }
+
+    function exportTableToCSV() {
+      const table = document.querySelector('#detailModalBody table');
+      if (!table) {
+        showToast('Tidak ada tabel data untuk diekspor', 'warning');
+        return;
+      }
+      let csv = [];
+      const rows = table.querySelectorAll('tr');
+      for (let i = 0; i < rows.length; i++) {
+        let row = [], cols = rows[i].querySelectorAll('td, th');
+        for (let j = 0; j < cols.length; j++) {
+          let text = cols[j].innerText.replace(/"/g, '""');
+          text = text.replace(/(\r\n|\n|\r)/gm, " ");
+          row.push('"' + text + '"');
+        }
+        csv.push(row.join(','));
+      }
+      downloadCSV(csv.join('\n'), 'Laporan_Kiziy_' + new Date().toISOString().slice(0, 10) + '.csv');
+    }
+  </script>
+  <!-- End of added missing features -->
 
 </body>
