@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registrasi Member - KIZIY</title>
+  <title>Registrasi Member Online</title>
   <!-- Browser Update Notification -->
   <script>
     var $buoop = {
@@ -884,7 +884,7 @@
     <div class="header">
       <img id="gymLogoHeader" src="https://i.imgur.com/NO5dVfb.png"
         style="width:100px;height:100px;border-radius:50%;margin:0 auto 20px;display:block;border:4px solid rgba(255,255,255,0.3);object-fit:cover">
-      <h1 id="gymNameHeader">KIZIY</h1>
+      <h1 id="gymNameHeader">Registrasi Member</h1>
       <p>Daftar Membership Online — Cepat, Mudah, dan Aman</p>
       <div style="max-width: 320px; margin: 16px auto 0;">
         <select id="pubBranch" class="form-input"
@@ -1119,7 +1119,7 @@
         <i class="fas fa-phone"></i> <span id="pubBranchPhone">08158905889</span> &nbsp;|&nbsp;
         <i class="fas fa-envelope"></i> <span id="pubBranchEmail">kiziyindonesia@gmail.com</span>
       </div>
-      <p id="dynamicFooterContact" style="margin-top:8px; margin-bottom: 20px;">© KIZIY · Pertanyaan? Hubungi admin kami</p>
+      <p id="dynamicFooterContact" style="margin-top:8px; margin-bottom: 20px;">© Pertanyaan? Hubungi admin kami</p>
 
       <!-- Developer Branding -->
       <div class="developer-branding"
@@ -1768,9 +1768,10 @@
 
       const footerEl = document.getElementById('dynamicFooterContact');
       if (footerEl) {
-        let contactText = '© ' + (config.name || 'KIZIY') + ' · Pertanyaan? Hubungi admin kami';
+        let contactText = '© ' + (config.name || 'Cabang') + ' · Pertanyaan? Hubungi admin kami';
         footerEl.textContent = contactText;
       }
+      document.title = 'Registrasi Member - ' + (config.name || 'Online');
     }
 
 

@@ -97,7 +97,7 @@
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kiziy Management</title>
+  <title>Gym Management System</title>
   <!-- Browser Update Notification -->
   <script>
     var $buoop = {
@@ -436,7 +436,7 @@
         if (existingModal) existingModal.remove();
 
         const activeBranch = getActiveBranchInfo();
-        const branchName = data.branchName || (activeBranch && activeBranch.name) || 'Kiziy';
+        const branchName = data.branchName || (activeBranch && activeBranch.name) || 'Gym';
         const branchAddress = data.branchAddress || (activeBranch && activeBranch.address) || '';
         const branchPhone = data.branchPhone || (activeBranch && activeBranch.phone) || '';
         const headerBg = (activeBranch && activeBranch.themeColor) || '#667eea';
@@ -3209,7 +3209,7 @@
       <div class="sidebar-header">
         <div style="display:flex;align-items:center;gap:12px">
           <img id="sidebarLogo" src="https://i.imgur.com/NO5dVfb.png" style="width:36px;height:36px;object-fit:contain">
-          <span id="sidebarBrandName" style="font-weight:700; letter-spacing:1px; font-size:14px">Kiziy</span>
+          <span id="sidebarBrandName" style="font-weight:700; letter-spacing:1px; font-size:14px">Gym Management</span>
         </div>
         <button class="btn-close-sidebar" onclick="toggleSidebar()">
           <i class="fas fa-times"></i>
@@ -3472,7 +3472,7 @@
       data = data || {};
       const now = formatDateTime(new Date());
       const activeBranch = getActiveBranchInfo();
-      const branchName = data.branchName || (activeBranch && activeBranch.name) || 'Kiziy';
+      const branchName = data.branchName || (activeBranch && activeBranch.name) || 'Gym';
       const branchAddress = data.branchAddress || (activeBranch && activeBranch.address) || '';
       const branchPhone = data.branchPhone || (activeBranch && activeBranch.phone) || '';
 
@@ -3693,7 +3693,7 @@ Terima kasih dan selamat berlatih!`;
           <div style="background: var(--primary); width: 80px; height: 80px; border-radius: 24px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(88, 86, 214, 0.2);">
             <img src="https://i.imgur.com/NO5dVfb.png" style="width: 100%; height: 100%; border-radius: 24px; object-fit: contain; padding: 4px;">
           </div>
-          <h2 style="font-size: 28px; font-weight: 800; color:var(--text-main); letter-spacing: -0.5px;">Kiziy</h2>
+          <h2 style="font-size: 28px; font-weight: 800; color:var(--text-main); letter-spacing: -0.5px;">Gym Management</h2>
           <p style="color: #636366; margin-top: 6px; font-size: 14px; font-weight: 500;">Management System v2.0</p>
         </div>
         
@@ -3859,7 +3859,7 @@ Terima kasih dan selamat berlatih!`;
               const sbName = document.getElementById('sidebarBrandName');
               if (sbLogo) sbLogo.src = selectedBranch.logoUrl || "https://i.imgur.com/NO5dVfb.png";
               if (tbLogo) tbLogo.src = selectedBranch.logoUrl || "https://i.imgur.com/NO5dVfb.png";
-              if (sbName) sbName.textContent = selectedBranch.name || "Kiziy";
+              if (sbName) sbName.textContent = selectedBranch.name || "Gym Management";
             }
 
             showView('dashboard');
@@ -3914,8 +3914,9 @@ Terima kasih dan selamat berlatih!`;
         birthdays: 'Ulang Tahun Member'
       };
 
+      const activeB = getActiveBranchInfo();
       document.getElementById('pageTitle').textContent = titles[view] || view;
-      document.getElementById('pageSubtitle').textContent = 'Kiziy Management System';
+      document.getElementById('pageSubtitle').textContent = (activeB && activeB.name) ? activeB.name + ' Management System' : 'Management System';
 
       stopScanner();
 
@@ -3949,7 +3950,7 @@ Terima kasih dan selamat berlatih!`;
         <div class="view-header dashboard-header-flex">
           <div>
             <h2 class="view-title"><i class="fas fa-chart-line"></i> Dashboard Analytics</h2>
-            <p class="view-subtitle">Ringkasan performa operasional dan keuangan Kiziy</p>
+            <p class="view-subtitle">Ringkasan performa operasional dan keuangan cabang</p>
           </div>
           <div style="display:flex; flex-wrap:wrap; gap:12px">
             <div class="filter-group" style="display:flex; align-items:center; gap:8px; background:white; padding:4px 12px; border-radius:10px; border:1px solid var(--border-color)">
@@ -5280,7 +5281,7 @@ Terima kasih dan selamat berlatih!`;
                       <div class="card-right">
                         <div>
                           <div class="header">
-                            <div class="gym-name">${escapeHtml((getActiveBranchInfo() && getActiveBranchInfo().name) || 'Kiziy')}</div>
+                            <div class="gym-name">${escapeHtml((getActiveBranchInfo() && getActiveBranchInfo().name) || 'Member Card')}</div>
                             <div class="tagline">Power 💪 Fitness 🏃 Health</div>
                           </div>
                           <div class="member-info">
@@ -6360,8 +6361,10 @@ Terima kasih dan selamat berlatih!`;
         .withSuccessHandler(function (res) {
           hideLoading();
           if (res.success) {
+            const activeBranch = getActiveBranchInfo();
+            const bName = (activeBranch && activeBranch.name) || 'Gym';
             let itemsText = data.items.map(it => ` ${it.name} x${it.qty}`).join('\n');
-            let text = `*STRUK PENJUALAN - Kiziy*\n` +
+            let text = `*STRUK PENJUALAN - ${bName}*\n` +
               `--------------------------------\n` +
               `ID Trx: ${trxId}\n` +
               `Tanggal: ${new Date().toLocaleString('id-ID')}\n` +
@@ -6374,7 +6377,7 @@ Terima kasih dan selamat berlatih!`;
               `*Total: ${formatCurrency(data.total)}*\n` +
               `Pembayaran: ${data.paymentMethod}\n\n` +
               `Download Struk PDF:\n${res.url}\n\n` +
-              `Terima kasih telah berbelanja di Kiziy!`;
+              `Terima kasih telah berbelanja di ${bName}!`;
 
             const waNumber = data.whatsapp || '';
             if (waNumber) {
@@ -9083,8 +9086,10 @@ Terima kasih dan selamat berlatih!`;
 
                 if (approval) {
                   const data = approval.data || {};
+                  const activeBranch = getActiveBranchInfo();
+                  const bName = (activeBranch && activeBranch.name) || 'Gym';
                   const receiptNumber = res.receiptNumber || '-';
-                  const waText = `*PEMBAYARAN DITERIMA - Kiziy*\n` +
+                  const waText = `*PEMBAYARAN DITERIMA - ${bName}*\n` +
                     `--------------------------------\n` +
                     `Halo *${approval.memberName || 'Member'}*,\n\n` +
                     `Pembayaran Anda telah kami terima dan diverifikasi.\n\n` +
@@ -9095,7 +9100,7 @@ Terima kasih dan selamat berlatih!`;
                     `--------------------------------\n` +
                     ` *📌 Langkah Selanjutnya:*\n` +
                     `Akun Anda sedang dalam proses *Aktivasi* oleh Admin. Anda akan menerima pemberitahuan berikutnya beserta Kode QR setelah masa berlaku diaktifkan.\n\n` +
-                    `Terima kasih telah bergabung dengan Kiziy! `;
+                    `Terima kasih telah bergabung dengan ${bName}! `;
 
                   setTimeout(() => {
                     showConfirm('Pembayaran berhasil disetujui! Apakah Anda ingin mengirim pesan konfirmasi WhatsApp ke member?', function (waOk) {
@@ -9196,7 +9201,9 @@ Terima kasih dan selamat berlatih!`;
 
       // Jika statusnya masih 'Pending' (belum di-approve bayar), buat pesan konfirmasi
       if (approval.status === 'Pending') {
-        const text = `*KONFIRMASI PENDAFTARAN - Kiziy*\n` +
+        const activeBranch = getActiveBranchInfo();
+        const bName = (activeBranch && activeBranch.name) || 'Gym';
+        const text = `*KONFIRMASI PENDAFTARAN - ${bName}*\n` +
           `--------------------------------\n` +
           `Halo *${approval.memberName || 'Member'}*,\n\n` +
           `Kami menerima pengajuan ${approval.type === 'Registration' ? 'pendaftaran' : 'perpanjangan'} Anda.\n\n` +
@@ -9205,7 +9212,7 @@ Terima kasih dan selamat berlatih!`;
           ` Total Pembayaran: ${formatCurrency(data.amount || 0)}\n` +
           ` Status: Menunggu Verifikasi Pembayaran\n\n` +
           `Jika Anda sudah melakukan transfer, mohon kirimkan kembali bukti transfer yang valid agar dapat kami verifikasi segera.\n\n` +
-          `Terima kasih! Kiziy `;
+          `Terima kasih! ${bName} `;
         shareToWhatsApp(phone, text);
         return;
       }
@@ -11206,8 +11213,10 @@ Terima kasih dan selamat berlatih!`;
           btn.disabled = false;
 
           if (res.success) {
+            const activeBranch = getActiveBranchInfo();
+            const bName = (activeBranch && activeBranch.name) || 'Gym';
             const summary = res.summary;
-            const text = `*LAPORAN HARIAN KASIR - Kiziy*\n` +
+            const text = `*LAPORAN HARIAN KASIR - ${bName}*\n` +
               `--------------------------------\n` +
               `Tanggal: ${res.fileName.replace('Laporan_Kasir_', '').replace('.pdf', '').replace(/_/g, ' ')}\n` +
               `--------------------------------\n` +
@@ -11224,7 +11233,7 @@ Terima kasih dan selamat berlatih!`;
               `--------------------------------\n` +
               `Detail Lengkap (PDF):\n` +
               `${res.url}\n\n` +
-              `_Laporan dikirim otomatis dari System Kiziy_`;
+              `_Laporan dikirim otomatis dari System ${bName}_`;
 
             // Kirim ke nomor owner/manager
             shareToWhatsApp('082221923200', text);
@@ -12001,7 +12010,7 @@ Terima kasih dan selamat berlatih!`;
       <div class="modal-body">
         <form id="addBranchForm" onsubmit="submitAddBranch(event)">
           <label class="form-label">Nama Cabang Baru</label>
-          <input type="text" id="newBranchName" class="form-input" required placeholder="Contoh: Kiziy Jakarta">
+          <input type="text" id="newBranchName" class="form-input" required placeholder="Contoh: Cabang Jakarta">
 
           <label class="form-label">Warna Tema (Opsional)</label>
           <input type="color" id="newBranchThemeColor" class="form-input" style="height:40px; padding:0"
@@ -12034,10 +12043,10 @@ Terima kasih dan selamat berlatih!`;
           <input type="text" id="editBranchPhone" class="form-input" placeholder="Contoh: 08123456789">
 
           <label class="form-label">Email Cabang</label>
-          <input type="email" id="editBranchEmail" class="form-input" placeholder="Contoh: info@kiziy.com">
+          <input type="email" id="editBranchEmail" class="form-input" placeholder="Contoh: info@emailcabang.com">
 
           <label class="form-label">Nomor Rekening</label>
-          <input type="text" id="editBranchBankAccount" class="form-input" placeholder="BCA 12345678 a/n Kiziy">
+          <input type="text" id="editBranchBankAccount" class="form-input" placeholder="BCA 12345678 a/n Rekening Cabang">
 
           <label class="form-label">Alamat Lengkap</label>
           <textarea id="editBranchAddress" class="form-input" rows="3" placeholder="Jl. Sudirman No 1..."></textarea>
@@ -12631,7 +12640,7 @@ Terima kasih dan selamat berlatih!`;
         const expiry = m.expiryDate ? formatDate(m.expiryDate) : '-';
         csv += `${id},${name},${phone},${gender},${joinDate},${expiry}\n`;
       });
-      downloadCSV(csv, 'Data_Member_Kiziy_' + new Date().toISOString().slice(0, 10) + '.csv');
+      downloadCSV(csv, 'Data_Member_' + new Date().toISOString().slice(0, 10) + '.csv');
     }
 
     function exportTableToCSV() {
@@ -12651,7 +12660,7 @@ Terima kasih dan selamat berlatih!`;
         }
         csv.push(row.join(','));
       }
-      downloadCSV(csv.join('\n'), 'Laporan_Kiziy_' + new Date().toISOString().slice(0, 10) + '.csv');
+      downloadCSV(csv.join('\n'), 'Laporan_' + new Date().toISOString().slice(0, 10) + '.csv');
     }
   </script>
   <!-- End of added missing features -->

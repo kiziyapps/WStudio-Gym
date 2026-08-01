@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Perpanjangan Member KIZIY</title>
+  <title>Perpanjangan Member Online</title>
   <!-- Browser Update Notification -->
   <script>
     var $buoop = {
@@ -455,7 +455,7 @@
     <div class="header">
       <img id="gymLogoHeader" src="https://i.imgur.com/NO5dVfb.png"
         style="width:80px;height:80px;border-radius:50%;margin-bottom:16px;border:3px solid rgba(255,255,255,0.3);object-fit:cover">
-      <h1 id="gymNameHeader">🔄 Perpanjangan Member KIZIY</h1>
+      <h1 id="gymNameHeader">🔄 Perpanjangan Member</h1>
       <p>Form perpanjangan keanggotaan online</p>
       <div style="max-width: 320px; margin: 16px auto 0;">
         <select id="pubBranch" class="form-input"
@@ -626,24 +626,21 @@
       });
     }
 
-    // ================ KONFIGURASI CABANG (REBRANDING) ================
-    const branchRebrandingConfig = {
-      branch_1: { name: "🔄 Perpanjangan KIZIY Utama", logo: "https://i.imgur.com/NO5dVfb.png", color: "#d4af37" },
-      branch_2: { name: "🔄 Perpanjangan KIZIY Premium", logo: "https://i.imgur.com/NO5dVfb.png", color: "#3b82f6" },
-      branch_3: { name: "🔄 Perpanjangan KIZIY Express", logo: "https://i.imgur.com/NO5dVfb.png", color: "#10b981" }
-    };
+    // ================ KONFIGURASI CABANG (DINAMIS DARI DB) ================
+    let currentPublicBranches = [];
 
-    function updateBrandingUI(branchKey) {
-      const config = branchRebrandingConfig[branchKey] || branchRebrandingConfig.branch_1;
+    function updateBrandingUI(branchId) {
+      const config = currentPublicBranches.find(b => b.id === branchId);
+      if (!config) return;
 
       const logoEl = document.getElementById('gymLogoHeader');
-      if (logoEl) logoEl.src = config.logoUrl || config.logo || "https://i.imgur.com/NO5dVfb.png";
+      if (logoEl) logoEl.src = config.logoUrl || "https://i.imgur.com/NO5dVfb.png";
 
       const nameEl = document.getElementById('gymNameHeader');
-      if (nameEl) nameEl.textContent = config.name;
+      if (nameEl) nameEl.textContent = '🔄 Perpanjangan Member - ' + config.name;
 
-      if (config.color || config.themeColor) {
-        document.documentElement.style.setProperty('--primary', config.color || config.themeColor);
+      if (config.themeColor) {
+        document.documentElement.style.setProperty('--primary', config.themeColor);
       }
 
       const phoneEl = document.getElementById('pubBranchPhone');
@@ -655,30 +652,33 @@
       if (emailEl) {
         emailEl.textContent = config.email || 'kiziyindonesia@gmail.com';
       }
+
+      document.title = 'Perpanjangan Member - ' + (config.name || 'Online');
     }
 
     function initBranchSelection() {
       google.script.run.withSuccessHandler(function (backendBranches) {
         const select = document.getElementById('pubBranch');
-        if (select) {
-          const realId = (backendBranches && backendBranches.length > 0) ? backendBranches[0].id : 'dummy_id';
+        if (select && backendBranches && backendBranches.length > 0) {
+          currentPublicBranches = backendBranches;
 
-          const customBranches = [
-            { id: realId, key: 'branch_1', name: 'KIZIY Utama' },
-            { id: realId, key: 'branch_2', name: 'KIZIY Premium (Cabang 2)' },
-            { id: realId, key: 'branch_3', name: 'KIZIY Express (Cabang 3)' }
-          ];
+          select.innerHTML = backendBranches.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
 
-          select.innerHTML = customBranches.map(b => `<option value="${b.id}" data-key="${b.key}">${b.name}</option>`).join('');
+          // Dapatkan branchId dari URL parameter (jika ada)
+          const urlParams = new URLSearchParams(window.location.search);
+          const urlBranchId = urlParams.get('branchId');
+          if (urlBranchId && backendBranches.find(b => b.id === urlBranchId)) {
+            select.value = urlBranchId;
+          }
 
           select.addEventListener('change', function (e) {
-            const selectedOption = e.target.options[e.target.selectedIndex];
-            const key = selectedOption.getAttribute('data-key');
-            updateBrandingUI(key);
+            updateBrandingUI(e.target.value);
             if (typeof loadPackages === 'function') loadPackages();
           });
 
-          updateBrandingUI('branch_1');
+          updateBrandingUI(select.value);
+        } else if (select) {
+          select.innerHTML = '<option value="">Tidak ada cabang tersedia</option>';
         }
       }).getActiveBranches();
     }
