@@ -422,10 +422,24 @@
     };
 
     // ================ IMPROVEMENT 3: LOCAL RECEIPT GENERATOR ================
+    function getActiveBranchInfo() {
+      if (typeof currentUser !== 'undefined' && currentUser && currentUser.branchId && typeof currentLoginBranches !== 'undefined') {
+        const b = currentLoginBranches.find(cb => String(cb.id) === String(currentUser.branchId));
+        if (b) return b;
+      }
+      return null;
+    }
+
     const ReceiptGenerator = {
       showPreview: function (data, type = 'membership') {
         const existingModal = document.getElementById('receiptPreviewModal');
         if (existingModal) existingModal.remove();
+
+        const activeBranch = getActiveBranchInfo();
+        const branchName = data.branchName || (activeBranch && activeBranch.name) || 'Kiziy';
+        const branchAddress = data.branchAddress || (activeBranch && activeBranch.address) || '';
+        const branchPhone = data.branchPhone || (activeBranch && activeBranch.phone) || '';
+        const headerBg = (activeBranch && activeBranch.themeColor) || '#667eea';
 
         const modal = document.createElement('div');
         modal.id = 'receiptPreviewModal';
@@ -465,10 +479,12 @@
 
         modal.innerHTML = `
           <div id="receiptPrintableArea" class="modal-content" style="max-width:350px;border-radius:16px;overflow:hidden;padding:0;background:white">
-            <div style="background:#667eea;color:white;padding:20px;text-align:center">
-              <i class="fas fa-receipt fa-3x" style="margin-bottom:12px"></i>
-              <h3 style="color:#166534;margin:0 0 4px 0">✅ Transaksi Berhasil</h3>
-              <p style="margin:8px 0 0 0;opacity:0.8;font-size:13px">${data.receiptNumber || 'Baru'}</p>
+            <div style="background:${headerBg};color:white;padding:20px;text-align:center">
+              <i class="fas fa-receipt fa-2x" style="margin-bottom:8px"></i>
+              <div style="font-weight:700;font-size:16px;margin-bottom:4px">${escapeHtml(branchName)}</div>
+              ${branchAddress ? `<div style="font-size:11px;opacity:0.9">${escapeHtml(branchAddress)}</div>` : ''}
+              ${branchPhone ? `<div style="font-size:11px;opacity:0.9">Telp: ${escapeHtml(branchPhone)}</div>` : ''}
+              <p style="margin:8px 0 0 0;opacity:0.9;font-size:12px;font-weight:600">${data.receiptNumber || 'Resi Transaksi'}</p>
             </div>
             <div style="padding:24px;background:white">
               <div style="text-align:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px dashed var(--border-color)">
@@ -506,7 +522,7 @@
                 </button>
               </div>
             </div>
-            <div style="background:var(--bg-light);padding:12px;text-align:center;font-size:11px;color:var(--text-secondary)">Terima kasih atas kunjungan Anda</div>
+            <div style="background:var(--bg-light);padding:12px;text-align:center;font-size:11px;color:var(--text-secondary)">Terima kasih atas kunjungan Anda ke ${escapeHtml(branchName)}</div>
           </div>
         `;
         document.body.appendChild(modal);
@@ -3453,10 +3469,20 @@
     }
 
     function generateReceiptText(type, data) {
+      data = data || {};
       const now = formatDateTime(new Date());
+      const activeBranch = getActiveBranchInfo();
+      const branchName = data.branchName || (activeBranch && activeBranch.name) || 'Kiziy';
+      const branchAddress = data.branchAddress || (activeBranch && activeBranch.address) || '';
+      const branchPhone = data.branchPhone || (activeBranch && activeBranch.phone) || '';
+
+      let contactInfo = '';
+      if (branchAddress) contactInfo += `Alamat: ${branchAddress}\n`;
+      if (branchPhone) contactInfo += `No HP: ${branchPhone}\n`;
+
       let text = '';
       if (type === 'registration') {
-        text = `*RECEIPT REGISTRASI Kiziy*
+        text = `*RECEIPT REGISTRASI ${branchName}*
 --------------------------------
 Waktu: ${now}
 Member ID: ${data.memberId}
@@ -3465,9 +3491,7 @@ Paket: ${data.package}
 Berlaku s/d: ${formatDate(data.expiry)}
 No. Transaksi: ${data.receipt}
 --------------------------------
-Alamat: Jl. Imogiri Tim., Nglebeng, Tamanan, Kec. Banguntapan, Kabupaten Bantul, Daerah Istimewa Yogyakarta 55198
-No HP: 08158905889
---------------------------------
+${contactInfo}--------------------------------
 *Rincian Pembayaran*
 Harga Paket: ${formatCurrency(data.price)}
 Total: ${formatCurrency(data.total)}
@@ -3478,7 +3502,7 @@ ${data.qr}
 
 Terima kasih telah bergabung!`;
       } else if (type === 'extension') {
-        text = `*RECEIPT PERPANJANGAN Kiziy*
+        text = `*RECEIPT PERPANJANGAN ${branchName}*
 --------------------------------
 Waktu: ${now}
 Member ID: ${data.memberId}
@@ -3487,16 +3511,14 @@ Paket: ${data.package}
 Berlaku s/d: ${formatDate(data.expiry)}
 No. Transaksi: ${data.receipt}
 --------------------------------
-Alamat: Jl. Imogiri Tim., Nglebeng, Tamanan, Kec. Banguntapan, Kabupaten Bantul, Daerah Istimewa Yogyakarta 55198
-No HP: 08158905889
---------------------------------
+${contactInfo}--------------------------------
 *Rincian Pembayaran*
 Total: ${formatCurrency(data.total)}
 Metode: ${data.payment}
 --------------------------------
 Terima kasih!`;
       } else if (type === 'pt') {
-        text = `*RECEIPT REGISTRASI PT Kiziy*
+        text = `*RECEIPT REGISTRASI PT ${branchName}*
 --------------------------------
 Waktu: ${now}
 Member: ${data.name}
@@ -3505,25 +3527,21 @@ Jumlah Sesi: ${data.sessions}
 Berlaku s/d: ${formatDate(data.expiry)}
 No. Transaksi: ${data.receipt}
 --------------------------------
-Alamat: Jl. Imogiri Tim., Nglebeng, Tamanan, Kec. Banguntapan, Kabupaten Bantul, Daerah Istimewa Yogyakarta 55198
-No HP: 08158905889
---------------------------------
+${contactInfo}--------------------------------
 *Rincian Pembayaran*
 Total: ${formatCurrency(data.total)}
 Metode: ${data.payment}
 --------------------------------
 Selamat berlatih!`;
       } else if (type === 'visit') {
-        text = `*RECEIPT VISIT HARIAN Kiziy*
+        text = `*RECEIPT VISIT HARIAN ${branchName}*
 --------------------------------
 Waktu: ${now}
 Customer: ${data.name}
 Paket: ${data.package}
 No. Transaksi: ${data.receipt}
 --------------------------------
-Alamat: Jl. Imogiri Tim., Nglebeng, Tamanan, Kec. Banguntapan, Kabupaten Bantul, Daerah Istimewa Yogyakarta 55198
-No HP: 08158905889
---------------------------------
+${contactInfo}--------------------------------
 *Rincian Pembayaran*
 Total: ${formatCurrency(data.total)}
 Metode: ${data.payment}
@@ -5262,7 +5280,7 @@ Terima kasih dan selamat berlatih!`;
                       <div class="card-right">
                         <div>
                           <div class="header">
-                            <div class="gym-name">Kiziy</div>
+                            <div class="gym-name">${escapeHtml((getActiveBranchInfo() && getActiveBranchInfo().name) || 'Kiziy')}</div>
                             <div class="tagline">Power 💪 Fitness 🏃 Health</div>
                           </div>
                           <div class="member-info">

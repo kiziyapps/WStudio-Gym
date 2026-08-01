@@ -564,7 +564,7 @@
 
     <div class="footer">
       <div style="margin-bottom: 15px;">
-        <i class="fas fa-phone"></i> 08158905889 | <i class="fas fa-envelope"></i> kiziyindonesia@gmail.com
+        <i class="fas fa-phone"></i> <span id="pubBranchPhone">08158905889</span> &nbsp;|&nbsp; <i class="fas fa-envelope"></i> <span id="pubBranchEmail">kiziyindonesia@gmail.com</span>
       </div>
 
       <!-- Developer Branding -->
@@ -637,12 +637,24 @@
       const config = branchRebrandingConfig[branchKey] || branchRebrandingConfig.branch_1;
 
       const logoEl = document.getElementById('gymLogoHeader');
-      if (logoEl) logoEl.src = config.logo;
+      if (logoEl) logoEl.src = config.logoUrl || config.logo || "https://i.imgur.com/NO5dVfb.png";
 
       const nameEl = document.getElementById('gymNameHeader');
       if (nameEl) nameEl.textContent = config.name;
 
-      document.documentElement.style.setProperty('--primary', config.color);
+      if (config.color || config.themeColor) {
+        document.documentElement.style.setProperty('--primary', config.color || config.themeColor);
+      }
+
+      const phoneEl = document.getElementById('pubBranchPhone');
+      if (phoneEl) {
+        phoneEl.textContent = config.phone || '08158905889';
+      }
+
+      const emailEl = document.getElementById('pubBranchEmail');
+      if (emailEl) {
+        emailEl.textContent = config.email || 'kiziyindonesia@gmail.com';
+      }
     }
 
     function initBranchSelection() {
