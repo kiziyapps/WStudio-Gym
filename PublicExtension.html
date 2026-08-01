@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Perpanjangan Member UGYM</title>
+  <title>Perpanjangan Member KIZIY</title>
   <!-- Browser Update Notification -->
   <script>
     var $buoop = {
@@ -453,9 +453,9 @@
 
   <div class="extension-container">
     <div class="header">
-      <img id="gymLogoHeader" src="https://i.imgur.com/PAB0dhW.png"
+      <img id="gymLogoHeader" src="https://i.imgur.com/NO5dVfb.png"
         style="width:80px;height:80px;border-radius:50%;margin-bottom:16px;border:3px solid rgba(255,255,255,0.3);object-fit:cover">
-      <h1 id="gymNameHeader">🔄 Perpanjangan Member UGYM</h1>
+      <h1 id="gymNameHeader">🔄 Perpanjangan Member KIZIY</h1>
       <p>Form perpanjangan keanggotaan online</p>
       <div style="max-width: 320px; margin: 16px auto 0;">
         <select id="pubBranch" class="form-input"
@@ -564,7 +564,7 @@
 
     <div class="footer">
       <div style="margin-bottom: 15px;">
-        <i class="fas fa-phone"></i> 08158905889 | <i class="fas fa-envelope"></i> ugymindonesia@gmail.com
+        <i class="fas fa-phone"></i> 08158905889 | <i class="fas fa-envelope"></i> kiziyindonesia@gmail.com
       </div>
 
       <!-- Developer Branding -->
@@ -628,9 +628,9 @@
 
     // ================ KONFIGURASI CABANG (REBRANDING) ================
     const branchRebrandingConfig = {
-      branch_1: { name: "🔄 Perpanjangan UGYM Utama", logo: "https://i.imgur.com/PAB0dhW.png", color: "#d4af37" },
-      branch_2: { name: "🔄 Perpanjangan UGYM Premium", logo: "https://i.imgur.com/PAB0dhW.png", color: "#3b82f6" },
-      branch_3: { name: "🔄 Perpanjangan UGYM Express", logo: "https://i.imgur.com/PAB0dhW.png", color: "#10b981" }
+      branch_1: { name: "🔄 Perpanjangan KIZIY Utama", logo: "https://i.imgur.com/NO5dVfb.png", color: "#d4af37" },
+      branch_2: { name: "🔄 Perpanjangan KIZIY Premium", logo: "https://i.imgur.com/NO5dVfb.png", color: "#3b82f6" },
+      branch_3: { name: "🔄 Perpanjangan KIZIY Express", logo: "https://i.imgur.com/NO5dVfb.png", color: "#10b981" }
     };
 
     function updateBrandingUI(branchKey) {
@@ -652,9 +652,9 @@
           const realId = (backendBranches && backendBranches.length > 0) ? backendBranches[0].id : 'dummy_id';
 
           const customBranches = [
-            { id: realId, key: 'branch_1', name: 'UGYM Utama' },
-            { id: realId, key: 'branch_2', name: 'UGYM Premium (Cabang 2)' },
-            { id: realId, key: 'branch_3', name: 'UGYM Express (Cabang 3)' }
+            { id: realId, key: 'branch_1', name: 'KIZIY Utama' },
+            { id: realId, key: 'branch_2', name: 'KIZIY Premium (Cabang 2)' },
+            { id: realId, key: 'branch_3', name: 'KIZIY Express (Cabang 3)' }
           ];
 
           select.innerHTML = customBranches.map(b => `<option value="${b.id}" data-key="${b.key}">${b.name}</option>`).join('');
