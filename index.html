@@ -6469,11 +6469,16 @@ Terima kasih dan selamat berlatih!`;
       const container = document.getElementById('catalogContent');
       container.innerHTML = `
         <div class="form-card">
-          <div class="form-card-header" style="display:flex; justify-content:space-between; align-items:center">
+          <div class="form-card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px">
             <h3 style="margin:0"><i class="fas fa-id-card"></i> Master Katalog Paket</h3>
-            <button class="btn btn-sm btn-success" onclick="openPackageModal()">
-              <i class="fas fa-plus"></i> Tambah Paket
-            </button>
+            <div style="display:flex; gap:8px; align-items:center">
+              <button class="btn btn-sm btn-outline" onclick="loadPackageList(true)" title="Perbarui Data">
+                <i class="fas fa-sync-alt"></i> Refresh
+              </button>
+              <button class="btn btn-sm btn-success" onclick="openPackageModal()">
+                <i class="fas fa-plus"></i> Tambah Paket
+              </button>
+            </div>
           </div>
           <div class="form-card-body">
             <div id="packageListTable">
@@ -6485,53 +6490,64 @@ Terima kasih dan selamat berlatih!`;
       loadPackageList();
     }
 
-    function loadPackageList() {
+    let __packagesCache = null;
+    function loadPackageList(force = false) {
+      if (!force && __packagesCache) {
+        _renderPackageTable(__packagesCache);
+        return;
+      }
       google.script.run
         .withSuccessHandler(function (res) {
           if (res.success) {
-            const list = res.packages;
-            document.getElementById('packageListTable').innerHTML = `
-              <div style="overflow-x:auto">
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Nama Paket</th>
-                      <th>Tipe</th>
-                      <th>Durasi</th>
-                      <th>Harga</th>
-                      <th>Status</th>
-                      <th>Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${list.map(p => `
-                      <tr>
-                        <td><code>${p['ID Paket']}</code></td>
-                        <td><b>${escapeHtml(p['Nama Paket'])}</b></td>
-                        <td><span class="badge badge-info">${p['Tipe Paket']}</span></td>
-                        <td>${p['Durasi']} hari</td>
-                        <td>${formatCurrency(p['Harga'])}</td>
-                        <td><span class="badge badge-${p['Is Active'] ? 'success' : 'secondary'}">${p['Is Active'] ? 'Aktif' : 'Non-Aktif'}</span></td>
-                        <td>
-                          <div style="display:flex; gap:4px">
-                            <button class="btn btn-sm btn-outline" onclick="openPackageModal('${p['ID Paket']}')" title="Edit Paket">
-                              <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline" style="color:#ef4444; border-color:#fecaca" onclick="confirmDeletePackage('${p['ID Paket']}', '${escapeJs(p['Nama Paket'])}')" title="Hapus Paket">
-                              <i class="fas fa-trash"></i>
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    `).join('')}
-                  </tbody>
-                </table>
-              </div>
-            `;
+            __packagesCache = res.packages;
+            _renderPackageTable(res.packages);
           }
         })
         .getFullCatalogue();
+    }
+
+    function _renderPackageTable(list) {
+      const container = document.getElementById('packageListTable');
+      if (!container) return;
+      container.innerHTML = `
+        <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nama Paket</th>
+                <th>Tipe</th>
+                <th>Durasi</th>
+                <th>Harga</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${list.map(p => `
+                <tr>
+                  <td><code>${p['ID Paket']}</code></td>
+                  <td><b>${escapeHtml(p['Nama Paket'])}</b></td>
+                  <td><span class="badge badge-info">${p['Tipe Paket']}</span></td>
+                  <td>${p['Durasi']}</td>
+                  <td>${formatCurrency(p['Harga'])}</td>
+                  <td><span class="badge badge-${p['Is Active'] === true || p['Is Active'] === 'TRUE' || p['Is Active'] === 'true' ? 'success' : 'secondary'}">${p['Is Active'] === true || p['Is Active'] === 'TRUE' || p['Is Active'] === 'true' ? 'Aktif' : 'Non-Aktif'}</span></td>
+                  <td>
+                    <div style="display:flex; gap:4px">
+                      <button class="btn btn-sm btn-outline" onclick="openPackageModal('${p['ID Paket']}')" title="Edit Paket">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button class="btn btn-sm btn-outline" style="color:#ef4444; border-color:#fecaca" onclick="confirmDeletePackage('${p['ID Paket']}', '${escapeJs(p['Nama Paket'])}')" title="Hapus Paket">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
     }
 
     function showProductCatalog() {
@@ -7055,12 +7071,16 @@ Terima kasih dan selamat berlatih!`;
       showConfirm(`Hapus paket "${name}"?`, function (ok) {
         if (!ok) return;
 
-        // 1. QUEUE SYNC BACKGROUND
+        // 1. UPDATE LOKAL INSTAN (OPTIMISTIC)
+        if (__packagesCache) {
+          __packagesCache = __packagesCache.filter(p => p['ID Paket'] !== id);
+          _renderPackageTable(__packagesCache);
+        }
+
+        // 2. QUEUE SYNC BACKGROUND
         SyncQueue.add('deletePackage', [id, currentUser ? currentUser.name : 'Admin']);
 
         showToast('✅ Paket dimasukkan ke antrean penghapusan', 'success');
-        // Refresh UI lokal
-        setTimeout(loadPackageList, 500);
       });
     }
 
@@ -7141,42 +7161,56 @@ Terima kasih dan selamat berlatih!`;
       document.getElementById('packageModal').style.display = 'flex';
       if (id) {
         document.getElementById('packageModalTitle').textContent = 'Edit Paket';
-        showLoading();
-        google.script.run
-          .withSuccessHandler(function (res) {
-            hideLoading();
-            if (res.success) {
-              const p = res.packages.find(x => x['ID Paket'] == id);
-              document.getElementById('pkg_id').value = p['ID Paket'];
-              document.getElementById('pkg_name').value = p['Nama Paket'];
-              document.getElementById('pkg_type').value = p['Tipe Paket'];
 
-              const durStr = (p['Durasi'] || '30 Hari').toString();
-              const match = durStr.match(/(\d+)\s*(.*)/);
-              if (match) {
-                document.getElementById('pkg_duration').value = match[1];
-                document.getElementById('pkg_unit').value = match[2] || 'Hari';
-              } else {
-                document.getElementById('pkg_duration').value = parseInt(durStr) || 30;
-                document.getElementById('pkg_unit').value = 'Hari';
+        const populateForm = (p) => {
+          if (!p) {
+            showToast('❌ Paket tidak ditemukan', 'error');
+            return;
+          }
+          document.getElementById('pkg_id').value = p['ID Paket'];
+          document.getElementById('pkg_name').value = p['Nama Paket'];
+          document.getElementById('pkg_type').value = p['Tipe Paket'];
+
+          const durStr = (p['Durasi'] || '30 Hari').toString();
+          const match = durStr.match(/(\d+)\s*(.*)/);
+          if (match) {
+            document.getElementById('pkg_duration').value = match[1];
+            document.getElementById('pkg_unit').value = match[2] || 'Hari';
+          } else {
+            document.getElementById('pkg_duration').value = parseInt(durStr) || 30;
+            document.getElementById('pkg_unit').value = 'Hari';
+          }
+
+          document.getElementById('pkg_price').value = p['Harga'];
+          document.getElementById('pkg_promo').value = p['Promo'] || 0;
+          document.getElementById('pkg_desc').value = p['Deskripsi'];
+          document.getElementById('pkg_active').checked = p['Is Active'] === true || p['Is Active'] === 'TRUE' || p['Is Active'] === 'true';
+
+          if (document.getElementById('pkg_sessions')) {
+            document.getElementById('pkg_sessions').value = p['Jumlah Sesi'] !== undefined ? p['Jumlah Sesi'] : '';
+          }
+          toggleSessionsField();
+        };
+
+        if (__packagesCache) {
+          const p = __packagesCache.find(x => x['ID Paket'] == id);
+          populateForm(p);
+        } else {
+          showLoading();
+          google.script.run
+            .withSuccessHandler(function (res) {
+              hideLoading();
+              if (res.success) {
+                __packagesCache = res.packages;
+                populateForm(res.packages.find(x => x['ID Paket'] == id));
               }
-
-              document.getElementById('pkg_price').value = p['Harga'];
-              document.getElementById('pkg_promo').value = p['Promo'] || 0;
-              document.getElementById('pkg_desc').value = p['Deskripsi'];
-              document.getElementById('pkg_active').checked = p['Is Active'] === true || p['Is Active'] === 'TRUE';
-
-              if (document.getElementById('pkg_sessions')) {
-                document.getElementById('pkg_sessions').value = p['Jumlah Sesi'] !== undefined ? p['Jumlah Sesi'] : '';
-              }
-              toggleSessionsField();
-            }
-          })
-          .withFailureHandler(function (err) {
-            hideLoading();
-            showToast('Gagal memuat detail paket: ' + err.message, 'error');
-          })
-          .getFullCatalogue();
+            })
+            .withFailureHandler(function (err) {
+              hideLoading();
+              showToast('Gagal memuat detail paket: ' + err.message, 'error');
+            })
+            .getFullCatalogue();
+        }
       } else {
         document.getElementById('packageModalTitle').textContent = 'Tambah Paket';
         document.getElementById('pkg_id').value = '';
@@ -7228,13 +7262,28 @@ Terima kasih dan selamat berlatih!`;
 
       if (!data['Nama Paket']) { showToast('⚠️ Nama paket wajib diisi', 'warning'); return; }
 
-      // 1. QUEUE SYNC BACKGROUND
+      // 1. UPDATE LOKAL INSTAN (OPTIMISTIC)
+      if (__packagesCache) {
+        let isNew = !data['ID Paket'];
+        if (isNew) {
+          data['ID Paket'] = 'TEMP_' + Date.now();
+          __packagesCache.push(data);
+        } else {
+          const idx = __packagesCache.findIndex(p => p['ID Paket'] === data['ID Paket']);
+          if (idx !== -1) {
+            __packagesCache[idx] = data;
+          } else {
+            __packagesCache.push(data);
+          }
+        }
+        _renderPackageTable(__packagesCache);
+      }
+
+      // 2. QUEUE SYNC BACKGROUND
       SyncQueue.add('savePackage', [data]);
 
       showToast('✅ Paket dimasukkan ke antrean', 'success');
       closePackageModal();
-      // Update UI lokal sederhana (opsional: bisa lebih detail)
-      setTimeout(loadPackageList, 500);
     }
 
     let productModalScanner = null;
@@ -9164,10 +9213,14 @@ Terima kasih dan selamat berlatih!`;
       showConfirm(`Tolak permintaan ID ${id}?`, function (ok) {
         if (!ok) return;
 
+        // 1. UPDATE LOKAL INSTAN (OPTIMISTIC)
+        currentApprovals = currentApprovals.filter(a => String(a.approvalId) !== String(id));
+        renderApprovals({ success: true, approvals: currentApprovals });
+
+        // 2. QUEUE SYNC BACKGROUND
         SyncQueue.add('rejectApproval', [id, reason.trim(), currentUser?.name || 'Admin']);
 
         showToast('✅ Penolakan dimasukkan ke antrean', 'success');
-        setTimeout(loadApprovals, 500);
       });
     }
 
