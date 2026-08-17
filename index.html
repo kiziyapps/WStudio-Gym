@@ -274,7 +274,7 @@
     const SyncManager = {
       isSyncing: false,
       lastSync: 0,
-      syncInterval: 5 * 60 * 1000, // 5 menit default
+      syncInterval: 30 * 1000, 
 
       init: function () {
 
@@ -307,38 +307,106 @@
         this.isSyncing = true;
         const self = this;
 
-        google.script.run
-          .withSuccessHandler(function (res) {
-            self.isSyncing = false;
-            if (res && res.success) {
+        // Memecah menjadi beberapa request paralel untuk menghindari timeout Google Script (batas 30 detik)
+        const totalRequests = 5;
+        let pendingRequests = totalRequests;
+        let hasError = false;
 
+        this.updateIndicator('syncing', 'Syncing... 0%');
+
+        const checkDone = () => {
+          pendingRequests--;
+          let progress = Math.round(((totalRequests - pendingRequests) / totalRequests) * 100);
+          
+          if (pendingRequests <= 0) {
+            self.isSyncing = false;
+            if (hasError) {
+              self.updateIndicator('online', 'Offline?');
+            } else {
               self.lastSync = Date.now();
               localStorage.setItem('ugym_last_sync', self.lastSync.toString());
-
-              // Simpan hasil sync ke cache
-              if (res.data.products) LocalCache.set('pos_products', res.data.products, 60);
-              if (res.data.packages) LocalCache.set('catalogue_packages', res.data.packages, 60);
-              if (res.data.stats) LocalCache.set('dashboard_stats', res.data.stats, 30);
-              if (res.data.members) {
-                LocalCache.set('all_members', res.data.members, 120);
-                SearchIndex.build(res.data.members); // BUILD INDEX UNTUK SEARCH INSTAN
-              }
-              if (res.data.recentTransactions) LocalCache.set('recent_transactions', res.data.recentTransactions, 60);
-              if (res.data.todayCheckins) LocalCache.set('today_checkins', res.data.todayCheckins, 60);
-
-              // Trigger event untuk UI yang butuh update
-              window.dispatchEvent(new CustomEvent('ugym_sync_complete', { detail: res.data }));
-
-              self.updateIndicator('success', 'Updated!');
+              self.updateIndicator('success', 'Updated 100%!');
               setTimeout(() => self.updateIndicator('online', 'Online'), 3000);
             }
+          } else {
+            self.updateIndicator('syncing', `Syncing... ${progress}%`);
+          }
+        };
+
+        // 1. Dashboard Stats (Cepat)
+        google.script.run
+          .withSuccessHandler(res => {
+            if (res && res.success && res.stats) {
+              LocalCache.set('dashboard_stats', res.stats, 30);
+              window.dispatchEvent(new CustomEvent('ugym_sync_complete', { detail: { stats: res.stats } }));
+            }
+            checkDone();
           })
-          .withFailureHandler(function (err) {
-            self.isSyncing = false;
-            console.error(' Sync Failed:', err);
-            self.updateIndicator('online', 'Offline?');
+          .withFailureHandler(err => { hasError = true; checkDone(); })
+          .getDashboardStats();
+
+        // 2. Packages (Cepat)
+        google.script.run
+          .withSuccessHandler(res => {
+            if (res && res.success && res.packages) {
+              LocalCache.set('catalogue_packages', res.packages, 60);
+              window.dispatchEvent(new CustomEvent('ugym_sync_complete', { detail: { packages: res.packages } }));
+            }
+            checkDone();
           })
-          .getSyncData(this.lastSync);
+          .withFailureHandler(err => { hasError = true; checkDone(); })
+          .getPackages();
+
+        // 3. Products (Cepat)
+        google.script.run
+          .withSuccessHandler(res => {
+            if (res && res.success && res.products) {
+              LocalCache.set('pos_products', res.products, 60);
+              window.dispatchEvent(new CustomEvent('ugym_sync_complete', { detail: { products: res.products } }));
+            }
+            checkDone();
+          })
+          .withFailureHandler(err => { hasError = true; checkDone(); })
+          .getProducts();
+
+        // 4. Recent Activity (Transaksi & Checkin - Cepat)
+        google.script.run
+          .withSuccessHandler(res => {
+            if (res && res.success) {
+              if (res.transactions) LocalCache.set('recent_transactions', res.transactions, 60);
+              if (res.checkins) LocalCache.set('today_checkins', res.checkins, 60);
+              window.dispatchEvent(new CustomEvent('ugym_sync_complete', { detail: res }));
+            }
+            checkDone();
+          })
+          .withFailureHandler(err => { hasError = true; checkDone(); })
+          .getRecentActivity();
+
+        // 5. Members Delta Sync (Berat/Lambat - Menggunakan Chunking)
+        let accumulatedMembers = [];
+        const fetchMembersChunk = (offset = 0) => {
+          google.script.run
+            .withSuccessHandler(res => {
+              if (res && res.success) {
+                if (res.members) {
+                  accumulatedMembers = accumulatedMembers.concat(res.members);
+                  if (res.hasMore) {
+                    self.updateIndicator('syncing', `Syncing Members... ${accumulatedMembers.length}`);
+                    fetchMembersChunk(res.nextOffset);
+                    return; // Jangan panggil checkDone dulu, tunggu sampai habis
+                  } else {
+                    LocalCache.set('all_members', accumulatedMembers, 120);
+                    SearchIndex.build(accumulatedMembers);
+                    window.dispatchEvent(new CustomEvent('ugym_sync_complete', { detail: { members: accumulatedMembers } }));
+                  }
+                }
+              }
+              checkDone();
+            })
+            .withFailureHandler(err => { hasError = true; checkDone(); })
+            .getMembersDelta(this.lastSync, offset, 1000); // 1000 baris per tarikan
+        };
+        fetchMembersChunk(0);
 
         // Jalankan queue secara berkala
         if (typeof SyncQueue !== 'undefined') SyncQueue.process();
@@ -4533,165 +4601,170 @@ Terima kasih dan selamat berlatih!`;
         const q = e.target.value.toLowerCase();
         let count = 0;
         document.querySelectorAll('.gallery-item').forEach(item => {
-          const text = item.textContent.toLowerCase();
-          const matches = text.includes(q);
-          item.style.display = matches ? 'flex' : 'none';
-          if (matches) count++;
+            if (matches) count++;
         });
       });
     }
 
     // ================ MEMBER REGISTRATION ================
     function loadMemberForm() {
+      const cachedPkgs = LocalCache.get('catalogue_packages');
+      if (cachedPkgs && cachedPkgs.length > 0) {
+        _renderMemberForm(cachedPkgs);
+        return;
+      }
+
       showLoading();
       google.script.run
         .withSuccessHandler(function (res) {
           hideLoading();
           const pkgs = (res && res.success) ? res.packages : [];
-
-          document.getElementById('contentArea').innerHTML = `
-            <div class="form-card">
-              <div class="form-card-header">
-                <h3><i class="fas fa-user-plus"></i> Registrasi Member Baru</h3>
-              </div>
-              <div class="form-card-body">
-                <div id="memberResult" class="result-card" style="display:none;"></div>
-                <div class="form-row">
-                  <div class="form-group">
-                    <label class="form-label">Nama Lengkap *</label>
-                    <input id="reg_name" class="form-input" placeholder="Contoh: Budi Santoso">
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label">Tanggal Lahir</label>
-                    <input id="reg_dob" type="date" class="form-input">
-                  </div>
-                </div>
-                <div class="form-row">
-                  <div class="form-group">
-                    <label class="form-label">No. Telepon *</label>
-                    <input id="reg_phone" class="form-input" placeholder="0xxxxxxxxxx">
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label">Email</label>
-                    <input id="reg_email" type="email" class="form-input" placeholder="contoh@email.com">
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Pilih Paket *</label>
-                  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px">
-                    ${pkgs.length ? pkgs.filter(p => {
-            const t = (p.type || '').toLowerCase();
-            const n = (p.name || '').toLowerCase();
-            return !t.includes('pt') && !t.includes('trainer') && !t.includes('harian') && !t.includes('visit') &&
-              !n.includes('harian') && !n.includes('visit');
-          }).map(p => `
-                      <div class="pkg-card" data-id="${p.id}" data-price="${p.price}" data-name="${p.name}" data-dur="${p.duration}" onclick="selectPkg(this)">
-                        <div style="font-weight:600;margin-bottom:6px">${escapeHtml(p.name)}</div>
-                        <div style="color:#667eea;font-weight:700">${formatCurrency(p.price)}</div>
-                        <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">${escapeHtml(p.duration || '')}</div>
-                      </div>
-                    `).join('') : '<p class="text-muted">Tidak ada paket tersedia</p>'}
-                  </div>
-                </div>
-                <div class="payment-info">
-                  <h4 style="margin-bottom:12px;color:var(--text-main)"><i class="fas fa-credit-card"></i> Informasi Pembayaran</h4>
-                  <div class="payment-row">
-                    <span>Harga Paket</span>
-                    <span id="paymentPackagePrice">Rp 0</span>
-                  </div>
-                  <div class="payment-row" id="regFeeRow" style="display:flex">
-                    <span>Biaya Registrasi</span>
-                    <span>Rp 50.000</span>
-                  </div>
-                  <div class="payment-row payment-total">
-                    <span>Total</span>
-                    <span id="paymentTotal">Rp 0</span>
-                  </div>
-                </div>
-                <!-- Foto Member -->
-                <div class="form-group">
-                  <label class="form-label"><i class="fas fa-camera" style="color:#667eea"></i> Foto Member <span style="color:var(--text-secondary);font-weight:400">(Opsional)</span></label>
-                  <div class="admin-photo-upload" id="adminPhotoUploadBox">
-                    <img id="adminPhotoPreview"
-                         src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90' viewBox='0 0 24 24' fill='none' stroke='%23aaa' stroke-width='1.5'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E"
-                         class="admin-photo-avatar" alt="Foto Member">
-                    <div class="admin-photo-actions">
-                      <p id="adminPhotoLabel">Belum ada foto. Pilih dari file atau ambil lewat kamera.</p>
-                      <div class="admin-photo-btns">
-                        <button type="button" class="admin-photo-btn" onclick="document.getElementById('adminPhotoFile').click()">
-                          <i class="fas fa-folder-open"></i> Upload File
-                        </button>
-                        <button type="button" class="admin-photo-btn camera" onclick="adminOpenWebcam()">
-                          <i class="fas fa-camera"></i> Buka Kamera
-                        </button>
-                        <button type="button" class="admin-photo-btn remove" id="adminPhotoClearBtn" onclick="clearAdminMemberPhoto()" style="display:none">
-                          <i class="fas fa-trash"></i> Hapus
-                        </button>
-                      </div>
-                    </div>
-                    <input type="file" id="adminPhotoFile" accept="image/*" style="display:none" onchange="adminPreviewMemberPhoto(this)">
-                    <input type="hidden" id="adminPhotoBase64">
-                  </div>
-                  <small style="color:var(--text-secondary);font-size:12px"><i class="fas fa-info-circle"></i> Format: JPG, PNG, WEBP (maks 2MB)</small>
-                </div>
-
-                <div class="form-row">
-                  <div class="form-group">
-                    <label class="form-label">Metode Pembayaran *</label>
-                    <select id="reg_payment" class="form-input">
-                      <option value="Transfer Bank">Transfer Bank</option>
-                      <option value="QRIS">QRIS</option>
-                      <option value="Debit">Debit</option>
-                      <option value="Cash">Cash</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label">Catatan</label>
-                    <input id="reg_notes" class="form-input" placeholder="Opsional">
-                  </div>
-                </div>
-                <div style="display:flex;gap:12px;flex-wrap:wrap">
-                  <button id="btnRegMember" class="btn btn-primary" onclick="registerMemberSubmit()">
-                    <i class="fas fa-save"></i> Daftarkan Member
-                  </button>
-                  <button class="btn btn-secondary" onclick="clearMemberForm()">
-                    <i class="fas fa-times"></i> Bersihkan Form
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-card" style="margin-top:20px">
-              <div class="form-card-header" style="display:flex; justify-content:space-between; align-items:center">
-                <h4 style="margin:0"><i class="fas fa-clock"></i> Transaksi Terakhir</h4>
-                <button class="btn btn-sm btn-outline" onclick="loadRecentPanelTransactions('Registration', 'regRecentTransactions')">
-                  <i class="fas fa-sync-alt"></i>
-                </button>
-              </div>
-              <div class="form-card-body" id="regRecentTransactions" style="padding:0">
-              </div>
-            </div>
-          `;
-
-          // IMPROVEMENT 5: Restore & Listen Auto-Save
-          const formFields = ['reg_name', 'reg_dob', 'reg_phone', 'reg_email', 'reg_payment', 'reg_notes'];
-          FormManager.restore('member_reg', formFields);
-          FormManager.listen('member_reg', formFields);
-
-          document.querySelectorAll('.pkg-card').forEach(card => {
-            card.addEventListener('click', function () {
-              updatePaymentInfo();
-            });
-          });
-
-          // Load recent transactions
-          loadRecentPanelTransactions('Registration', 'regRecentTransactions');
+          LocalCache.set('catalogue_packages', pkgs, 60);
+          _renderMemberForm(pkgs);
         })
         .withFailureHandler(function (err) {
           hideLoading();
           showToast('Gagal memuat paket: ' + err.message, 'error');
         })
         .getPackages();
+    }
+
+    function _renderMemberForm(pkgs) {
+      document.getElementById('contentArea').innerHTML = `
+        <div class="form-card">
+          <div class="form-card-header">
+            <h3><i class="fas fa-user-plus"></i> Pendaftaran Member Baru</h3>
+          </div>
+          <div class="form-card-body">
+            <div id="regResult" class="result-card" style="display:none;"></div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Nama Lengkap *</label>
+                <input id="reg_name" class="form-input" placeholder="Contoh: Budi Santoso">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Tanggal Lahir</label>
+                <input id="reg_dob" type="date" class="form-input">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">No. Telepon *</label>
+                <input id="reg_phone" class="form-input" placeholder="0xxxxxxxxxx">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email</label>
+                <input id="reg_email" type="email" class="form-input" placeholder="contoh@email.com">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Pilih Paket *</label>
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px">
+                ${pkgs.length ? pkgs.filter(p => {
+        const t = (p.type || '').toLowerCase();
+        const n = (p.name || '').toLowerCase();
+        return !t.includes('pt') && !t.includes('trainer') && !t.includes('harian') && !t.includes('visit') &&
+          !n.includes('harian') && !n.includes('visit');
+      }).map(p => `
+                  <div class="pkg-card" data-id="${p.id}" data-price="${p.price}" data-name="${p.name}" data-dur="${p.duration}" onclick="selectPkg(this)">
+                    <div style="font-weight:600;margin-bottom:6px">${escapeHtml(p.name)}</div>
+                    <div style="color:#667eea;font-weight:700">${formatCurrency(p.price)}</div>
+                    <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">${escapeHtml(p.duration || '')}</div>
+                  </div>
+                `).join('') : '<p class="text-muted">Tidak ada paket tersedia</p>'}
+              </div>
+            </div>
+            <div class="payment-info">
+              <h4 style="margin-bottom:12px;color:var(--text-main)"><i class="fas fa-credit-card"></i> Informasi Pembayaran</h4>
+              <div class="payment-row">
+                <span>Harga Paket</span>
+                <span id="paymentPackagePrice">Rp 0</span>
+              </div>
+              <div class="payment-row" id="regFeeRow" style="display:flex">
+                <span>Biaya Registrasi</span>
+                <span>Rp 50.000</span>
+              </div>
+              <div class="payment-row payment-total">
+                <span>Total</span>
+                <span id="paymentTotal">Rp 0</span>
+              </div>
+            </div>
+            <!-- Foto Member -->
+            <div class="form-group">
+              <label class="form-label"><i class="fas fa-camera" style="color:#667eea"></i> Foto Member <span style="color:var(--text-secondary);font-weight:400">(Opsional)</span></label>
+              <div class="admin-photo-upload" id="adminPhotoUploadBox">
+                <img id="adminPhotoPreview"
+                     src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90' viewBox='0 0 24 24' fill='none' stroke='%23aaa' stroke-width='1.5'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E"
+                     class="admin-photo-avatar" alt="Foto Member">
+                <div class="admin-photo-actions">
+                  <p id="adminPhotoLabel">Belum ada foto. Pilih dari file atau ambil lewat kamera.</p>
+                  <div class="admin-photo-btns">
+                    <button type="button" class="admin-photo-btn" onclick="document.getElementById('adminPhotoFile').click()">
+                      <i class="fas fa-folder-open"></i> Upload File
+                    </button>
+                    <button type="button" class="admin-photo-btn camera" onclick="adminOpenWebcam()">
+                      <i class="fas fa-camera"></i> Buka Kamera
+                    </button>
+                    <button type="button" class="admin-photo-btn remove" id="adminPhotoClearBtn" onclick="clearAdminMemberPhoto()" style="display:none">
+                      <i class="fas fa-trash"></i> Hapus
+                    </button>
+                  </div>
+                </div>
+                <input type="file" id="adminPhotoFile" accept="image/*" style="display:none" onchange="adminPreviewMemberPhoto(this)">
+                <input type="hidden" id="adminPhotoBase64">
+              </div>
+              <small style="color:var(--text-secondary);font-size:12px"><i class="fas fa-info-circle"></i> Format: JPG, PNG, WEBP (maks 2MB)</small>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Metode Pembayaran *</label>
+                <select id="reg_payment" class="form-input">
+                  <option value="Transfer Bank">Transfer Bank</option>
+                  <option value="QRIS">QRIS</option>
+                  <option value="Debit">Debit</option>
+                  <option value="Cash">Cash</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Catatan</label>
+                <input id="reg_notes" class="form-input" placeholder="Opsional">
+              </div>
+            </div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap">
+              <button id="btnRegMember" class="btn btn-primary" onclick="registerMemberSubmit()">
+                <i class="fas fa-save"></i> Daftarkan Member
+              </button>
+              <button class="btn btn-secondary" onclick="clearMemberForm()">
+                <i class="fas fa-times"></i> Bersihkan Form
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-card" style="margin-top:20px">
+          <div class="form-card-header" style="display:flex; justify-content:space-between; align-items:center">
+            <h4 style="margin:0"><i class="fas fa-clock"></i> Transaksi Terakhir</h4>
+            <button class="btn btn-sm btn-outline" onclick="loadRecentPanelTransactions('Registration', 'regRecentTransactions')">
+              <i class="fas fa-sync-alt"></i>
+            </button>
+          </div>
+          <div class="form-card-body" id="regRecentTransactions" style="padding:0">
+          </div>
+        </div>
+      `;
+
+      const formFields = ['reg_name', 'reg_dob', 'reg_phone', 'reg_email', 'reg_payment', 'reg_notes'];
+      FormManager.restore('member_reg', formFields);
+      FormManager.listen('member_reg', formFields);
+
+      document.querySelectorAll('.pkg-card').forEach(card => {
+        card.addEventListener('click', function () {
+          updatePaymentInfo();
+        });
+      });
+
+      loadRecentPanelTransactions('Registration', 'regRecentTransactions');
     }
 
     function selectPkg(el) {
@@ -5315,99 +5388,109 @@ Terima kasih dan selamat berlatih!`;
 
     // ================ TRANSACTIONS ================
     function loadTransactionForm() {
+      const cachedPkgs = LocalCache.get('catalogue_packages');
+      if (cachedPkgs && cachedPkgs.length > 0) {
+        _renderTransactionForm(cachedPkgs);
+        return;
+      }
+      
       showLoading();
       google.script.run
         .withSuccessHandler(function (res) {
           hideLoading();
           const pkgs = (res && res.success) ? res.packages : [];
-
-          document.getElementById('contentArea').innerHTML = `
-            <div class="form-card">
-              <div class="form-card-header">
-                <h3><i class="fas fa-cash-register"></i> Perpanjangan Member</h3>
-              </div>
-              <div class="form-card-body">
-                <div id="trxResult" class="result-card" style="display:none;"></div>
-                <div class="form-row">
-                  <div class="form-group">
-                    <label class="form-label">Member ID / Nama *</label>
-                    <div style="display:flex;gap:8px">
-                      <input id="trx_memberId" class="form-input" placeholder="Cari ID atau nama..." oninput="searchMemberForTrx(this.value)">
-                      <button class="btn btn-outline" onclick="searchMemberForTrx(document.getElementById('trx_memberId').value)">
-                        <i class="fas fa-search"></i>
-                      </button>
-                    </div>
-                    <div id="memberSearchResults" style="margin-top:8px;max-height:300px;overflow-y:auto"></div>
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label">Info Member</label>
-                    <div id="selectedMemberInfo" style="padding:14px;background:var(--bg-light);border-radius:8px;border:1px solid var(--border-color);font-size:13px;color:var(--text-secondary);min-height:100px">
-                      <i class="fas fa-info-circle"></i> Belum ada member dipilih
-                    </div>
-                  </div>
-                </div>
-                <div class="form-row">
-                  <div class="form-group">
-                    <label class="form-label">Pilih Paket *</label>
-                    <select id="trx_package" class="form-input">
-                      <option value="">-- Pilih Paket --</option>
-                      ${pkgs.filter(p => {
-            const t = (p.type || '').toLowerCase();
-            const n = (p.name || '').toLowerCase();
-            return !t.includes('pt') && !t.includes('trainer') && !t.includes('harian') && !t.includes('visit') &&
-              !n.includes('harian') && !n.includes('visit');
-          }).map(p =>
-            `<option value="${p.id}" data-price="${p.price}" data-name="${p.name}" data-duration="${p.duration}">${escapeHtml(p.name)} - ${formatCurrency(p.price)} (${escapeHtml(p.duration)})</option>`
-          ).join('')}
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label">Metode Pembayaran *</label>
-                    <select id="trx_payment" class="form-input">
-                      <option value="Transfer Bank">Transfer Bank</option>
-                      <option value="QRIS">QRIS</option>
-                      <option value="Debit">Debit</option>
-                      <option value="Cash">Cash</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="payment-info">
-                  <h4 style="margin-bottom:12px"><i class="fas fa-receipt"></i> Ringkasan Transaksi</h4>
-                  <div id="transactionSummary" style="color:var(--text-main)">
-                    <p class="text-muted">Pilih member dan paket untuk melihat ringkasan</p>
-                  </div>
-                </div>
-                <div style="display:flex;gap:12px;flex-wrap:wrap">
-                  <button id="btnProcessTrx" class="btn btn-success" onclick="processTransactionSubmit()">
-                    <i class="fas fa-check"></i> Proses Transaksi
-                  </button>
-                  <button class="btn btn-secondary" onclick="clearTrxForm()">
-                    <i class="fas fa-times"></i> Reset
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-card" style="margin-top:20px">
-              <div class="form-card-header" style="display:flex; justify-content:space-between; align-items:center">
-                <h4 style="margin:0"><i class="fas fa-clock"></i> Transaksi Terakhir</h4>
-                <button class="btn btn-sm btn-outline" onclick="loadRecentPanelTransactions('Extension', 'extRecentTransactions')">
-                  <i class="fas fa-sync-alt"></i>
-                </button>
-              </div>
-              <div class="form-card-body" id="extRecentTransactions" style="padding:0">
-              </div>
-            </div>
-          `;
-
-          document.getElementById('trx_package').addEventListener('change', updateTransactionSummary);
-          loadRecentPanelTransactions('Extension', 'extRecentTransactions');
+          LocalCache.set('catalogue_packages', pkgs, 60);
+          _renderTransactionForm(pkgs);
         })
         .withFailureHandler(function (err) {
           hideLoading();
-          showToast('Gagal: ' + err.message, 'error');
+          showToast('Gagal memuat paket: ' + err.message, 'error');
         })
         .getPackages();
+    }
+
+    function _renderTransactionForm(pkgs) {
+      document.getElementById('contentArea').innerHTML = `
+        <div class="form-card">
+          <div class="form-card-header">
+            <h3><i class="fas fa-cash-register"></i> Perpanjangan Member</h3>
+          </div>
+          <div class="form-card-body">
+            <div id="trxResult" class="result-card" style="display:none;"></div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Member ID / Nama *</label>
+                <div style="display:flex;gap:8px">
+                  <input id="trx_memberId" class="form-input" placeholder="Cari ID atau nama..." oninput="searchMemberForTrx(this.value)">
+                  <button class="btn btn-outline" onclick="searchMemberForTrx(document.getElementById('trx_memberId').value)">
+                    <i class="fas fa-search"></i>
+                  </button>
+                </div>
+                <div id="memberSearchResults" style="margin-top:8px;max-height:300px;overflow-y:auto"></div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Info Member</label>
+                <div id="selectedMemberInfo" style="padding:14px;background:var(--bg-light);border-radius:8px;border:1px solid var(--border-color);font-size:13px;color:var(--text-secondary);min-height:100px">
+                  <i class="fas fa-info-circle"></i> Belum ada member dipilih
+                </div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Pilih Paket *</label>
+                <select id="trx_package" class="form-input">
+                  <option value="">-- Pilih Paket --</option>
+                  ${pkgs.filter(p => {
+        const t = (p.type || '').toLowerCase();
+        const n = (p.name || '').toLowerCase();
+        return !t.includes('pt') && !t.includes('trainer') && !t.includes('harian') && !t.includes('visit') &&
+          !n.includes('harian') && !n.includes('visit');
+      }).map(p =>
+        `<option value="${p.id}" data-price="${p.price}" data-name="${p.name}" data-duration="${p.duration}">${escapeHtml(p.name)} - ${formatCurrency(p.price)} (${escapeHtml(p.duration)})</option>`
+      ).join('')}
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Metode Pembayaran *</label>
+                <select id="trx_payment" class="form-input">
+                  <option value="Transfer Bank">Transfer Bank</option>
+                  <option value="QRIS">QRIS</option>
+                  <option value="Debit">Debit</option>
+                  <option value="Cash">Cash</option>
+                </select>
+              </div>
+            </div>
+            <div class="payment-info">
+              <h4 style="margin-bottom:12px"><i class="fas fa-receipt"></i> Ringkasan Transaksi</h4>
+              <div id="transactionSummary" style="color:var(--text-main)">
+                <p class="text-muted">Pilih member dan paket untuk melihat ringkasan</p>
+              </div>
+            </div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap">
+              <button id="btnProcessTrx" class="btn btn-success" onclick="processTransactionSubmit()">
+                <i class="fas fa-check"></i> Proses Transaksi
+              </button>
+              <button class="btn btn-secondary" onclick="clearTrxForm()">
+                <i class="fas fa-times"></i> Reset
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-card" style="margin-top:20px">
+          <div class="form-card-header" style="display:flex; justify-content:space-between; align-items:center">
+            <h4 style="margin:0"><i class="fas fa-clock"></i> Transaksi Terakhir</h4>
+            <button class="btn btn-sm btn-outline" onclick="loadRecentPanelTransactions('Extension', 'extRecentTransactions')">
+              <i class="fas fa-sync-alt"></i>
+            </button>
+          </div>
+          <div class="form-card-body" id="extRecentTransactions" style="padding:0">
+          </div>
+        </div>
+      `;
+
+      document.getElementById('trx_package').addEventListener('change', updateTransactionSummary);
+      loadRecentPanelTransactions('Extension', 'extRecentTransactions');
     }
 
     function searchMemberForTrx(query) {
@@ -7076,6 +7159,9 @@ Terima kasih dan selamat berlatih!`;
           __packagesCache = __packagesCache.filter(p => p['ID Paket'] !== id);
           _renderPackageTable(__packagesCache);
         }
+        LocalCache.update('catalogue_packages', (catPkgs) => {
+          return (Array.isArray(catPkgs) ? catPkgs : []).filter(p => p.id !== id);
+        });
 
         // 2. QUEUE SYNC BACKGROUND
         SyncQueue.add('deletePackage', [id, currentUser ? currentUser.name : 'Admin']);
@@ -7277,6 +7363,25 @@ Terima kasih dan selamat berlatih!`;
           }
         }
         _renderPackageTable(__packagesCache);
+        
+        LocalCache.update('catalogue_packages', (catPkgs) => {
+          const list = Array.isArray(catPkgs) ? catPkgs : [];
+          const mapped = {
+            id: data['ID Paket'],
+            name: data['Nama Paket'],
+            type: data['Tipe Paket'],
+            duration: data['Durasi'],
+            price: data['Harga']
+          };
+          if (isNew) {
+            list.push(mapped);
+          } else {
+            const cIdx = list.findIndex(p => p.id === data['ID Paket']);
+            if (cIdx !== -1) list[cIdx] = mapped;
+            else list.push(mapped);
+          }
+          return list;
+        });
       }
 
       // 2. QUEUE SYNC BACKGROUND
@@ -8179,29 +8284,39 @@ Terima kasih dan selamat berlatih!`;
       document.getElementById('visit_name').value = 'Visitor';
       document.getElementById('visit_phone').value = '-';
 
-      google.script.run
-        .withSuccessHandler(function (res) {
-          if (res && res.success && res.packages) {
-            // Filter hanya paket VISIT atau Harian
-            const visitPkgs = res.packages.filter(p => {
-              const t = (p.type || '').toUpperCase();
-              return t === 'VISIT' || t === 'HARIAN' || t.includes('VISIT');
-            });
+      const renderVisitOptions = (pkgs) => {
+        // Filter hanya paket VISIT atau Harian
+        const visitPkgs = pkgs.filter(p => {
+          const t = (p.type || '').toUpperCase();
+          return t === 'VISIT' || t === 'HARIAN' || t.includes('VISIT');
+        });
 
-            if (visitPkgs.length === 0) {
-              typeSelect.innerHTML = '<option value="">Tidak ada paket VISIT aktif</option>';
+        if (visitPkgs.length === 0) {
+          typeSelect.innerHTML = '<option value="">Tidak ada paket VISIT aktif</option>';
+        } else {
+          typeSelect.innerHTML = visitPkgs.map(p =>
+            `<option value="${p.id}" data-price="${p.price}">${escapeHtml(p.name)} - ${formatCurrency(p.price)}</option>`
+          ).join('');
+          updateVisitPrice();
+        }
+      };
+
+      const cachedPkgs = LocalCache.get('catalogue_packages');
+      if (cachedPkgs && cachedPkgs.length > 0) {
+        renderVisitOptions(cachedPkgs);
+      } else {
+        google.script.run
+          .withSuccessHandler(function (res) {
+            if (res && res.success && res.packages) {
+              LocalCache.set('catalogue_packages', res.packages, 60);
+              renderVisitOptions(res.packages);
             } else {
-              typeSelect.innerHTML = visitPkgs.map(p =>
-                `<option value="${p.id}" data-price="${p.price}">${escapeHtml(p.name)} - ${formatCurrency(p.price)}</option>`
-              ).join('');
-              updateVisitPrice();
+              showToast('❌ Gagal memuat paket visit', 'error');
+              typeSelect.innerHTML = '<option value="">Gagal memuat paket</option>';
             }
-          } else {
-            showToast('❌ Gagal memuat paket visit', 'error');
-            typeSelect.innerHTML = '<option value="">Gagal memuat paket</option>';
-          }
-        })
-        .getPackages();
+          })
+          .getPackages();
+      }
 
       document.getElementById('visitModal').style.display = 'flex';
     }
@@ -9521,7 +9636,15 @@ Terima kasih dan selamat berlatih!`;
         .sendTestEmail(email);
     }
 
-    function loadMemberList() {
+    function loadMemberList(force = false) {
+      if (!force) {
+        const cached = LocalCache.get('all_members');
+        if (cached && cached.length > 0) {
+          _renderMemberList(cached);
+          return;
+        }
+      }
+
       document.getElementById('adminDataView').innerHTML = `
         <div style="text-align:center;padding:20px;color:var(--text-secondary)">
           <i class="fas fa-spinner fa-spin"></i> Memuat...
@@ -9533,69 +9656,8 @@ Terima kasih dan selamat berlatih!`;
           const el = document.getElementById('adminDataView');
           if (!el) return;
           let list = (res && res.success) ? res.members : [];
-          window.currentMemberList = list;
-
-          // MERGE PENDING REGISTRATIONS (OPTIMISTIC)
-          const queue = SyncQueue.get();
-          const pending = queue.filter(q => q.action === 'registerMember');
-
-          pending.forEach(p => {
-            const data = p.args[0] || {};
-            list.unshift({
-              memberId: 'SYNCING...',
-              fullName: data.fullName || 'Member',
-              phone: data.phone || '-',
-              status: 'Aktif',
-              expiryDate: '-',
-              isSyncing: true
-            });
-          });
-
-          if (!list || !list.length) {
-            el.innerHTML = '<p class="text-muted" style="padding:20px;text-align:center">Tidak ada data member</p>';
-            return;
-          }
-
-          el.innerHTML = `
-            <div class="table-container">
-              <div style="padding:16px;background:var(--bg-light);border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center">
-                <h4 style="font-weight:600; margin:0">Daftar Member (${list.length})</h4>
-                <button class="btn btn-sm btn-outline" onclick="exportMembersToCSV()">
-                  <i class="fas fa-file-csv"></i> Export CSV
-                </button>
-              </div>
-              <div style="overflow-x:auto">
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>ID Member</th>
-                      <th>Nama Lengkap</th>
-                      <th>No. HP</th>
-                      <th>Status</th>
-                      <th>Masa Aktif</th>
-                      <th>Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${list.map(m => `
-                      <tr>
-                        <td><code>${escapeHtml(m.memberId || '-')}</code></td>
-                        <td><b>${escapeHtml(m.fullName || m.name || '-')}</b></td>
-                        <td>${escapeHtml(m.phone || '-')}</td>
-                        <td><span class="badge badge-success">Aktif</span></td>
-                        <td>${formatDate(m.expiryDate)}</td>
-                        <td>
-                          <button class="btn btn-sm btn-outline" onclick="viewMemberDetail('${m.memberId}')">
-                            <i class="fas fa-eye"></i>
-                          </button>
-                        </td>
-                      </tr>
-                    `).join('')}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          `;
+          LocalCache.set('all_members', list, 120);
+          _renderMemberList(list);
         })
         .withFailureHandler(function (err) {
           const el = document.getElementById('adminDataView');
@@ -9604,91 +9666,167 @@ Terima kasih dan selamat berlatih!`;
         .getAllMembers();
     }
 
-    function loadTransactionList() {
+    function _renderMemberList(list) {
+      const el = document.getElementById('adminDataView');
+      if (!el) return;
+      window.currentMemberList = list;
+
+      if (!list || !list.length) {
+        el.innerHTML = '<p class="text-muted" style="padding:20px;text-align:center">Tidak ada data member</p>';
+        return;
+      }
+
+      el.innerHTML = `
+        <div class="table-container">
+          <div style="padding:16px;background:var(--bg-light);border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px">
+            <h4 style="font-weight:600; margin:0">Daftar Member (${list.length})</h4>
+            <div style="display:flex; gap:8px; align-items:center">
+              <button class="btn btn-sm btn-outline" onclick="loadMemberList(true)" title="Perbarui Data">
+                <i class="fas fa-sync-alt"></i> Refresh
+              </button>
+              <button class="btn btn-sm btn-outline" onclick="exportMembersToCSV()">
+                <i class="fas fa-file-csv"></i> Export CSV
+              </button>
+            </div>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID Member</th>
+                  <th>Nama Lengkap</th>
+                  <th>No. HP</th>
+                  <th>Status</th>
+                  <th>Masa Aktif</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${list.map(m => `
+                  <tr>
+                    <td><code>${escapeHtml(m.memberId || m.id || '-')}</code></td>
+                    <td><b>${escapeHtml(m.fullName || m.name || '-')}</b></td>
+                    <td>${escapeHtml(m.phone || '-')}</td>
+                    <td><span class="badge badge-${m.status === 'Aktif' || !m.status ? 'success' : 'secondary'}">${m.status || 'Aktif'}</span></td>
+                    <td>${formatDate(m.expiryDate || m.expiry)}</td>
+                    <td>
+                      <button class="btn btn-sm btn-outline" onclick="viewMemberDetail('${m.memberId || m.id}')">
+                        <i class="fas fa-eye"></i>
+                      </button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    let __transactionCache = null;
+    function loadTransactionList(force = false) {
+      if (!force && __transactionCache) {
+        _renderTransactionList(__transactionCache);
+        return;
+      }
+
       document.getElementById('adminDataView').innerHTML = `
         <div style="text-align:center;padding:20px;color:var(--text-secondary)">
           <i class="fas fa-spinner fa-spin"></i> Memuat...
         </div>
       `;
 
-      const isAdmin = currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Super Admin');
-
       google.script.run
         .withSuccessHandler(function (res) {
           const el = document.getElementById('adminDataView');
           if (!el) return;
           let list = (res && res.success) ? res.transactions : [];
-
-          // MERGE PENDING TRANSACTIONS (OPTIMISTIC)
-          const queue = SyncQueue.get();
-          const pending = queue.filter(q => q.action === 'processTransaction');
-          const allMembers = LocalCache.get('all_members') || [];
-
-          pending.forEach(p => {
-            const data = p.args[0] || {};
-            const m = allMembers.find(mem => (mem.memberId || mem.id) === data.memberId);
-            list.unshift({
-              receiptNumber: 'SYNCING...',
-              memberName: m ? (m.fullName || m.name) : 'Member',
-              packageName: '...',
-              totalAmount: 0,
-              transactionDate: new Date(p.timestamp).toISOString(),
-              status: 'Berhasil'
-            });
-          });
-
-          if (!list || !list.length) {
-            el.innerHTML = '<p class="text-muted" style="padding:20px;text-align:center">Tidak ada data transaksi</p>';
-            return;
-          }
-
-          el.innerHTML = `
-            <div class="table-container">
-              <div style="padding:16px;background:var(--bg-light);border-bottom:1px solid var(--border-color)">
-                <h4 style="font-weight:600">Riwayat Transaksi (${list.length})</h4>
-              </div>
-              <div style="overflow-x:auto">
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>No. Kwitansi</th>
-                      <th>Member</th>
-                      <th>Paket</th>
-                      <th>Total</th>
-                      <th>Tanggal</th>
-                      <th>Status</th>
-                      <th>Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${list.map(t => `
-                      <tr>
-                        <td><code>${escapeHtml(t.receiptNumber || '-')}</code></td>
-                        <td>${escapeHtml(t.memberName || '-')}</td>
-                        <td>${escapeHtml(t.packageName || '-')}</td>
-                        <td><b style="color:#22c55e">${formatCurrency(t.totalAmount || 0)}</b></td>
-                        <td>${formatDateTime(t.transactionDate)}</td>
-                        <td><span class="badge badge-success">Berhasil</span></td>
-                        <td>
-                          ${isAdmin ? `
-                          <button class="btn btn-sm btn-outline" style="padding:4px 8px; color:#ef4444; border-color:#ef4444" onclick="deleteTransactionUI('${t.receiptNumber}')" title="Hapus Transaksi">
-                            <i class="fas fa-trash"></i>
-                          </button>
-                          ` : ''}
-                        </td>
-                      </tr>
-                    `).join('')}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          `;
+          __transactionCache = list;
+          _renderTransactionList(list);
         })
         .withFailureHandler(function (err) {
           const el = document.getElementById('adminDataView');
           if (el) el.innerHTML = '<p class="text-muted">Error: ' + err.message + '</p>';
         })
         .getTransactionHistory();
+    }
+
+    function _renderTransactionList(baseList) {
+      const el = document.getElementById('adminDataView');
+      if (!el) return;
+      const isAdmin = currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Super Admin');
+      
+      let list = [...baseList];
+
+      // MERGE PENDING TRANSACTIONS (OPTIMISTIC)
+      const queue = SyncQueue.get();
+      const pending = queue.filter(q => q.action === 'processTransaction');
+      const allMembers = LocalCache.get('all_members') || [];
+
+      pending.forEach(p => {
+        const data = p.args[0] || {};
+        const m = allMembers.find(mem => (mem.memberId || mem.id) === data.memberId);
+        list.unshift({
+          receiptNumber: 'SYNCING...',
+          memberName: m ? (m.fullName || m.name) : 'Member',
+          packageName: 'Sedang diproses...',
+          totalAmount: data.totalAmount || 0,
+          transactionDate: new Date(p.timestamp || Date.now()).toISOString(),
+          status: 'Pending'
+        });
+      });
+
+      if (!list || !list.length) {
+        el.innerHTML = '<p class="text-muted" style="padding:20px;text-align:center">Tidak ada data transaksi</p>';
+        return;
+      }
+
+      el.innerHTML = `
+        <div class="table-container">
+          <div style="padding:16px;background:var(--bg-light);border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px">
+            <h4 style="font-weight:600; margin:0">Riwayat Transaksi (${list.length})</h4>
+            <div style="display:flex; gap:8px; align-items:center">
+              <button class="btn btn-sm btn-outline" onclick="loadTransactionList(true)" title="Perbarui Data">
+                <i class="fas fa-sync-alt"></i> Refresh
+              </button>
+            </div>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Waktu</th>
+                  <th>No. Kwitansi</th>
+                  <th>Member</th>
+                  <th>Detail Paket</th>
+                  ${isAdmin ? '<th>Nominal</th>' : ''}
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${list.map(t => `
+                  <tr>
+                    <td>${formatDateTime(t.transactionDate)}</td>
+                    <td><code>${escapeHtml(t.receiptNumber || '-')}</code></td>
+                    <td><b>${escapeHtml(t.memberName || '-')}</b></td>
+                    <td>${escapeHtml(t.packageName || '-')}</td>
+                    ${isAdmin ? `<td><b style="color:#22c55e">${formatCurrency(t.totalAmount || 0)}</b></td>` : ''}
+                    <td><span class="badge badge-${t.status === 'Pending' ? 'warning' : 'success'}">${escapeHtml(t.status || 'Berhasil')}</span></td>
+                    <td>
+                      ${isAdmin && t.status !== 'Pending' ? `
+                      <button class="btn btn-sm btn-outline" style="padding:4px 8px; color:#ef4444; border-color:#ef4444" onclick="deleteTransactionUI('${t.receiptNumber}')" title="Hapus Transaksi">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                      ` : ''}
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
     }
 
     function triggerShowSysInfo() {
