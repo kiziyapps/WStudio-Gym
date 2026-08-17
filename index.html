@@ -274,8 +274,8 @@
     const SyncManager = {
       isSyncing: false,
       lastSync: 0,
-      syncInterval: 30 * 1000, 
-
+      syncInterval: 5 * 60 * 1000, // 5 menit
+      queue: [],
       init: function () {
 
         this.lastSync = parseInt(localStorage.getItem('ugym_last_sync') || '0');
@@ -12857,3 +12857,4 @@ Terima kasih dan selamat berlatih!`;
   <!-- End of added missing features -->
 
 </body>
+</html>
