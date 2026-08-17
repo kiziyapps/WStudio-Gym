@@ -7166,7 +7166,7 @@ Terima kasih dan selamat berlatih!`;
         // 2. QUEUE SYNC BACKGROUND
         SyncQueue.add('deletePackage', [id, currentUser ? currentUser.name : 'Admin']);
 
-        showToast('✅ Paket dimasukkan ke antrean penghapusan', 'success');
+        showToast('✅ Paket dimasukkan antrean hapus. Perubahan tampil di sistem 5 menit ke depan.', 'success');
       });
     }
 
@@ -7187,7 +7187,7 @@ Terima kasih dan selamat berlatih!`;
         // 2. QUEUE
         SyncQueue.add('deleteProduct', [id, currentUser ? currentUser.name : 'Admin']);
 
-        showToast('✅ Produk dimasukkan ke antrean penghapusan', 'success');
+        showToast('✅ Produk dimasukkan antrean hapus. Perubahan tampil di sistem 5 menit ke depan.', 'success');
       });
     }
 
@@ -7387,7 +7387,7 @@ Terima kasih dan selamat berlatih!`;
       // 2. QUEUE SYNC BACKGROUND
       SyncQueue.add('savePackage', [data]);
 
-      showToast('✅ Paket dimasukkan ke antrean', 'success');
+      showToast('✅ Paket disimpan ke antrean. Perubahan tampil di sistem 5 menit ke depan.', 'success');
       closePackageModal();
     }
 
@@ -7550,7 +7550,7 @@ Terima kasih dan selamat berlatih!`;
       // 2. QUEUE SYNC BACKGROUND
       SyncQueue.add('saveProduct', [data]);
 
-      showToast('✅ Produk dimasukkan ke antrean', 'success');
+      showToast('✅ Produk disimpan ke antrean. Perubahan tampil di sistem 5 menit ke depan.', 'success');
       closeProductModal();
     }
 
