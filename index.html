@@ -4626,7 +4626,7 @@ Terima kasih dan selamat berlatih!`;
           hideLoading();
           showToast('Gagal memuat paket: ' + err.message, 'error');
         })
-        .getPackages();
+        .getPackages(true);
     }
 
     function _renderMemberForm(pkgs) {
@@ -5423,7 +5423,7 @@ Terima kasih dan selamat berlatih!`;
           hideLoading();
           showToast('Gagal memuat paket: ' + err.message, 'error');
         })
-        .getPackages();
+        .getPackages(true);
     }
 
     function _renderTransactionForm(pkgs) {
