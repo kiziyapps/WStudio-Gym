@@ -1526,14 +1526,16 @@
 
       google.script.run
         .withSuccessHandler(function (res) {
-          renderPackagesList(res);
+          if (res && res.success && res.packages) {
+            renderPackagesList(res);
+          }
         })
         .withFailureHandler(function (err) {
-          console.error('Gagal memperbarui paket dari server:', err);
+          console.error('Gagal memuat paket:', err);
           document.getElementById('packagesContainer').innerHTML =
             '<p style="color:#ef4444;text-align:center;padding:30px">Gagal memuat paket: ' + err.message + '</p>';
         })
-        .getPackages();
+        .getPackages(true);
     }
 
     function selectPackage(pkg) {

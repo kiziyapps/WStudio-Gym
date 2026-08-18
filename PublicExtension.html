@@ -717,7 +717,7 @@
         .withFailureHandler(function (err) {
           console.error('Gagal memperbarui paket dari server:', err);
         })
-        .getPackages();
+        .getPackages(true); // <-- Force bypass cache
     }
 
     function loadMemberInfo() {
