@@ -1487,9 +1487,24 @@
               <div class="package-duration">
                 <i class="far fa-clock"></i> ${p.duration || '-'}
               </div>
+              <div style="margin-top:8px;font-size:11px;color:#ef4444;font-weight:600;">
+                + Biaya Registrasi: Rp 50.000
+              </div>
+              ${p.description ? `
+                <div style="margin-top:8px;font-size:13px;color:#475569;font-style:italic">
+                  ${p.description}
+                </div>
+              ` : ''}
               ${p.benefits ? `
                 <div style="margin-top:12px;font-size:12px;color:#64748b">
+                  <div style="font-weight:600;margin-bottom:4px;color:#334155">Benefits:</div>
                   <i class="fas fa-check-circle" style="color:#22c55e"></i> ${p.benefits}
+                </div>
+              ` : ''}
+              ${p.terms ? `
+                <div style="margin-top:8px;font-size:11px;color:#94a3b8;border-top:1px dashed #cbd5e1;padding-top:8px">
+                  <div style="font-weight:600;margin-bottom:2px">Syarat & Ketentuan:</div>
+                  ${p.terms}
                 </div>
               ` : ''}
             </div>
@@ -1504,41 +1519,22 @@
       }
     }
 
-    // ================ LOAD PACKAGES (Stale-While-Revalidate) ================
+    // ================ LOAD PACKAGES (Always Fresh) ================
     function loadPackages() {
-      const cacheKey = 'ugym_pub_packages_v2';
-      const cacheExpiryKey = 'ugym_pub_packages_v2_expiry';
-      const cachedData = localStorage.getItem(cacheKey);
-      const cacheExpiry = localStorage.getItem(cacheExpiryKey);
-
-      const isCacheValid = cachedData && cacheExpiry && (Date.now() < parseInt(cacheExpiry));
-
-      if (isCacheValid) {
-        try {
-          const res = JSON.parse(cachedData);
-          renderPackagesList(res);
-          console.log('⚡ Loaded packages from Client-Side Cache');
-        } catch (e) {
-          localStorage.removeItem(cacheKey);
-          localStorage.removeItem(cacheExpiryKey);
-        }
-      }
+      // Menghapus sisa cache lama agar tidak mengganggu
+      localStorage.removeItem('ugym_pub_packages');
+      localStorage.removeItem('ugym_pub_packages_expiry');
+      localStorage.removeItem('ugym_pub_packages_v2');
+      localStorage.removeItem('ugym_pub_packages_v2_expiry');
 
       google.script.run
         .withSuccessHandler(function (res) {
-          if (res && res.success && res.packages && res.packages.length) {
-            // Simpan ke cache lokal (kedaluwarsa dalam 2 jam)
-            localStorage.setItem(cacheKey, JSON.stringify(res));
-            localStorage.setItem(cacheExpiryKey, (Date.now() + 2 * 60 * 60 * 1000).toString());
-          }
           renderPackagesList(res);
         })
         .withFailureHandler(function (err) {
           console.error('Gagal memperbarui paket dari server:', err);
-          if (!isCacheValid) {
-            document.getElementById('packagesContainer').innerHTML =
-              '<p style="color:#ef4444;text-align:center;padding:30px">Gagal memuat paket: ' + err.message + '</p>';
-          }
+          document.getElementById('packagesContainer').innerHTML =
+            '<p style="color:#ef4444;text-align:center;padding:30px">Gagal memuat paket: ' + err.message + '</p>';
         })
         .getPackages();
     }

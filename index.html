@@ -343,7 +343,7 @@
             checkDone();
           })
           .withFailureHandler(err => { hasError = true; checkDone(); })
-          .getDashboardStats();
+          .getDashboardStats(null, null, force);
 
         // 2. Packages (Cepat)
         google.script.run
@@ -355,7 +355,7 @@
             checkDone();
           })
           .withFailureHandler(err => { hasError = true; checkDone(); })
-          .getPackages();
+          .getPackages(force);
 
         // 3. Products (Cepat)
         google.script.run
@@ -367,7 +367,7 @@
             checkDone();
           })
           .withFailureHandler(err => { hasError = true; checkDone(); })
-          .getProducts();
+          .getProducts(force);
 
         // 4. Recent Activity (Transaksi & Checkin - Cepat)
         google.script.run
@@ -4659,7 +4659,7 @@ Terima kasih dan selamat berlatih!`;
             </div>
             <div class="form-group">
               <label class="form-label">Pilih Paket *</label>
-              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px">
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
                 ${pkgs.length ? pkgs.filter(p => {
         const t = (p.type || '').toLowerCase();
         const n = (p.name || '').toLowerCase();
@@ -4667,9 +4667,26 @@ Terima kasih dan selamat berlatih!`;
           !n.includes('harian') && !n.includes('visit');
       }).map(p => `
                   <div class="pkg-card" data-id="${p.id}" data-price="${p.price}" data-name="${p.name}" data-dur="${p.duration}" onclick="selectPkg(this)">
-                    <div style="font-weight:600;margin-bottom:6px">${escapeHtml(p.name)}</div>
-                    <div style="color:#667eea;font-weight:700">${formatCurrency(p.price)}</div>
-                    <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">${escapeHtml(p.duration || '')}</div>
+                    <div style="font-weight:600;margin-bottom:6px;font-size:15px">${escapeHtml(p.name)}</div>
+                    <div style="color:#667eea;font-weight:700;font-size:16px">${formatCurrency(p.price)}</div>
+                    <div style="font-size:12px;color:var(--text-secondary);margin-top:4px"><i class="far fa-clock"></i> ${escapeHtml(p.duration || '')}</div>
+                    ${p.description ? `
+                      <div style="margin-top:8px;font-size:12px;color:#475569;font-style:italic">
+                        ${escapeHtml(p.description)}
+                      </div>
+                    ` : ''}
+                    ${p.benefits ? `
+                      <div style="margin-top:10px;font-size:11px;color:#64748b">
+                        <div style="font-weight:600;margin-bottom:2px;color:#334155">Benefits:</div>
+                        <i class="fas fa-check-circle" style="color:#22c55e"></i> ${escapeHtml(p.benefits)}
+                      </div>
+                    ` : ''}
+                    ${p.terms ? `
+                      <div style="margin-top:8px;font-size:10px;color:#94a3b8;border-top:1px dashed #cbd5e1;padding-top:6px">
+                        <div style="font-weight:600;margin-bottom:2px">S&K:</div>
+                        ${escapeHtml(p.terms)}
+                      </div>
+                    ` : ''}
                   </div>
                 `).join('') : '<p class="text-muted">Tidak ada paket tersedia</p>'}
               </div>
@@ -7269,7 +7286,9 @@ Terima kasih dan selamat berlatih!`;
 
           document.getElementById('pkg_price').value = p['Harga'];
           document.getElementById('pkg_promo').value = p['Promo'] || 0;
-          document.getElementById('pkg_desc').value = p['Deskripsi'];
+          document.getElementById('pkg_desc').value = p['Deskripsi'] || '';
+          document.getElementById('pkg_benefits').value = p['Benefit'] || '';
+          document.getElementById('pkg_terms').value = p['Syarat'] || '';
           document.getElementById('pkg_active').checked = p['Is Active'] === true || p['Is Active'] === 'TRUE' || p['Is Active'] === 'true';
 
           if (document.getElementById('pkg_sessions')) {
@@ -7307,6 +7326,8 @@ Terima kasih dan selamat berlatih!`;
         document.getElementById('pkg_price').value = 0;
         document.getElementById('pkg_promo').value = 0;
         document.getElementById('pkg_desc').value = '';
+        document.getElementById('pkg_benefits').value = '';
+        document.getElementById('pkg_terms').value = '';
         document.getElementById('pkg_active').checked = true;
 
         if (document.getElementById('pkg_sessions')) {
@@ -7337,6 +7358,10 @@ Terima kasih dan selamat berlatih!`;
         'Promo': promoVal,
         'Total Harga': totalVal,
         'Deskripsi': document.getElementById('pkg_desc').value,
+        'Benefit': document.getElementById('pkg_benefits').value,
+        'Benefits': document.getElementById('pkg_benefits').value,
+        'Syarat': document.getElementById('pkg_terms').value,
+        'Terms': document.getElementById('pkg_terms').value,
         'Is Active': document.getElementById('pkg_active').checked
       };
 
@@ -10785,6 +10810,14 @@ Terima kasih dan selamat berlatih!`;
         <div class="form-group">
           <label class="form-label">Deskripsi</label>
           <textarea id="pkg_desc" class="form-input" rows="2"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Benefits</label>
+          <textarea id="pkg_benefits" class="form-input" rows="2" placeholder="Contoh: Free towel, locker, wifi"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Syarat & Ketentuan</label>
+          <textarea id="pkg_terms" class="form-input" rows="2" placeholder="Contoh: Minimal usia 15 tahun"></textarea>
         </div>
         <div class="form-group">
           <label style="display:flex; align-items:center; gap:10px; cursor:pointer">

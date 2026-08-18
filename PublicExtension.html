@@ -701,31 +701,15 @@
     }
 
     function loadPackages() {
-      const cacheKey = 'ugym_pub_packages_v2';
-      const cacheExpiryKey = 'ugym_pub_packages_v2_expiry';
-      const cachedData = localStorage.getItem(cacheKey);
-      const cacheExpiry = localStorage.getItem(cacheExpiryKey);
-
-      const isCacheValid = cachedData && cacheExpiry && (Date.now() < parseInt(cacheExpiry));
-
-      if (isCacheValid) {
-        try {
-          const res = JSON.parse(cachedData);
-          packages = filterPackages(res.packages);
-          if (currentMember) renderPackages();
-          console.log('⚡ Loaded packages from Client-Side Cache in Extension');
-        } catch (e) {
-          localStorage.removeItem(cacheKey);
-          localStorage.removeItem(cacheExpiryKey);
-        }
-      }
+      // Menghapus sisa cache lama agar tidak mengganggu
+      localStorage.removeItem('ugym_pub_packages');
+      localStorage.removeItem('ugym_pub_packages_expiry');
+      localStorage.removeItem('ugym_pub_packages_v2');
+      localStorage.removeItem('ugym_pub_packages_v2_expiry');
 
       google.script.run
         .withSuccessHandler(function (res) {
           if (res && res.success && res.packages) {
-            localStorage.setItem(cacheKey, JSON.stringify(res));
-            localStorage.setItem(cacheExpiryKey, (Date.now() + 2 * 60 * 60 * 1000).toString());
-
             packages = filterPackages(res.packages);
             if (currentMember) renderPackages();
           }
@@ -819,16 +803,30 @@
       packages.forEach(pkg => {
         html += `
           <div class="package-card" onclick="selectPackage('${pkg.id}')" id="pkg-${pkg.id}">
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <span class="package-name">${pkg.name}</span>
-              <span class="package-price">${formatCurrency(pkg.price || pkg.total)}</span>
+            <div class="package-name" style="font-weight:600;font-size:16px">${pkg.name}</div>
+            <div class="package-price" style="color:#667eea;font-weight:700;font-size:18px;margin-top:4px">${formatCurrency(pkg.price || pkg.total)}</div>
+            <div class="package-duration" style="margin-top:8px;font-size:14px;color:#64748b">
+              <i class="far fa-clock"></i> ${pkg.duration || '-'}
             </div>
-            <div style="display:flex;justify-content:space-between;margin-top:4px">
-              <span class="package-duration"><i class="far fa-clock"></i> ${pkg.duration}</span>
-              <span style="color:#94a3b8;font-size:13px">${pkg.discount > 0 ? 'Diskon: ' + formatCurrency(pkg.discount) : ''}</span>
-            </div>
-            ${pkg.benefits ? `<div style="margin-top:8px;font-size:11px;color:#64748b;border-top:1px dashed #eee;padding-top:4px"><i class="fas fa-check-circle" style="color:#22c55e"></i> ${pkg.benefits}</div>` : ''}
-          </div>`;
+            ${pkg.description ? `
+              <div style="margin-top:8px;font-size:13px;color:#475569;font-style:italic">
+                ${pkg.description}
+              </div>
+            ` : ''}
+            ${pkg.benefits ? `
+              <div style="margin-top:12px;font-size:12px;color:#64748b">
+                <div style="font-weight:600;margin-bottom:4px;color:#334155">Benefits:</div>
+                <i class="fas fa-check-circle" style="color:#22c55e"></i> ${pkg.benefits}
+              </div>
+            ` : ''}
+            ${pkg.terms ? `
+              <div style="margin-top:8px;font-size:11px;color:#94a3b8;border-top:1px dashed #cbd5e1;padding-top:8px">
+                <div style="font-weight:600;margin-bottom:2px">Syarat & Ketentuan:</div>
+                ${pkg.terms}
+              </div>
+            ` : ''}
+          </div>
+        `;
       });
       container.innerHTML = html;
     }
