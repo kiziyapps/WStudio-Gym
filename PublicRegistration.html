@@ -1461,13 +1461,14 @@
         return;
       }
 
-      // Standarisasi filter: Tampilkan seluruh paket keanggotaan publik (REGULAR, PROMO, VISIT, dll kecuali PT)
+      // Standarisasi filter: Tampilkan hanya paket bertipe REGULAR
       let filtered = res.packages.filter(p => {
         const t = (p.type || '').toString().toUpperCase();
-        return t !== 'PT';
+        return t === 'REGULAR' || t === 'MEMBER'; // Di Kode.gs, default awal tipenya "Member", namun distandarisasi jadi "REGULAR" di app. Kita cek dua-duanya untuk aman.
       });
       if (!filtered || filtered.length === 0) {
-        filtered = res.packages;
+        // Jangan fallback ke semua paket jika tidak ada REGULAR, biar sesuai request
+        filtered = [];
       }
 
       packages = filtered;

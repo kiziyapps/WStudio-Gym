@@ -692,13 +692,11 @@
 
     function filterPackages(resPackages) {
       if (!resPackages || !resPackages.length) return [];
-      let filtered = resPackages.filter(p => p.type && p.type.toLowerCase().includes('regular'));
-      if (!filtered || filtered.length === 0) {
-        filtered = resPackages.filter(p => !p.type || (!p.type.toLowerCase().includes('pt') && !p.type.toLowerCase().includes('personal')));
-      }
-      if (!filtered || filtered.length === 0) {
-        filtered = resPackages;
-      }
+      // Standarisasi filter: Tampilkan hanya paket bertipe REGULAR / MEMBER (Sama seperti Public Registration)
+      let filtered = resPackages.filter(p => {
+        const t = (p.type || '').toString().toUpperCase();
+        return t === 'REGULAR' || t === 'MEMBER';
+      });
       return filtered;
     }
 
