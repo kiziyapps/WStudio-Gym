@@ -1792,8 +1792,10 @@
           });
 
           updateBrandingUI(select.value);
+          if (typeof loadPackages === 'function') loadPackages();
         } else if (select) {
           select.innerHTML = '<option value="">Tidak ada cabang tersedia</option>';
+          if (typeof loadPackages === 'function') loadPackages();
         }
       }).getActiveBranches();
     }
@@ -1801,7 +1803,6 @@
     // Initialize
     window.onload = function () {
       initBranchSelection();
-      loadPackages();
       restoreDraft();
       setupAutosave();
     };

@@ -139,9 +139,10 @@
                             get: function (tt, finalMethod) {
                               return function (...args) {
                                 // Kirim request dengan kedua handler
+                                const currentBranchId = (typeof currentUser !== 'undefined' && currentUser && currentUser.branchId) ? currentUser.branchId : (document.getElementById('loginBranch') ? document.getElementById('loginBranch').value : null);
                                 fetch(SCRIPT_URL, {
                                   method: 'POST',
-                                  body: JSON.stringify({ action: finalMethod, args: args }),
+                                  body: JSON.stringify({ action: finalMethod, args: args, branchId: currentBranchId }),
                                   headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                                 })
                                   .then(response => response.json())
@@ -164,9 +165,10 @@
                       }
                       // Jika hanya withSuccessHandler tanpa withFailureHandler
                       return function (...args) {
+                        const currentBranchId = (typeof currentUser !== 'undefined' && currentUser && currentUser.branchId) ? currentUser.branchId : (document.getElementById('loginBranch') ? document.getElementById('loginBranch').value : null);
                         fetch(SCRIPT_URL, {
                           method: 'POST',
-                          body: JSON.stringify({ action: nextMethod, args: args }),
+                          body: JSON.stringify({ action: nextMethod, args: args, branchId: currentBranchId }),
                           headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                         })
                           .then(response => response.json())
@@ -182,9 +184,10 @@
               }
               // Jika langsung memanggil fungsi tanpa handler (misal untuk testing)
               return function (...args) {
+                const currentBranchId = (typeof currentUser !== 'undefined' && currentUser && currentUser.branchId) ? currentUser.branchId : (document.getElementById('loginBranch') ? document.getElementById('loginBranch').value : null);
                 fetch(SCRIPT_URL, {
                   method: 'POST',
-                  body: JSON.stringify({ action: methodName, args: args }),
+                  body: JSON.stringify({ action: methodName, args: args, branchId: currentBranchId }),
                   headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                 })
                   .then(response => response.json())
