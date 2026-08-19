@@ -703,10 +703,10 @@
 
     function loadPackages() {
       // Menghapus sisa cache lama agar tidak mengganggu
-      localStorage.removeItem('ugym_pub_packages');
-      localStorage.removeItem('ugym_pub_packages_expiry');
-      localStorage.removeItem('ugym_pub_packages_v2');
-      localStorage.removeItem('ugym_pub_packages_v2_expiry');
+      localStorage.removeItem('wstudio_pub_packages');
+      localStorage.removeItem('wstudio_pub_packages_expiry');
+      localStorage.removeItem('wstudio_pub_packages_v2');
+      localStorage.removeItem('wstudio_pub_packages_v2_expiry');
 
       google.script.run
         .withSuccessHandler(function (res) {
@@ -946,7 +946,7 @@
     // ================ AUTOSAVE DRAFT FORM ================
     function saveDraft() {
       const memberId = document.getElementById('memberIdInput')?.value || '';
-      localStorage.setItem('ugym_pub_ext_draft', memberId);
+      localStorage.setItem('wstudio_pub_ext_draft', memberId);
     }
 
     function restoreDraft() {
@@ -959,7 +959,7 @@
           return;
         }
 
-        const savedMemberId = localStorage.getItem('ugym_pub_ext_draft');
+        const savedMemberId = localStorage.getItem('wstudio_pub_ext_draft');
         if (savedMemberId) {
           document.getElementById('memberIdInput').value = savedMemberId;
         }
@@ -969,7 +969,7 @@
     }
 
     function clearDraft() {
-      localStorage.removeItem('ugym_pub_ext_draft');
+      localStorage.removeItem('wstudio_pub_ext_draft');
     }
 
     function setupAutosave() {

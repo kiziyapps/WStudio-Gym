@@ -205,7 +205,7 @@
 
     // ================ LOCAL CACHE & SYNC MANAGER ================
     const LocalCache = {
-      prefix: 'ugym_cache_',
+      prefix: 'wstudio_cache_',
       set: function (key, data, expiryMinutes = 60) {
         const item = {
           data: data,
@@ -251,7 +251,7 @@
     };
 
     const FollowupTracker = {
-      key: 'ugym_followup_tracking',
+      key: 'wstudio_followup_tracking',
       get(id, type, val) {
         const data = JSON.parse(localStorage.getItem(this.key) || '{}');
         return data[`${type}_${id}_${val}`] === true;
@@ -281,7 +281,7 @@
       queue: [],
       init: function () {
 
-        this.lastSync = parseInt(localStorage.getItem('ugym_last_sync') || '0');
+        this.lastSync = parseInt(localStorage.getItem('wstudio_last_sync') || '0');
 
         // Jalankan sync pertama kali setelah login
         if (currentUser) this.start();
@@ -327,7 +327,7 @@
               self.updateIndicator('online', 'Offline?');
             } else {
               self.lastSync = Date.now();
-              localStorage.setItem('ugym_last_sync', self.lastSync.toString());
+              localStorage.setItem('wstudio_last_sync', self.lastSync.toString());
               self.updateIndicator('success', 'Updated 100%!');
               setTimeout(() => self.updateIndicator('online', 'Online'), 3000);
             }
@@ -341,7 +341,7 @@
           .withSuccessHandler(res => {
             if (res && res.success && res.stats) {
               LocalCache.set('dashboard_stats', res.stats, 30);
-              window.dispatchEvent(new CustomEvent('ugym_sync_complete', { detail: { stats: res.stats } }));
+              window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { stats: res.stats } }));
             }
             checkDone();
           })
@@ -353,7 +353,7 @@
           .withSuccessHandler(res => {
             if (res && res.success && res.packages) {
               LocalCache.set('catalogue_packages', res.packages, 60);
-              window.dispatchEvent(new CustomEvent('ugym_sync_complete', { detail: { packages: res.packages } }));
+              window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { packages: res.packages } }));
             }
             checkDone();
           })
@@ -365,7 +365,7 @@
           .withSuccessHandler(res => {
             if (res && res.success && res.products) {
               LocalCache.set('pos_products', res.products, 60);
-              window.dispatchEvent(new CustomEvent('ugym_sync_complete', { detail: { products: res.products } }));
+              window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { products: res.products } }));
             }
             checkDone();
           })
@@ -378,7 +378,7 @@
             if (res && res.success) {
               if (res.transactions) LocalCache.set('recent_transactions', res.transactions, 60);
               if (res.checkins) LocalCache.set('today_checkins', res.checkins, 60);
-              window.dispatchEvent(new CustomEvent('ugym_sync_complete', { detail: res }));
+              window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: res }));
             }
             checkDone();
           })
@@ -400,7 +400,7 @@
                   } else {
                     LocalCache.set('all_members', accumulatedMembers, 120);
                     SearchIndex.build(accumulatedMembers);
-                    window.dispatchEvent(new CustomEvent('ugym_sync_complete', { detail: { members: accumulatedMembers } }));
+                    window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { members: accumulatedMembers } }));
                   }
                 }
               }
@@ -450,7 +450,7 @@
 
     // ================ IMPROVEMENT 5: FORM AUTO-SAVE ================
     const FormManager = {
-      key: 'ugym_form_backup',
+      key: 'wstudio_form_backup',
       save: function (formId, data) {
         const backups = JSON.parse(localStorage.getItem(this.key) || '{}');
         backups[formId] = { data: data, timestamp: Date.now() };
@@ -694,7 +694,7 @@
 
     // ================ SYNC QUEUE FOR OFFLINE ACTIONS ================
     const SyncQueue = {
-      key: 'ugym_offline_queue',
+      key: 'wstudio_offline_queue',
       isProcessing: false,
       add: function (action, args) {
         const queue = this.get();
@@ -10665,7 +10665,7 @@ Terima kasih dan selamat berlatih!`;
     function toggleDarkMode() {
       const body = document.body;
       const isDark = body.classList.toggle('dark-mode');
-      localStorage.setItem('gym_theme', isDark ? 'dark' : 'light');
+      localStorage.setItem('wstudio_theme', isDark ? 'dark' : 'light');
       updateThemeUI();
     }
 
@@ -10678,7 +10678,7 @@ Terima kasih dan selamat berlatih!`;
     }
 
     // Load theme on startup
-    const savedTheme = localStorage.getItem('gym_theme');
+    const savedTheme = localStorage.getItem('wstudio_theme');
     if (savedTheme === 'dark') {
       document.body.classList.add('dark-mode');
     }

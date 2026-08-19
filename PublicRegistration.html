@@ -1519,10 +1519,10 @@
     // ================ LOAD PACKAGES (Always Fresh) ================
     function loadPackages() {
       // Menghapus sisa cache lama agar tidak mengganggu
-      localStorage.removeItem('ugym_pub_packages');
-      localStorage.removeItem('ugym_pub_packages_expiry');
-      localStorage.removeItem('ugym_pub_packages_v2');
-      localStorage.removeItem('ugym_pub_packages_v2_expiry');
+      localStorage.removeItem('wstudio_pub_packages');
+      localStorage.removeItem('wstudio_pub_packages_expiry');
+      localStorage.removeItem('wstudio_pub_packages_v2');
+      localStorage.removeItem('wstudio_pub_packages_v2_expiry');
 
       google.script.run
         .withSuccessHandler(function (res) {
@@ -1691,12 +1691,12 @@
         paymentMethod: document.getElementById('paymentMethod')?.value || '',
         selectedPackage: selectedPackage ? { id: selectedPackage.id, name: selectedPackage.name, price: selectedPackage.price, duration: selectedPackage.duration } : null
       };
-      localStorage.setItem('ugym_pub_reg_draft', JSON.stringify(draft));
+      localStorage.setItem('wstudio_pub_reg_draft', JSON.stringify(draft));
     }
 
     function restoreDraft() {
       try {
-        const draftStr = localStorage.getItem('ugym_pub_reg_draft');
+        const draftStr = localStorage.getItem('wstudio_pub_reg_draft');
         if (!draftStr) return;
         const draft = JSON.parse(draftStr);
 
@@ -1715,7 +1715,7 @@
     }
 
     function clearDraft() {
-      localStorage.removeItem('ugym_pub_reg_draft');
+      localStorage.removeItem('wstudio_pub_reg_draft');
     }
 
     function setupAutosave() {
