@@ -879,7 +879,7 @@
     </div>
   </div>
 
-  <div class="container">
+  <div class="container" id="mainAppContainer" style="display:none">
     <!-- Header -->
     <div class="header">
       <img id="gymLogoHeader" src="https://i.imgur.com/NO5dVfb.png"
@@ -1772,6 +1772,7 @@
 
 
     function initBranchSelection() {
+      document.getElementById('loadingOverlay').style.display = 'flex';
       google.script.run.withSuccessHandler(function (backendBranches) {
         const select = document.getElementById('pubBranch');
         if (select && backendBranches && backendBranches.length > 0) {
@@ -1797,6 +1798,8 @@
           select.innerHTML = '<option value="">Tidak ada cabang tersedia</option>';
           if (typeof loadPackages === 'function') loadPackages();
         }
+        document.getElementById('loadingOverlay').style.display = 'none';
+        document.getElementById('mainAppContainer').style.display = 'block';
       }).getActiveBranches();
     }
 

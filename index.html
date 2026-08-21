@@ -3241,7 +3241,7 @@
     </div>
   </div>
 
-  <div id="authView" class="auth-layout">
+  <div id="authView" class="auth-layout" style="display:none">
     <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
       <div id="authCard" class="auth-card">Memuat Form Login...</div>
       <!-- Developer Branding -->
@@ -3738,6 +3738,7 @@ Terima kasih dan selamat berlatih!`;
     }
 
     function renderLoginForm() {
+      document.getElementById('loadingOverlay').style.display = 'flex';
       setTimeout(() => {
         google.script.run.withSuccessHandler(function (backendBranches) {
           const select = document.getElementById('loginBranch');
@@ -3756,6 +3757,8 @@ Terima kasih dan selamat berlatih!`;
           } else if (select) {
             select.innerHTML = '<option value="">Tidak ada cabang aktif</option>';
           }
+          document.getElementById('loadingOverlay').style.display = 'none';
+          document.getElementById('authView').style.display = 'flex';
         }).getActiveBranches();
       }, 500);
 
