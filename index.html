@@ -12764,6 +12764,27 @@ Terima kasih dan selamat berlatih!`;
         .resetUserPassword(currentUser.username, userId, newPass);
     }
 
+    function resendWelcomeEmail(memberId) {
+      if (!confirm('Kirim ulang email registrasi ke member ini? Email akan dikirim dengan menggunakan identitas cabang aktif saat ini.')) return;
+      showLoading('Mengirim ulang email...');
+      const currentBranchId = document.getElementById('loginBranch') ? document.getElementById('loginBranch').value : null;
+      
+      google.script.run
+        .withSuccessHandler(function (res) {
+          hideLoading();
+          if (res && res.success) {
+            showToast('Email berhasil dikirim ulang!', 'success');
+          } else {
+            showToast(res?.message || 'Gagal mengirim email', 'error');
+          }
+        })
+        .withFailureHandler(function (err) {
+          hideLoading();
+          showToast('Error: ' + err.message, 'error');
+        })
+        .resendMemberWelcomeEmail(memberId, currentBranchId);
+    }
+
     function viewMemberDetail(memberId) {
       const members = LocalCache.get('all_members') || [];
       const member = members.find(m => m.memberId === memberId || m.id === memberId);
@@ -12798,6 +12819,12 @@ Terima kasih dan selamat berlatih!`;
           <tr><td style="border:none; padding:4px"><b>Status</b></td><td style="border:none; padding:4px"><span class="badge badge-success">Aktif</span></td></tr>
         </tbody>
       </table>
+
+      <div style="margin-top:20px; text-align:center;">
+        <button class="btn btn-outline" onclick="resendWelcomeEmail('${member.memberId || member.id}')" style="width:100%; justify-content:center;">
+          <i class="fas fa-envelope"></i> Kirim Ulang Email Registrasi
+        </button>
+      </div>
     `;
 
       modal.style.display = 'flex';
