@@ -140,12 +140,24 @@
                               return function (...args) {
                                 // Kirim request dengan kedua handler
                                 const currentBranchId = (typeof currentUser !== 'undefined' && currentUser && currentUser.branchId) ? currentUser.branchId : (document.getElementById('loginBranch') ? document.getElementById('loginBranch').value : null);
-                                fetch(SCRIPT_URL, {
+                                  const finalUrl = SCRIPT_URL + "?t=" + Date.now();
+                                fetch(finalUrl, {
                                   method: 'POST',
                                   body: JSON.stringify({ action: finalMethod, args: args, branchId: currentBranchId }),
                                   headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                                 })
-                                  .then(response => response.json())
+                                  .then(async response => {
+                                    const text = await response.text();
+                                    try {
+                                      return JSON.parse(text);
+                                    } catch (e) {
+                                      if (text.includes('<html') || text.includes('<!DOCTYPE')) {
+                                        console.error("Terdeteksi respon HTML pada Proxy (Multi-Akun / Salah URL):", text.substring(0, 100));
+                                        throw new Error("Sistem mendeteksi bentrok sesi akun Google atau URL Web App salah (Proxy). Harap gunakan Mode Samaran.");
+                                      }
+                                      throw new Error("Invalid response dari server.");
+                                    }
+                                  })
                                   .then(data => {
                                     if (!data.success) {
                                       if (failureCallback) failureCallback(new Error(data.message));
@@ -166,12 +178,24 @@
                       // Jika hanya withSuccessHandler tanpa withFailureHandler
                       return function (...args) {
                         const currentBranchId = (typeof currentUser !== 'undefined' && currentUser && currentUser.branchId) ? currentUser.branchId : (document.getElementById('loginBranch') ? document.getElementById('loginBranch').value : null);
-                        fetch(SCRIPT_URL, {
+                        const finalUrl = SCRIPT_URL + "?t=" + Date.now();
+                        fetch(finalUrl, {
                           method: 'POST',
                           body: JSON.stringify({ action: nextMethod, args: args, branchId: currentBranchId }),
                           headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                         })
-                          .then(response => response.json())
+                          .then(async response => {
+                            const text = await response.text();
+                            try {
+                              return JSON.parse(text);
+                            } catch (e) {
+                              if (text.includes('<html') || text.includes('<!DOCTYPE')) {
+                                console.error("Terdeteksi respon HTML pada Proxy:", text.substring(0, 100));
+                                throw new Error("Bentrok sesi akun Google atau URL Web App salah.");
+                              }
+                              throw new Error("Invalid response dari server.");
+                            }
+                          })
                           .then(data => {
                             if (!data.success) console.error('Backend Error:', data.message);
                             else if (successCallback) successCallback(data.result);
@@ -185,12 +209,24 @@
               // Jika langsung memanggil fungsi tanpa handler (misal untuk testing)
               return function (...args) {
                 const currentBranchId = (typeof currentUser !== 'undefined' && currentUser && currentUser.branchId) ? currentUser.branchId : (document.getElementById('loginBranch') ? document.getElementById('loginBranch').value : null);
-                fetch(SCRIPT_URL, {
+                const finalUrl = SCRIPT_URL + "?t=" + Date.now();
+                fetch(finalUrl, {
                   method: 'POST',
                   body: JSON.stringify({ action: methodName, args: args, branchId: currentBranchId }),
                   headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                 })
-                  .then(response => response.json())
+                  .then(async response => {
+                    const text = await response.text();
+                    try {
+                      return JSON.parse(text);
+                    } catch (e) {
+                      if (text.includes('<html') || text.includes('<!DOCTYPE')) {
+                        console.error("Terdeteksi respon HTML pada Proxy:", text.substring(0, 100));
+                        throw new Error("Bentrok sesi akun Google atau URL Web App salah.");
+                      }
+                      throw new Error("Invalid response dari server.");
+                    }
+                  })
                   .then(data => {
                     if (!data.success) console.error('Backend Error:', data.message);
                     else console.log('Result:', data.result);
