@@ -79,9 +79,7 @@
       fetch(finalUrl, {
         method: 'POST',
         body: JSON.stringify(payload),
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        credentials: 'omit',
-        redirect: 'follow'
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
       })
         .then(async response => {
           const text = await response.text();
@@ -159,9 +157,7 @@
                                 fetch(finalUrl, {
                                   method: 'POST',
                                   body: JSON.stringify({ action: finalMethod, args: args, branchId: currentBranchId }),
-                                  headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                                  credentials: 'omit',
-                                  redirect: 'follow'
+                                  headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                                 })
                                   .then(async response => {
                                     const text = await response.text();
@@ -199,9 +195,7 @@
                         fetch(finalUrl, {
                           method: 'POST',
                           body: JSON.stringify({ action: nextMethod, args: args, branchId: currentBranchId }),
-                          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                          credentials: 'omit',
-                          redirect: 'follow'
+                          headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                         })
                           .then(async response => {
                             const text = await response.text();
@@ -232,9 +226,7 @@
                 fetch(finalUrl, {
                   method: 'POST',
                   body: JSON.stringify({ action: methodName, args: args, branchId: currentBranchId }),
-                  headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                  credentials: 'omit',
-                  redirect: 'follow'
+                  headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                 })
                   .then(async response => {
                     const text = await response.text();

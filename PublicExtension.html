@@ -54,9 +54,7 @@
                   fetch(finalUrl, {
                     method: 'POST',
                     body: JSON.stringify({ action: propName, args: args, branchId: branchId }),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    credentials: 'omit',
-                    redirect: 'follow'
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                   })
                     .then(async response => {
                       const text = await response.text();
