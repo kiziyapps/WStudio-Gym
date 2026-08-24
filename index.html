@@ -320,7 +320,7 @@
         const checkDone = () => {
           pendingRequests--;
           let progress = Math.round(((totalRequests - pendingRequests) / totalRequests) * 100);
-          
+
           if (pendingRequests <= 0) {
             self.isSyncing = false;
             if (hasError) {
@@ -4607,7 +4607,7 @@ Terima kasih dan selamat berlatih!`;
         const q = e.target.value.toLowerCase();
         let count = 0;
         document.querySelectorAll('.gallery-item').forEach(item => {
-            if (matches) count++;
+          if (matches) count++;
         });
       });
     }
@@ -5416,7 +5416,7 @@ Terima kasih dan selamat berlatih!`;
         _renderTransactionForm(cachedPkgs);
         return;
       }
-      
+
       showLoading();
       google.script.run
         .withSuccessHandler(function (res) {
@@ -7394,7 +7394,7 @@ Terima kasih dan selamat berlatih!`;
           }
         }
         _renderPackageTable(__packagesCache);
-        
+
         LocalCache.update('catalogue_packages', (catPkgs) => {
           const list = Array.isArray(catPkgs) ? catPkgs : [];
           const mapped = {
@@ -9786,7 +9786,7 @@ Terima kasih dan selamat berlatih!`;
       const el = document.getElementById('adminDataView');
       if (!el) return;
       const isAdmin = currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Super Admin');
-      
+
       let list = [...baseList];
 
       // MERGE PENDING TRANSACTIONS (OPTIMISTIC)
@@ -12276,7 +12276,8 @@ Terima kasih dan selamat berlatih!`;
           <input type="email" id="editBranchEmail" class="form-input" placeholder="Contoh: info@emailcabang.com">
 
           <label class="form-label">Nomor Rekening</label>
-          <input type="text" id="editBranchBankAccount" class="form-input" placeholder="BCA 12345678 a/n Rekening Cabang">
+          <input type="text" id="editBranchBankAccount" class="form-input"
+            placeholder="BCA 12345678 a/n Rekening Cabang">
 
           <label class="form-label">Alamat Lengkap</label>
           <textarea id="editBranchAddress" class="form-input" rows="3" placeholder="Jl. Sudirman No 1..."></textarea>
@@ -12768,7 +12769,7 @@ Terima kasih dan selamat berlatih!`;
       if (!confirm('Kirim ulang email registrasi ke member ini? Email akan dikirim dengan menggunakan identitas cabang aktif saat ini.')) return;
       showLoading('Mengirim ulang email...');
       const currentBranchId = document.getElementById('loginBranch') ? document.getElementById('loginBranch').value : null;
-      
+
       google.script.run
         .withSuccessHandler(function (res) {
           hideLoading();
@@ -12923,4 +12924,5 @@ Terima kasih dan selamat berlatih!`;
   <!-- End of added missing features -->
 
 </body>
+
 </html>
