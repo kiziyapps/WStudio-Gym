@@ -5632,24 +5632,52 @@ Terima kasih dan selamat berlatih!`;
     function searchMemberForCheckin(query) {
       if (window.ciSearchTimeout) clearTimeout(window.ciSearchTimeout);
       const q = query.trim();
-      if (q.length < 3) {
-        // Clear preview if input is too short
-        if (q.length === 0) document.getElementById('checkinPreviewArea').innerHTML = '';
+      if (q.length < 2) {
+        document.getElementById('checkinPreviewArea').innerHTML = '';
+        document.getElementById('ciMemberResults').innerHTML = '';
         return;
       }
 
-      // Direct Profile Fetch: Try Local Cache First
       const localResults = localSearchMember(q);
+      
+      // 1. Instant Scanner Match (Auto-select jika ID sama persis, karena ketikan scanner barcode instant)
       if (localResults && localResults.length > 0) {
         const exactMatch = localResults.find(m => (m.memberId || '').toUpperCase() === q.toUpperCase());
-        const bestMatch = exactMatch || localResults[0];
-        previewMemberCheckin(bestMatch.memberId);
-      } else {
-        // Fallback: If not found locally, try server fetch after delay
-        window.ciSearchTimeout = setTimeout(function () {
-          previewMemberCheckin(q);
-        }, 800);
+        if (exactMatch) {
+          // Hilangkan dropdown karena ini aktivitas scanner
+          document.getElementById('ciMemberResults').innerHTML = '';
+          previewMemberCheckin(exactMatch.memberId);
+          return; // Stop disini
+        }
       }
+
+      // 2. Jika bukan exact match, tampilkan dropdown (Manual Typing)
+      if (localResults) {
+        renderMemberSearchResults(localResults, 'ciMemberResults', 'selectMemberForCheckin');
+      } else {
+        document.getElementById('ciMemberResults').innerHTML = '<div style="text-align:center;padding:10px;color:var(--text-secondary)"><i class="fas fa-spinner fa-spin"></i></div>';
+      }
+
+      // 3. Fallback server fetch
+      window.ciSearchTimeout = setTimeout(function () {
+        google.script.run
+          .withSuccessHandler(function (res) {
+            if (res && res.success && res.members) {
+              // Pastikan input belum berubah saat response datang
+              if (document.getElementById('ci_memberId').value.trim() === q) {
+                  renderMemberSearchResults(res.members, 'ciMemberResults', 'selectMemberForCheckin');
+              }
+            }
+          })
+          .searchMembers(q);
+      }, localResults ? 1000 : 300);
+    }
+
+    function selectMemberForCheckin(json) {
+      const m = JSON.parse(json);
+      document.getElementById('ci_memberId').value = m.memberId;
+      document.getElementById('ciMemberResults').innerHTML = ''; // Sembunyikan dropdown
+      previewMemberCheckin(m.memberId);
     }
 
     function searchMemberForPOS(query) {
@@ -7818,7 +7846,10 @@ Terima kasih dan selamat berlatih!`;
                 </h4>
                 <div class="form-group">
                   <label class="form-label">Member ID / Nama / HP</label>
-                  <input id="ci_memberId" class="form-input" placeholder="Ketik ID, Nama, atau No. HP..." oninput="searchMemberForCheckin(this.value)" autocomplete="off">
+                  <div style="position:relative">
+                    <input id="ci_memberId" class="form-input" placeholder="Ketik ID, Nama, atau No. HP..." oninput="searchMemberForCheckin(this.value)" autocomplete="off">
+                    <div id="ciMemberResults" class="search-dropdown"></div>
+                  </div>
                 </div>
                 <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px">Profil member akan muncul secara otomatis di atas.</p>
                 <button class="btn btn-info btn-block" onclick="openVisitModal()">
