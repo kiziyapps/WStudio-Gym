@@ -11517,6 +11517,9 @@ Terima kasih dan selamat berlatih!`;
       btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyiapkan...';
       btn.disabled = true;
 
+      const start = document.getElementById('report_start')?.value;
+      const end = document.getElementById('report_end')?.value;
+
       google.script.run
         .withSuccessHandler(function (res) {
           btn.innerHTML = originalText;
@@ -11558,7 +11561,7 @@ Terima kasih dan selamat berlatih!`;
           btn.disabled = false;
           showToast('Error: ' + err.message, 'error');
         })
-        .generateDailyReportPDF();
+        .generateDailyReportPDF(start, end);
     }
 
     // ================ POS & STOCK HISTORY ================
