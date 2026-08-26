@@ -11251,9 +11251,9 @@ Terima kasih dan selamat berlatih!`;
       `;
 
       // Cek Cache untuk laporan hari ini
-      const cachedReport = LocalCache.get('today_full_report');
+      const todayKey = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
+      const cachedReport = LocalCache.get('daily_report_' + todayKey);
       if (cachedReport) {
-
         renderDailyReport(cachedReport);
       } else {
         generateRangeReport();
@@ -11274,7 +11274,7 @@ Terima kasih dan selamat berlatih!`;
             // Cache jika ini adalah laporan hari ini (range kosong atau start=end=today)
             const today = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
             if ((!start || start === today) && (!end || end === today)) {
-              LocalCache.set('today_full_report', res.report, 30);
+              LocalCache.set('daily_report_' + today, res.report, 30);
             }
           } else {
             if (loadArea) loadArea.innerHTML = '<div class="alert alert-error">Gagal memuat laporan: ' + res.message + '</div>';
