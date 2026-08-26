@@ -94,11 +94,12 @@
           }
         })
         .then(data => {
+          console.log('Full API Response:', data);
           if (data.success) {
             if (onSuccess) onSuccess(data.result);
           } else {
             const errMsg = data.error || data.message || 'Terjadi kesalahan sistem yang tidak diketahui';
-            console.error('API Error:', errMsg);
+            console.error('API Error:', errMsg, data);
             if (onFailure) onFailure(new Error(errMsg));
           }
         })
@@ -210,8 +211,13 @@
                             }
                           })
                           .then(data => {
-                            if (!data.success) console.error('Backend Error:', data.message);
-                            else if (successCallback) successCallback(data.result);
+                            console.log('Full API Response (Proxy 2):', data);
+                            if (!data.success) {
+                              const errMsg = data.error || data.message || 'Terjadi kesalahan sistem yang tidak diketahui';
+                              console.error('Backend Error:', errMsg, data);
+                            } else if (successCallback) {
+                              successCallback(data.result);
+                            }
                           })
                           .catch(err => console.error('Network Error:', err));
                       };
