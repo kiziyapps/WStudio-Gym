@@ -6957,9 +6957,10 @@ Terima kasih dan selamat berlatih!`;
       `;
       // Set default dates
       const today = new Date();
-      document.getElementById('restock_end').value = today.toISOString().split('T')[0];
+      const tzOffset = today.getTimezoneOffset() * 60000;
+      document.getElementById('restock_end').value = new Date(today.getTime() - tzOffset).toISOString().split('T')[0];
       const monthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
-      document.getElementById('restock_start').value = monthAgo.toISOString().split('T')[0];
+      document.getElementById('restock_start').value = new Date(monthAgo.getTime() - tzOffset).toISOString().split('T')[0];
 
       loadRestockHistory();
     }
@@ -11226,7 +11227,7 @@ Terima kasih dan selamat berlatih!`;
       const content = document.getElementById('dailyReportContent');
       modal.style.display = 'flex';
 
-      const today = new Date().toISOString().split('T')[0];
+      const today = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
 
       content.innerHTML = `
         <div style="background:var(--bg-light);padding:16px;border-radius:12px;margin-bottom:20px;border:1px solid var(--border-color)">
@@ -11271,7 +11272,7 @@ Terima kasih dan selamat berlatih!`;
           if (res.success) {
             renderDailyReport(res.report);
             // Cache jika ini adalah laporan hari ini (range kosong atau start=end=today)
-            const today = new Date().toISOString().split('T')[0];
+            const today = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
             if ((!start || start === today) && (!end || end === today)) {
               LocalCache.set('today_full_report', res.report, 30);
             }
@@ -11592,9 +11593,10 @@ Terima kasih dan selamat berlatih!`;
 
       // Default dates: current month
       const today = new Date();
+      const tzOffset = today.getTimezoneOffset() * 60000;
       const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-      document.getElementById('pos_hist_start').value = firstDay.toISOString().split('T')[0];
-      document.getElementById('pos_hist_end').value = today.toISOString().split('T')[0];
+      document.getElementById('pos_hist_start').value = new Date(firstDay.getTime() - tzOffset).toISOString().split('T')[0];
+      document.getElementById('pos_hist_end').value = new Date(today.getTime() - tzOffset).toISOString().split('T')[0];
 
       loadPOSTransactionHistory();
     }
@@ -12981,7 +12983,7 @@ Terima kasih dan selamat berlatih!`;
         const expiry = m.expiryDate ? formatDate(m.expiryDate) : '-';
         csv += `${id},${name},${phone},${gender},${joinDate},${expiry}\n`;
       });
-      downloadCSV(csv, 'Data_Member_' + new Date().toISOString().slice(0, 10) + '.csv');
+      downloadCSV(csv, 'Data_Member_' + new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10) + '.csv');
     }
 
     function exportTableToCSV() {
@@ -13001,7 +13003,7 @@ Terima kasih dan selamat berlatih!`;
         }
         csv.push(row.join(','));
       }
-      downloadCSV(csv.join('\n'), 'Laporan_' + new Date().toISOString().slice(0, 10) + '.csv');
+      downloadCSV(csv.join('\n'), 'Laporan_' + new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10) + '.csv');
     }
   </script>
   <!-- End of added missing features -->
