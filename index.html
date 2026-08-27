@@ -4386,7 +4386,7 @@ Terima kasih dan selamat berlatih!`;
       }
 
       showToast('Memperbarui data...', 'info');
-      fetchDashboardData(start, end);
+      fetchDashboardData(start, end, true);
       renderPTInfoInDashboard();
     }
 
@@ -4452,8 +4452,8 @@ Terima kasih dan selamat berlatih!`;
       refreshDashboard();
     }
 
-    function fetchDashboardData(start, end) {
-      if (!start && !end) {
+    function fetchDashboardData(start, end, force = false) {
+      if (!start && !end && !force) {
         const cached = LocalCache.get('dashboard_stats');
         if (cached && cached.hasOwnProperty('regularCheckinsCount')) {
 
@@ -4473,7 +4473,7 @@ Terima kasih dan selamat berlatih!`;
         .withFailureHandler(function (err) {
           console.error('Fetch dashboard error:', err);
         })
-        .getDashboardStats(start, end);
+        .getDashboardStats(start, end, force);
     }
 
     function updateDashboardUI(s) {
