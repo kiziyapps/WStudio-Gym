@@ -11547,21 +11547,28 @@ Terima kasih dan selamat berlatih!`;
           if (res.success) {
             const activeBranch = getActiveBranchInfo();
             const bName = (activeBranch && activeBranch.name) || 'Gym';
+
             const summary = res.summary;
             const text = `*LAPORAN HARIAN KASIR - ${bName}*\n` +
               `--------------------------------\n` +
               `Tanggal: ${res.fileName.replace('Laporan_Kasir_', '').replace('.pdf', '').replace(/_/g, ' ')}\n` +
               `--------------------------------\n` +
               `*Ringkasan Keuangan:*\n` +
-              `- Total Revenue: ${formatCurrency(summary.totalRevenue)}\n` +
+              `- Total Pendapatan: ${formatCurrency(summary.totalRevenue)}\n` +
               `   • Cash: ${formatCurrency(summary.cashIn || 0)}\n` +
               `   • Trf: ${formatCurrency(summary.transferIn || 0)}\n` +
-              `- Total Expenses: ${formatCurrency(summary.totalExpenses)}\n` +
+              `   • QRIS: ${formatCurrency(summary.qrisIn || 0)}\n` +
+              `   • Debit: ${formatCurrency(summary.debitIn || 0)}\n` +
+              `- Total Pengeluaran: ${formatCurrency(summary.totalExpenses)}\n` +
               `   • Cash: ${formatCurrency(summary.cashOut || 0)}\n` +
               `   • Trf: ${formatCurrency(summary.transferOut || 0)}\n` +
+              `   • QRIS: ${formatCurrency(summary.qrisOut || 0)}\n` +
+              `   • Debit: ${formatCurrency(summary.debitOut || 0)}\n` +
               `- Kas Kombinasi (Net): ${formatCurrency((summary.totalRevenue || 0) - (summary.totalExpenses || 0))}\n` +
               `   • Cash Net: ${formatCurrency(summary.netCash || 0)}\n` +
               `   • Trf Net: ${formatCurrency(summary.netTransfer || 0)}\n` +
+              `   • QRIS Net: ${formatCurrency(summary.netQris || 0)}\n` +
+              `   • Debit Net: ${formatCurrency(summary.netDebit || 0)}\n` +
               `--------------------------------\n` +
               `Detail Lengkap (PDF):\n` +
               `${res.url}\n\n` +
