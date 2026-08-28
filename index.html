@@ -7,7 +7,7 @@
 
 
     // Konfigurasi endpoint GAS Anda (Ganti dengan URL eksekusi GAS yang di-deploy)
-    const GAS_REST_API_URL = 'https://script.google.com/macros/s/AKfycbxOTUY8cVdLjGVAnqcz47fKDJXtUD7lsXVMJFqwFLsh-TjfdBT_DxaqsiAnFU4r36PcGg/exec';
+    const GAS_REST_API_URL = 'https://wstudiogym-proxy.kiziyapps.workers.dev/';
 
     // Polyfill & Proxy untuk google.script.run
     window.google = window.google || {};
@@ -141,7 +141,7 @@
   <script>
 
 
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxOTUY8cVdLjGVAnqcz47fKDJXtUD7lsXVMJFqwFLsh-TjfdBT_DxaqsiAnFU4r36PcGg/exec';
+    const SCRIPT_URL = 'https://wstudiogym-proxy.kiziyapps.workers.dev/';
     // ================ IMPROVED PROXY FOR google.script.run ================
     if (typeof google === 'undefined' || typeof google.script === 'undefined' || typeof google.script.run === 'undefined') {
       window.google = {
