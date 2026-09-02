@@ -1644,6 +1644,10 @@
       btn.disabled = true;
       showLoading();
 
+      const branchSelect = document.getElementById('pubBranch');
+      const branchId = branchSelect ? branchSelect.value : '';
+      const branchName = branchSelect && branchSelect.selectedIndex >= 0 ? branchSelect.options[branchSelect.selectedIndex].text : '';
+
       const registrationData = {
         fullName: formData.fullName,
         phone: formData.phone,
@@ -1653,7 +1657,9 @@
         paymentMethod: paymentMethod,
         paymentProof: paymentProofBase64,
         memberPhoto: memberPhoto,  // <-- TAMBAHKAN INI
-        ipAddress: 'web-client'
+        ipAddress: 'web-client',
+        branchId: branchId,
+        branchName: branchName
       };
 
       google.script.run

@@ -911,6 +911,9 @@
       reader.onload = function (e) {
         compressImage(e.target.result, 1000, 1000, 0.8).then(function (compressed) {
           const base64Data = compressed.split(',')[1];
+          const branchSelect = document.getElementById('pubBranch');
+          const branchId = branchSelect ? branchSelect.value : '';
+          const branchName = branchSelect && branchSelect.selectedIndex >= 0 ? branchSelect.options[branchSelect.selectedIndex].text : '';
 
           google.script.run
             .withSuccessHandler(function (res) {
@@ -957,7 +960,9 @@
             .submitExtensionRequest({
               memberId: currentMember.id,
               packageId: selectedPackage.id,
-              paymentProof: base64Data
+              paymentProof: base64Data,
+              branchId: branchId,
+              branchName: branchName
             });
         });
       };
