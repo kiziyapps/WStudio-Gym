@@ -89,10 +89,10 @@
             return JSON.parse(text);
           } catch (e) {
             if (text.includes('<html') || text.includes('<!DOCTYPE')) {
-              console.error("Terdeteksi respon HTML pada Proxy (Multi-Akun / Salah URL):", text.substring(0, 100));
-              throw new Error("Sistem mendeteksi bentrok sesi akun Google atau URL Web App salah. Harap gunakan Mode Samaran (Incognito).");
+              console.error("Terdeteksi respon HTML pada Proxy:", text.substring(0, 200));
+              throw new Error("Proxy menerima respons HTML, bukan JSON. Cek console log. Pastikan URL Web App (GAS) sudah benar (/exec) dan di-deploy dengan akses 'Anyone' (Semua Orang) dan Execute as 'Me'.");
             }
-            throw new Error("Invalid response dari server.");
+            throw new Error("Invalid response dari server: " + text.substring(0, 50));
           }
         })
         .then(data => {
@@ -172,10 +172,10 @@
                                       return JSON.parse(text);
                                     } catch (e) {
                                       if (text.includes('<html') || text.includes('<!DOCTYPE')) {
-                                        console.error("Terdeteksi respon HTML pada Proxy (Multi-Akun / Salah URL):", text.substring(0, 100));
-                                        throw new Error("Sistem mendeteksi bentrok sesi akun Google atau URL Web App salah (Proxy). Harap gunakan Mode Samaran.");
+                                        console.error("Terdeteksi respon HTML pada Proxy (Multi-Akun / Salah URL):", text.substring(0, 200));
+                                        throw new Error("Proxy menerima respons HTML, bukan JSON. Pastikan Web App GAS di-deploy dengan akses 'Anyone' dan Execute as 'Me'.");
                                       }
-                                      throw new Error("Invalid response dari server.");
+                                      throw new Error("Invalid response dari server: " + text.substring(0, 50));
                                     }
                                   })
                                   .then(data => {
@@ -210,10 +210,10 @@
                               return JSON.parse(text);
                             } catch (e) {
                               if (text.includes('<html') || text.includes('<!DOCTYPE')) {
-                                console.error("Terdeteksi respon HTML pada Proxy:", text.substring(0, 100));
-                                throw new Error("Bentrok sesi akun Google atau URL Web App salah.");
+                                console.error("Terdeteksi respon HTML pada Proxy:", text.substring(0, 200));
+                                throw new Error("Proxy menerima respons HTML, bukan JSON. Pastikan Web App GAS di-deploy dengan akses 'Anyone' dan Execute as 'Me'.");
                               }
-                              throw new Error("Invalid response dari server.");
+                              throw new Error("Invalid response dari server: " + text.substring(0, 50));
                             }
                           })
                           .then(data => {
@@ -246,10 +246,10 @@
                       return JSON.parse(text);
                     } catch (e) {
                       if (text.includes('<html') || text.includes('<!DOCTYPE')) {
-                        console.error("Terdeteksi respon HTML pada Proxy:", text.substring(0, 100));
-                        throw new Error("Bentrok sesi akun Google atau URL Web App salah.");
+                        console.error("Terdeteksi respon HTML pada Proxy:", text.substring(0, 200));
+                        throw new Error("Proxy menerima respons HTML, bukan JSON. Pastikan Web App GAS di-deploy dengan akses 'Anyone' dan Execute as 'Me'.");
                       }
-                      throw new Error("Invalid response dari server.");
+                      throw new Error("Invalid response dari server: " + text.substring(0, 50));
                     }
                   })
                   .then(data => {
