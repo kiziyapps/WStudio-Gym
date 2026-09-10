@@ -410,7 +410,7 @@
           if (pendingRequests <= 0) {
             self.isSyncing = false;
             if (hasError) {
-              self.updateIndicator('online', 'Offline?');
+              self.updateIndicator('offline', 'Error Sync');
             } else {
               self.lastSync = Date.now();
               localStorage.setItem('wstudio_last_sync', self.lastSync.toString());
