@@ -396,109 +396,107 @@
         this.isSyncing = true;
         const self = this;
 
-        // Memecah menjadi beberapa request paralel untuk menghindari timeout Google Script (batas 30 detik)
-        const totalRequests = 5;
-        let pendingRequests = totalRequests;
         let hasError = false;
 
-        this.updateIndicator('syncing', 'Syncing... 0%');
-
-        const checkDone = () => {
-          pendingRequests--;
-          let progress = Math.round(((totalRequests - pendingRequests) / totalRequests) * 100);
-
-          if (pendingRequests <= 0) {
-            self.isSyncing = false;
-            if (hasError) {
-              self.updateIndicator('offline', 'Error Sync');
-            } else {
-              self.lastSync = Date.now();
-              localStorage.setItem('wstudio_last_sync', self.lastSync.toString());
-              self.updateIndicator('success', 'Updated 100%!');
-              setTimeout(() => self.updateIndicator('online', 'Online'), 3000);
-            }
+        const finishSync = () => {
+          self.isSyncing = false;
+          if (hasError) {
+            self.updateIndicator('offline', 'Error Sync');
           } else {
-            self.updateIndicator('syncing', `Syncing... ${progress}%`);
+            self.lastSync = Date.now();
+            localStorage.setItem('wstudio_last_sync', self.lastSync.toString());
+            self.updateIndicator('success', 'Updated 100%!');
+            setTimeout(() => self.updateIndicator('online', 'Online'), 3000);
           }
+          // Jalankan queue secara berkala
+          if (typeof SyncQueue !== 'undefined') SyncQueue.process();
         };
 
-        // 1. Dashboard Stats (Cepat)
-        google.script.run
-          .withSuccessHandler(res => {
-            if (res && res.success && res.stats) {
-              LocalCache.set('dashboard_stats', res.stats, 30);
-              window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { stats: res.stats } }));
-            }
-            checkDone();
-          })
-          .withFailureHandler(err => { hasError = true; checkDone(); })
-          .getDashboardStats(null, null, force);
-
-        // 2. Packages (Cepat)
-        google.script.run
-          .withSuccessHandler(res => {
-            if (res && res.success && res.packages) {
-              LocalCache.set('catalogue_packages', res.packages, 60);
-              window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { packages: res.packages } }));
-            }
-            checkDone();
-          })
-          .withFailureHandler(err => { hasError = true; checkDone(); })
-          .getPackages(force);
-
-        // 3. Products (Cepat)
-        google.script.run
-          .withSuccessHandler(res => {
-            if (res && res.success && res.products) {
-              LocalCache.set('pos_products', res.products, 60);
-              window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { products: res.products } }));
-            }
-            checkDone();
-          })
-          .withFailureHandler(err => { hasError = true; checkDone(); })
-          .getProducts(force);
-
-        // 4. Recent Activity (Transaksi & Checkin - Cepat)
-        google.script.run
-          .withSuccessHandler(res => {
-            if (res && res.success) {
-              if (res.transactions) LocalCache.set('recent_transactions', res.transactions, 60);
-              if (res.checkins) LocalCache.set('today_checkins', res.checkins, 60);
-              window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: res }));
-            }
-            checkDone();
-          })
-          .withFailureHandler(err => { hasError = true; checkDone(); })
-          .getRecentActivity();
-
-        // 5. Members Delta Sync (Berat/Lambat - Menggunakan Chunking)
-        let accumulatedMembers = [];
-        const fetchMembersChunk = (offset = 0) => {
-          google.script.run
-            .withSuccessHandler(res => {
-              if (res && res.success) {
-                if (res.members) {
+        const step5_Members = () => {
+          self.updateIndicator('syncing', 'Syncing Members... 80%');
+          let accumulatedMembers = [];
+          const fetchMembersChunk = (offset = 0) => {
+            google.script.run
+              .withSuccessHandler(res => {
+                if (res && res.success && res.members) {
                   accumulatedMembers = accumulatedMembers.concat(res.members);
                   if (res.hasMore) {
                     self.updateIndicator('syncing', `Syncing Members... ${accumulatedMembers.length}`);
                     fetchMembersChunk(res.nextOffset);
-                    return; // Jangan panggil checkDone dulu, tunggu sampai habis
+                    return;
                   } else {
                     LocalCache.set('all_members', accumulatedMembers, 120);
                     SearchIndex.build(accumulatedMembers);
                     window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { members: accumulatedMembers } }));
                   }
                 }
-              }
-              checkDone();
-            })
-            .withFailureHandler(err => { hasError = true; checkDone(); })
-            .getMembersDelta(this.lastSync, offset, 1000); // 1000 baris per tarikan
+                finishSync();
+              })
+              .withFailureHandler(err => { hasError = true; finishSync(); })
+              .getMembersDelta(self.lastSync, offset, 1000);
+          };
+          fetchMembersChunk(0);
         };
-        fetchMembersChunk(0);
 
-        // Jalankan queue secara berkala
-        if (typeof SyncQueue !== 'undefined') SyncQueue.process();
+        const step4_Activity = () => {
+          self.updateIndicator('syncing', 'Syncing Activity... 60%');
+          google.script.run
+            .withSuccessHandler(res => {
+              if (res && res.success) {
+                if (res.transactions) LocalCache.set('recent_transactions', res.transactions, 60);
+                if (res.checkins) LocalCache.set('today_checkins', res.checkins, 60);
+                window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: res }));
+              }
+              step5_Members();
+            })
+            .withFailureHandler(err => { hasError = true; step5_Members(); })
+            .getRecentActivity();
+        };
+
+        const step3_Products = () => {
+          self.updateIndicator('syncing', 'Syncing Products... 40%');
+          google.script.run
+            .withSuccessHandler(res => {
+              if (res && res.success && res.products) {
+                LocalCache.set('pos_products', res.products, 60);
+                window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { products: res.products } }));
+              }
+              step4_Activity();
+            })
+            .withFailureHandler(err => { hasError = true; step4_Activity(); })
+            .getProducts(force);
+        };
+
+        const step2_Packages = () => {
+          self.updateIndicator('syncing', 'Syncing Packages... 20%');
+          google.script.run
+            .withSuccessHandler(res => {
+              if (res && res.success && res.packages) {
+                LocalCache.set('catalogue_packages', res.packages, 60);
+                window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { packages: res.packages } }));
+              }
+              step3_Products();
+            })
+            .withFailureHandler(err => { hasError = true; step3_Products(); })
+            .getPackages(force);
+        };
+
+        const step1_Dashboard = () => {
+          self.updateIndicator('syncing', 'Syncing Dashboard... 0%');
+          google.script.run
+            .withSuccessHandler(res => {
+              if (res && res.success && res.stats) {
+                LocalCache.set('dashboard_stats', res.stats, 30);
+                window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { stats: res.stats } }));
+              }
+              step2_Packages();
+            })
+            .withFailureHandler(err => { hasError = true; step2_Packages(); })
+            .getDashboardStats(null, null, force);
+        };
+
+        // Mulai eksekusi rantai sinkronisasi (sekuensial)
+        step1_Dashboard();
       },
       updateIndicator: function (status, text) {
         const dot = document.getElementById('syncStatusDot');
