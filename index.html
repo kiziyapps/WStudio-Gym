@@ -4029,12 +4029,20 @@ Terima kasih dan selamat berlatih!`;
       btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memverifikasi...';
       btn.disabled = true;
 
+      console.log('[Auth] 🔐 Memulai proses verifikasi ke server Google Apps Script...');
+      console.log('[Auth] 📡 Mengakses Master Database untuk memvalidasi Cabang (' + branchId + ')...');
+      const startTime = Date.now();
+
       google.script.run
         .withSuccessHandler(function (res) {
+          const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+          console.log(`[Auth] ✅ Respons server diterima dalam ${duration} detik.`);
+          
           btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Masuk';
           btn.disabled = false;
 
           if (res && res.success) {
+            console.log('[Auth] 🔑 Login berhasil! Memuat dashboard untuk:', res.user.name);
             currentUser = res.user;
             document.getElementById('authView').style.display = 'none';
             document.getElementById('dashboardView').style.display = 'flex';
