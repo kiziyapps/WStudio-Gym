@@ -463,9 +463,9 @@
                 if (res.checkins) LocalCache.set('today_checkins', res.checkins, 60);
                 window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: res }));
               }
-              step5_Members();
+              setTimeout(step5_Members, 1000);
             })
-            .withFailureHandler(err => { hasError = true; step5_Members(); })
+            .withFailureHandler(err => { hasError = true; setTimeout(step5_Members, 1000); })
             .getRecentActivity();
         };
 
@@ -477,9 +477,9 @@
                 LocalCache.set('pos_products', res.products, 60);
                 window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { products: res.products } }));
               }
-              step4_Activity();
+              setTimeout(step4_Activity, 1000);
             })
-            .withFailureHandler(err => { hasError = true; step4_Activity(); })
+            .withFailureHandler(err => { hasError = true; setTimeout(step4_Activity, 1000); })
             .getProducts(force);
         };
 
@@ -491,9 +491,9 @@
                 LocalCache.set('catalogue_packages', res.packages, 60);
                 window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { packages: res.packages } }));
               }
-              step3_Products();
+              setTimeout(step3_Products, 1000);
             })
-            .withFailureHandler(err => { hasError = true; step3_Products(); })
+            .withFailureHandler(err => { hasError = true; setTimeout(step3_Products, 1000); })
             .getPackages(force);
         };
 
@@ -505,9 +505,9 @@
                 LocalCache.set('dashboard_stats', res.stats, 30);
                 window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { stats: res.stats } }));
               }
-              step2_Packages();
+              setTimeout(step2_Packages, 1000);
             })
-            .withFailureHandler(err => { hasError = true; step2_Packages(); })
+            .withFailureHandler(err => { hasError = true; setTimeout(step2_Packages, 1000); })
             .getDashboardStats(null, null, force);
         };
 
