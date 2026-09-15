@@ -236,10 +236,11 @@
         const cachedData = LocalCache.get(cacheKey);
         if (cachedData) {
           if (successCallback) {
-            // Simulasi async agar tidak memblokir antrean UI
+            // Tampilkan cache (Stale) secara instan
             setTimeout(() => successCallback(cachedData), 10);
           }
-          return; // Langsung hentikan proses, tidak perlu fetch ke server
+          // SWR: Kita TIDAK 'return' di sini. 
+          // Proses fetch (Revalidate) akan tetap berjalan di background
         }
       }
 
@@ -272,6 +273,17 @@
           if (failureCallback) failureCallback(err);
           else console.error('Network Error:', err);
         });
+    }
+
+    // ================ UI HELPERS ================
+    function getEmptyStateHtml(iconClass, title, subtitle) {
+      return `
+        <div class="empty-state">
+          <i class="${iconClass}"></i>
+          <h3>${title}</h3>
+          <p>${subtitle}</p>
+        </div>
+      `;
     }
 
     // ================ LOCAL CACHE & SYNC MANAGER ================
@@ -3130,6 +3142,39 @@
       width: 50px;
       border-radius: 50%;
     }
+    
+    /* Micro-Interactions */
+    .btn { transition: all 0.2s ease; }
+    .btn:active { transform: scale(0.96); }
+    .stat-card { transition: all 0.3s ease; }
+    .stat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.15); }
+    .data-table tbody tr { transition: background 0.2s ease, transform 0.2s ease; }
+    .data-table tbody tr:hover { background: rgba(107, 70, 193, 0.04) !important; }
+    
+    /* Elegant Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-secondary);
+      background: var(--bg-light);
+      border-radius: 16px;
+      margin: 20px 0;
+      border: 1px dashed var(--border-color);
+    }
+    .empty-state i {
+      font-size: 48px;
+      color: rgba(107, 70, 193, 0.5);
+      margin-bottom: 16px;
+    }
+    .empty-state h3 {
+      font-size: 18px;
+      margin-bottom: 8px;
+      color: var(--text-main);
+    }
+    .empty-state p {
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
   </style>
 </head>
 
@@ -4410,7 +4455,7 @@ Terima kasih dan selamat berlatih!`;
       const start = document.getElementById('dash_start_date')?.value;
       const end = document.getElementById('dash_end_date')?.value;
 
-      showLoading();
+      setDashboardSkeleton();
       executeApi('getGlobalDashboardStats', [start, end], function (res) {
         hideLoading();
         if (res.success && res.stats) {
@@ -4468,7 +4513,21 @@ Terima kasih dan selamat berlatih!`;
       refreshDashboard();
     }
 
+    function setDashboardSkeleton() {
+      const skeletonHtml = '<div class="skeleton skeleton-text" style="width: 50%; height: 24px; margin: auto;"></div>';
+      const fields = ['statTotal', 'statAktif', 'statNewRegistrations', 'statExpiring', 'statExpired', 'statRegularCheckins', 'statPTCheckins', 'statVisitCheckins', 'statGallery', 'statBirthday', 'statRenewals', 'statRegRevenueCount', 'statPTSales', 'statVisitSales', 'statPOSCount', 'statPending', 'statDeletedTransactions'];
+      fields.forEach(id => {
+        if (document.getElementById(id)) document.getElementById(id).innerHTML = skeletonHtml;
+      });
+      const revSkeletonHtml = '<div class="skeleton skeleton-text" style="width: 80%; height: 16px; margin: auto; margin-top: 5px;"></div>';
+      const revFields = ['labelRenewalsRevenue', 'labelNewRegistrationsRevenue', 'labelPTRevenue', 'labelVisitRevenue', 'labelPOSRevenueDetail'];
+      revFields.forEach(id => {
+        if (document.getElementById(id)) document.getElementById(id).innerHTML = revSkeletonHtml;
+      });
+    }
+
     function fetchDashboardData(start, end, force = false) {
+      setDashboardSkeleton();
       if (!start && !end && !force) {
         const cached = LocalCache.get('dashboard_stats');
         if (cached && cached.hasOwnProperty('regularCheckinsCount')) {
@@ -5623,7 +5682,7 @@ Terima kasih dan selamat berlatih!`;
       if (!el) return;
 
       if (!members || members.length === 0) {
-        el.innerHTML = `<div style="padding:20px;text-align:center;background:var(--bg-light);border-radius:8px"><p style="color:var(--text-secondary);font-size:13px">Tidak ada member ditemukan</p></div>`;
+        el.innerHTML = getEmptyStateHtml('fas fa-search', 'Tidak ada member ditemukan', 'Coba gunakan kata kunci pencarian yang lain.');
         return;
       }
 
@@ -6842,7 +6901,7 @@ Terima kasih dan selamat berlatih!`;
       });
 
       if (!combined.length) {
-        container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-secondary)">Belum ada aktivitas hari ini</div>';
+        container.innerHTML = getEmptyStateHtml('fas fa-bed', 'Belum ada aktivitas', 'Belum ada member yang melakukan check-in hari ini.');
         return;
       }
 
