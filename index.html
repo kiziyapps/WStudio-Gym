@@ -3297,14 +3297,14 @@
         <input type="hidden" id="visit_phone" value="-">
 
         <div class="form-group">
-          <label class="form-label">Tipe Visit *</label>
+          <label for="visit_type" class="form-label">Tipe Visit *</label>
           <select id="visit_type" class="form-input" onchange="updateVisitPrice()">
             <option value="">-- Memuat Paket... --</option>
           </select>
         </div>
 
         <div class="form-group" style="margin-top:16px">
-          <label class="form-label">Metode Pembayaran *</label>
+          <label for="visit_payment" class="form-label">Metode Pembayaran *</label>
           <select id="visit_payment" class="form-input">
             <option value="Cash">Cash</option>
             <option value="Transfer Bank">Transfer Bank</option>
@@ -3890,7 +3890,7 @@ Terima kasih dan selamat berlatih!`;
         <div class="auth-form" style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
           <div id="loginAlert" class="alert" style="display:none; width: 100%; border-radius: 12px; font-size: 13px;"></div>
           <div class="form-group" style="width: 100%;">
-            <label class="form-label" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #8e8e93; margin-bottom: 8px;">
+            <label for="loginBranch" class="form-label" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #8e8e93; margin-bottom: 8px;">
               <i class="fas fa-store"></i> Pilih Cabang
             </label>
             <select id="loginBranch" class="form-input" style="text-align: center; text-align-last: center; background: #f2f2f7; border: none; border-radius: 16px; padding: 16px; width: 100%;">
@@ -3899,7 +3899,7 @@ Terima kasih dan selamat berlatih!`;
           </div>
           
           <div class="form-group" style="width: 100%;">
-            <label class="form-label" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #8e8e93; margin-bottom: 8px;">
+            <label for="loginUser" class="form-label" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #8e8e93; margin-bottom: 8px;">
               <i class="fas fa-user-circle"></i> Username Access
             </label>
             <input id="loginUser" class="form-input" placeholder="Username" 
@@ -3908,7 +3908,7 @@ Terima kasih dan selamat berlatih!`;
           </div>
           
           <div class="form-group" style="width: 100%;">
-            <label class="form-label" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #8e8e93; margin-bottom: 8px;">
+            <label for="loginPass" class="form-label" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #8e8e93; margin-bottom: 8px;">
               <i class="fas fa-shield-alt"></i> Security Key
             </label>
             <input id="loginPass" type="password" class="form-input" placeholder="" 
@@ -3955,7 +3955,7 @@ Terima kasih dan selamat berlatih!`;
         </div>
         <div class="auth-form">
           <div class="form-group">
-            <label class="form-label"><i class="fas fa-id-card"></i> Member ID</label>
+            <label for="checkMid" class="form-label"><i class="fas fa-id-card"></i> Member ID</label>
             <input id="checkMid" class="form-input" placeholder="Contoh: M2301001" 
                    onkeypress="if(event.key==='Enter') doPublicCheckMember()">
           </div>
@@ -4783,21 +4783,21 @@ Terima kasih dan selamat berlatih!`;
             <div id="regResult" class="result-card" style="display:none;"></div>
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">Nama Lengkap *</label>
+                <label for="reg_name" class="form-label">Nama Lengkap *</label>
                 <input id="reg_name" class="form-input" placeholder="Contoh: Budi Santoso">
               </div>
               <div class="form-group">
-                <label class="form-label">Tanggal Lahir</label>
+                <label for="reg_dob" class="form-label">Tanggal Lahir</label>
                 <input id="reg_dob" type="date" class="form-input">
               </div>
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">No. Telepon *</label>
+                <label for="reg_phone" class="form-label">No. Telepon *</label>
                 <input id="reg_phone" class="form-input" placeholder="0xxxxxxxxxx">
               </div>
               <div class="form-group">
-                <label class="form-label">Email</label>
+                <label for="reg_email" class="form-label">Email</label>
                 <input id="reg_email" type="email" class="form-input" placeholder="contoh@email.com">
               </div>
             </div>
@@ -4879,7 +4879,7 @@ Terima kasih dan selamat berlatih!`;
 
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">Metode Pembayaran *</label>
+                <label for="reg_payment" class="form-label">Metode Pembayaran *</label>
                 <select id="reg_payment" class="form-input">
                   <option value="Transfer Bank">Transfer Bank</option>
                   <option value="QRIS">QRIS</option>
@@ -4888,7 +4888,7 @@ Terima kasih dan selamat berlatih!`;
                 </select>
               </div>
               <div class="form-group">
-                <label class="form-label">Catatan</label>
+                <label for="reg_notes" class="form-label">Catatan</label>
                 <input id="reg_notes" class="form-input" placeholder="Opsional">
               </div>
             </div>
@@ -5580,7 +5580,7 @@ Terima kasih dan selamat berlatih!`;
             <div id="trxResult" class="result-card" style="display:none;"></div>
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">Member ID / Nama *</label>
+                <label for="trx_memberId" class="form-label">Member ID / Nama *</label>
                 <div style="display:flex;gap:8px">
                   <input id="trx_memberId" class="form-input" placeholder="Cari ID atau nama..." oninput="searchMemberForTrx(this.value)">
                   <button class="btn btn-outline" onclick="searchMemberForTrx(document.getElementById('trx_memberId').value)">
@@ -5598,7 +5598,7 @@ Terima kasih dan selamat berlatih!`;
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">Pilih Paket *</label>
+                <label for="trx_package" class="form-label">Pilih Paket *</label>
                 <select id="trx_package" class="form-input">
                   <option value="">-- Pilih Paket --</option>
                   ${pkgs.filter(p => {
@@ -5612,7 +5612,7 @@ Terima kasih dan selamat berlatih!`;
                 </select>
               </div>
               <div class="form-group">
-                <label class="form-label">Metode Pembayaran *</label>
+                <label for="trx_payment" class="form-label">Metode Pembayaran *</label>
                 <select id="trx_payment" class="form-input">
                   <option value="Transfer Bank">Transfer Bank</option>
                   <option value="QRIS">QRIS</option>
@@ -6073,7 +6073,7 @@ Terima kasih dan selamat berlatih!`;
             <div class="cart-footer">
               <div class="form-row" style="margin-bottom:15px; grid-template-columns: 1fr;">
                 <div class="form-group" style="margin-bottom:10px">
-                  <label class="form-label">Member / Customer</label>
+                  <label for="pos_memberId" class="form-label">Member / Customer</label>
                   <div style="position:relative">
                     <input type="text" id="pos_memberId" class="form-input" placeholder="Cari Nama/ID/HP..." oninput="searchMemberForPOS(this.value)">
                     <div id="posMemberResults" class="search-dropdown"></div>
@@ -6081,7 +6081,7 @@ Terima kasih dan selamat berlatih!`;
                   <div id="pos_memberInfo" style="margin-top:4px; font-size:12px; color:var(--text-secondary)">Guest Customer</div>
                 </div>
                 <div class="form-group" style="margin-bottom:0">
-                  <label class="form-label">WhatsApp Customer</label>
+                  <label for="pos_wa_number" class="form-label">WhatsApp Customer</label>
                   <input type="text" id="pos_wa_number" class="form-input" placeholder="08xxxxxxxxxx">
                 </div>
               </div>
@@ -6105,7 +6105,7 @@ Terima kasih dan selamat berlatih!`;
               
               <div style="display:flex; flex-direction:column; gap:12px; margin-top:15px">
                 <div class="form-group" style="margin-bottom:0">
-                  <label class="form-label">Metode Pembayaran</label>
+                  <label for="pos_payment" class="form-label">Metode Pembayaran</label>
                   <select id="pos_payment" class="form-input" style="padding:10px">
                     <option value="Tunai">Tunai / Cash</option>
                     <option value="Transfer">Transfer Bank</option>
@@ -7002,7 +7002,7 @@ Terima kasih dan selamat berlatih!`;
           </div>
           <div class="form-card-body" style="text-align:center">
             <div class="form-group" style="max-width:500px; margin:0 auto 20px auto; position:relative">
-              <label class="form-label" style="text-align:left">Cari Nama atau ID Produk</label>
+              <label for="opnameSearch" class="form-label" style="text-align:left">Cari Nama atau ID Produk</label>
               <div style="position:relative">
                 <i class="fas fa-search" style="position:absolute; left:12px; top:12px; color:var(--text-secondary)"></i>
                 <input type="text" id="opnameSearch" class="form-input" style="padding-left:36px" placeholder="Ketik nama produk..." oninput="searchProductForOpname(this.value)" onfocus="ensureProductsLoaded()">
@@ -7935,7 +7935,7 @@ Terima kasih dan selamat berlatih!`;
                   <i class="fas fa-keyboard"></i> Input Manual
                 </h4>
                 <div class="form-group">
-                  <label class="form-label">Member ID / Nama / HP</label>
+                  <label for="ci_memberId" class="form-label">Member ID / Nama / HP</label>
                   <div style="position:relative">
                     <input id="ci_memberId" class="form-input" placeholder="Ketik ID, Nama, atau No. HP..." oninput="searchMemberForCheckin(this.value)" autocomplete="off">
                     <div id="ciMemberResults" class="search-dropdown"></div>
@@ -8213,7 +8213,7 @@ Terima kasih dan selamat berlatih!`;
               </div>
 
               <div style="margin-bottom:16px;padding:10px;background:var(--bg-light);border-radius:8px;border:1px solid var(--border-color)">
-                <label style="display:flex;align-items:center;gap:10px;cursor:${m.ptSessionsLeft > 0 ? 'pointer' : 'not-allowed'}; opacity: ${m.ptSessionsLeft > 0 ? '1' : '0.6'}">
+                <label for="ci_usePT" style="display:flex;align-items:center;gap:10px;cursor:${m.ptSessionsLeft > 0 ? 'pointer' : 'not-allowed'}; opacity: ${m.ptSessionsLeft > 0 ? '1' : '0.6'}">
                   <input type="checkbox" id="ci_usePT" style="width:18px;height:18px" ${m.ptSessionsLeft > 0 ? 'checked' : 'disabled'}>
                   <div>
                     <span style="font-weight:600;font-size:13px"><i class="fas fa-dumbbell" style="color:#8b5cf6"></i> Gunakan Sesi Personal Trainer</span>
@@ -8712,7 +8712,7 @@ Terima kasih dan selamat berlatih!`;
                 </h4>
                 
                 <div class="form-group">
-                  <label class="form-label">
+                  <label for="pt_memberId" class="form-label">
                     <i class="fas fa-search"></i> Cari Member *
                   </label>
                   <input id="pt_memberId" class="form-input" 
@@ -8730,25 +8730,25 @@ Terima kasih dan selamat berlatih!`;
                 </div>
                 
                 <div class="form-group">
-                  <label class="form-label"><i class="fas fa-user-tie"></i> Katalog PT *</label>
+                  <label for="pt_catalog" class="form-label"><i class="fas fa-user-tie"></i> Katalog PT *</label>
                   <select id="pt_catalog" class="form-input" onchange="onPTCatalogChange()">
                     <option value="">-- Pilih Katalog PT --</option>
                   </select>
                 </div>
                 
                 <div class="form-group">
-                  <label class="form-label"><i class="fas fa-user-ninja"></i> Nama Trainer *</label>
+                  <label for="pt_trainer" class="form-label"><i class="fas fa-user-ninja"></i> Nama Trainer *</label>
                   <input type="text" id="pt_trainer" class="form-input" placeholder="Ketik nama trainer...">
                 </div>
                 
                 <div class="form-row">
                   <div class="form-group">
-                    <label class="form-label"><i class="fas fa-hashtag"></i> Jumlah Sesi *</label>
+                    <label for="pt_sessions" class="form-label"><i class="fas fa-hashtag"></i> Jumlah Sesi *</label>
                     <input id="pt_sessions" type="number" class="form-input" min="1" value="10" 
                            oninput="updatePTSummary()" placeholder="10">
                   </div>
                   <div class="form-group">
-                    <label class="form-label"><i class="fas fa-tag"></i> Harga/Sesi *</label>
+                    <label for="pt_price" class="form-label"><i class="fas fa-tag"></i> Harga/Sesi *</label>
                     <input id="pt_price" type="number" class="form-input" min="10000" value="150000" 
                            oninput="updatePTSummary()" placeholder="150000" readonly style="background:var(--bg-light); cursor:not-allowed">
                   </div>
@@ -8773,7 +8773,7 @@ Terima kasih dan selamat berlatih!`;
                 </div>
                 
                 <div class="form-group">
-                  <label class="form-label"><i class="fas fa-credit-card"></i> Metode Pembayaran *</label>
+                  <label for="pt_payment" class="form-label"><i class="fas fa-credit-card"></i> Metode Pembayaran *</label>
                   <select id="pt_payment" class="form-input">
                     <option value="Transfer Bank">Transfer Bank</option>
                     <option value="QRIS">QRIS</option>
@@ -9376,11 +9376,11 @@ Terima kasih dan selamat berlatih!`;
                   <!-- Date Overrides -->
                   <div style="margin:12px 0; display:grid; grid-template-columns:1fr 1fr; gap:8px">
                     <div class="form-group" style="margin:0">
-                      <label style="font-size:11px; font-weight:600; color:var(--text-secondary)">TANGGAL PEMBAYARAN</label>
+                      <label for="payDate_${a.approvalId}" style="font-size:11px; font-weight:600; color:var(--text-secondary)">TANGGAL PEMBAYARAN</label>
                       <input type="date" id="payDate_${a.approvalId}" class="form-input" style="padding:6px; font-size:12px" value="${localDateStr}">
                     </div>
                     <div class="form-group" style="margin:0">
-                      <label style="font-size:11px; font-weight:600; color:var(--text-secondary)">TANGGAL MULAI AKTIF</label>
+                      <label for="startDate_${a.approvalId}" style="font-size:11px; font-weight:600; color:var(--text-secondary)">TANGGAL MULAI AKTIF</label>
                       <input type="date" id="startDate_${a.approvalId}" class="form-input" style="padding:6px; font-size:12px" value="${localDateStr}">
                     </div>
                   </div>
@@ -9634,30 +9634,30 @@ Terima kasih dan selamat berlatih!`;
                 </h4>
                 <div id="createUserAlert" class="alert" style="display:none"></div>
                 <div class="form-group">
-                  <label class="form-label">Nama Lengkap *</label>
+                  <label for="cu_name" class="form-label">Nama Lengkap *</label>
                   <input id="cu_name" class="form-input" placeholder="Nama lengkap">
                 </div>
                 <div class="form-group">
-                  <label class="form-label">No. Telepon *</label>
+                  <label for="cu_phone" class="form-label">No. Telepon *</label>
                   <input id="cu_phone" class="form-input" placeholder="0xxxxxxxxxx">
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Username *</label>
+                  <label for="cu_username" class="form-label">Username *</label>
                   <input id="cu_username" class="form-input" placeholder="username unik">
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Email</label>
+                  <label for="cu_email" class="form-label">Email</label>
                   <input id="cu_email" type="email" class="form-input" placeholder="email@contoh.com">
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Role *</label>
+                  <label for="cu_role" class="form-label">Role *</label>
                   <select id="cu_role" class="form-input">
                     <option value="Staff">Staff</option>
                     <option value="Admin">Admin</option>
                   </select>
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Password *</label>
+                  <label for="cu_password" class="form-label">Password *</label>
                   <input id="cu_password" type="password" class="form-input" placeholder="Min 6 karakter">
                 </div>
                 <button id="btnCreateUser" class="btn btn-primary btn-block" onclick="createUserAccount()">
@@ -10288,11 +10288,11 @@ Terima kasih dan selamat berlatih!`;
       const content = `
         <div class="filter-container">
           <div class="filter-item">
-            <label class="filter-label">Tanggal Mulai</label>
+            <label for="exp_start_date" class="filter-label">Tanggal Mulai</label>
             <input type="date" id="exp_start_date" class="filter-input">
           </div>
           <div class="filter-item">
-            <label class="filter-label">Tanggal Akhir</label>
+            <label for="exp_end_date" class="filter-label">Tanggal Akhir</label>
             <input type="date" id="exp_end_date" class="filter-input">
           </div>
           <div style="display:flex; gap:8px">
@@ -10338,11 +10338,11 @@ Terima kasih dan selamat berlatih!`;
               <form id="expenseForm" onsubmit="event.preventDefault(); submitExpenseForm();">
                 <div class="form-row">
                   <div class="form-group">
-                    <label class="form-label">Tanggal</label>
+                    <label for="exp_date" class="form-label">Tanggal</label>
                     <input type="date" id="exp_date" class="form-input" required>
                   </div>
                   <div class="form-group">
-                    <label class="form-label">Kategori</label>
+                    <label for="exp_category" class="form-label">Kategori</label>
                     <select id="exp_category" class="form-input" required>
                       <option value="">-- Pilih Kategori --</option>
                       <option value="Operasional">Operasional</option>
@@ -10358,11 +10358,11 @@ Terima kasih dan selamat berlatih!`;
                 </div>
                 <div class="form-row">
                   <div class="form-group">
-                    <label class="form-label">Jumlah (Rp)</label>
+                    <label for="exp_amount" class="form-label">Jumlah (Rp)</label>
                     <input type="number" id="exp_amount" class="form-input" placeholder="Masukkan angka saja" required>
                   </div>
                   <div class="form-group">
-                    <label class="form-label">Metode Pembayaran</label>
+                    <label for="exp_payment" class="form-label">Metode Pembayaran</label>
                     <select id="exp_payment" class="form-input" required>
                       <option value="Tunai">Tunai</option>
                       <option value="Transfer">Transfer</option>
@@ -10371,7 +10371,7 @@ Terima kasih dan selamat berlatih!`;
                   </div>
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Deskripsi / Keterangan</label>
+                  <label for="exp_description" class="form-label">Deskripsi / Keterangan</label>
                   <textarea id="exp_description" class="form-input" rows="2" placeholder="Contoh: Bayar tagihan listrik bulan April" required></textarea>
                 </div>
                 <button type="submit" class="btn btn-primary btn-block">
@@ -10723,6 +10723,9 @@ Terima kasih dan selamat berlatih!`;
               container.innerHTML = '<div style="color:red;padding:20px">' + (res.message || 'Gagal memuat riwayat') + '</div>';
             }
           })
+          .withFailureHandler(function (err) {
+            container.innerHTML = '<div style="color:red;padding:20px;text-align:center;">' + (err.message || 'Koneksi ke server gagal (Timeout/Quota).') + '</div>';
+          })
           .getDeletedTransactions();
       } else {
         google.script.run
@@ -10803,6 +10806,9 @@ Terima kasih dan selamat berlatih!`;
             } else {
               container.innerHTML = '<div style="color:red;padding:20px">' + (res.message || 'Gagal memuat data') + '</div>';
             }
+          })
+          .withFailureHandler(function (err) {
+            container.innerHTML = '<div style="color:red;padding:20px;text-align:center;">' + (err.message || 'Koneksi ke server gagal (Timeout/Quota).') + '</div>';
           })
           .getDashboardDetail(type, startDate, endDate);
       }
@@ -10946,11 +10952,11 @@ Terima kasih dan selamat berlatih!`;
         <input type="hidden" id="pkg_id">
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Nama Paket</label>
+            <label for="pkg_name" class="form-label">Nama Paket</label>
             <input type="text" id="pkg_name" class="form-input" placeholder="Contoh: Member Bulanan">
           </div>
           <div class="form-group">
-            <label class="form-label">Tipe Paket</label>
+            <label for="pkg_type" class="form-label">Tipe Paket</label>
             <select id="pkg_type" class="form-input" onchange="toggleSessionsField()">
               <option value="REGULAR">Regular</option>
               <option value="PT">Personal Trainer</option>
@@ -10961,7 +10967,7 @@ Terima kasih dan selamat berlatih!`;
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Durasi</label>
+            <label for="pkg_duration" class="form-label">Durasi</label>
             <div style="display:flex; gap:4px">
               <input type="number" id="pkg_duration" class="form-input" value="1" style="width:70px">
               <select id="pkg_unit" class="form-input">
@@ -10972,34 +10978,34 @@ Terima kasih dan selamat berlatih!`;
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label">Harga (Rp)</label>
+            <label for="pkg_price" class="form-label">Harga (Rp)</label>
             <input type="number" id="pkg_price" class="form-input" value="0">
           </div>
           <div class="form-group">
-            <label class="form-label">Promo / Cashback (Rp)</label>
+            <label for="pkg_promo" class="form-label">Promo / Cashback (Rp)</label>
             <input type="number" id="pkg_promo" class="form-input" value="0">
           </div>
         </div>
         <div class="form-row" id="sessions_row" style="display:none">
           <div class="form-group">
-            <label class="form-label">Jumlah Sesi</label>
+            <label for="pkg_sessions" class="form-label">Jumlah Sesi</label>
             <input type="number" id="pkg_sessions" class="form-input" value="10" placeholder="Contoh: 10">
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Deskripsi</label>
+          <label for="pkg_desc" class="form-label">Deskripsi</label>
           <textarea id="pkg_desc" class="form-input" rows="2"></textarea>
         </div>
         <div class="form-group">
-          <label class="form-label">Benefits</label>
+          <label for="pkg_benefits" class="form-label">Benefits</label>
           <textarea id="pkg_benefits" class="form-input" rows="2"></textarea>
         </div>
         <div class="form-group">
-          <label class="form-label">Syarat & Ketentuan</label>
+          <label for="pkg_terms" class="form-label">Syarat & Ketentuan</label>
           <textarea id="pkg_terms" class="form-input" rows="2"></textarea>
         </div>
         <div class="form-group">
-          <label style="display:flex; align-items:center; gap:10px; cursor:pointer">
+          <label for="pkg_active" style="display:flex; align-items:center; gap:10px; cursor:pointer">
             <input type="checkbox" id="pkg_active" checked style="width:18px; height:18px">
             <span>Paket Aktif (Muncul di Registrasi)</span>
           </label>
@@ -11041,13 +11047,13 @@ Terima kasih dan selamat berlatih!`;
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Nama Produk</label>
+          <label for="prod_name" class="form-label">Nama Produk</label>
           <input type="text" id="prod_name" class="form-input" placeholder="Contoh: Whey Protein 1kg"
             oninput="checkProductForm()">
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Barcode (Scan/Ketik)</label>
+            <label for="prod_barcode" class="form-label">Barcode (Scan/Ketik)</label>
             <div style="display:flex; gap:4px">
               <input type="text" id="prod_barcode" class="form-input">
               <button class="btn btn-info btn-sm" onclick="startBarcodeScannerForInput('prod_barcode')"><i
@@ -11055,27 +11061,27 @@ Terima kasih dan selamat berlatih!`;
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label">Kategori</label>
+            <label for="prod_category" class="form-label">Kategori</label>
             <input type="text" id="prod_category" class="form-input" placeholder="Minuman/Suplemen">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Harga Beli (Rp)</label>
+            <label for="prod_buyPrice" class="form-label">Harga Beli (Rp)</label>
             <input type="number" id="prod_buyPrice" class="form-input" value="0">
           </div>
           <div class="form-group">
-            <label class="form-label">Harga Jual (Rp)</label>
+            <label for="prod_price" class="form-label">Harga Jual (Rp)</label>
             <input type="number" id="prod_price" class="form-input" value="0" oninput="checkProductForm()">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Stok Awal</label>
+            <label for="prod_stock" class="form-label">Stok Awal</label>
             <input type="number" id="prod_stock" class="form-input" value="0">
           </div>
           <div class="form-group">
-            <label class="form-label">Satuan</label>
+            <label for="prod_unit" class="form-label">Satuan</label>
             <input type="text" id="prod_unit" class="form-input" placeholder="pcs/botol">
           </div>
         </div>
@@ -11122,21 +11128,21 @@ Terima kasih dan selamat berlatih!`;
       <div class="modal-body">
         <input type="hidden" id="restock_prod_id">
         <div class="form-group">
-          <label class="form-label">Nama Produk</label>
+          <label for="restock_prod_name" class="form-label">Nama Produk</label>
           <input type="text" id="restock_prod_name" class="form-input" readonly style="background:var(--bg-light)">
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Jumlah Ditambah</label>
+            <label for="restock_qty" class="form-label">Jumlah Ditambah</label>
             <input type="number" id="restock_qty" class="form-input" value="0" min="1">
           </div>
           <div class="form-group">
-            <label class="form-label">Total Biaya Beli (Rp)</label>
+            <label for="restock_cost" class="form-label">Total Biaya Beli (Rp)</label>
             <input type="number" id="restock_cost" class="form-input" value="0">
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Metode Pembayaran (Diambil dari Kas)</label>
+          <label for="restock_payment" class="form-label">Metode Pembayaran (Diambil dari Kas)</label>
           <select id="restock_payment" class="form-input">
             <option value="Tunai">Tunai</option>
             <option value="Transfer">Transfer</option>
@@ -11164,15 +11170,15 @@ Terima kasih dan selamat berlatih!`;
       <div class="modal-body">
         <input type="hidden" id="adjust_prod_id">
         <div class="form-group">
-          <label class="form-label">Nama Produk</label>
+          <label for="adjust_prod_name" class="form-label">Nama Produk</label>
           <input type="text" id="adjust_prod_name" class="form-input" readonly style="background:var(--bg-light)">
         </div>
         <div class="form-group">
-          <label class="form-label">Stok Akhir Sebenarnya (Hasil Opname)</label>
+          <label for="adjust_new_stock" class="form-label">Stok Akhir Sebenarnya (Hasil Opname)</label>
           <input type="number" id="adjust_new_stock" class="form-input" value="0">
         </div>
         <div class="form-group">
-          <label class="form-label">Alasan Penyesuaian</label>
+          <label for="adjust_reason" class="form-label">Alasan Penyesuaian</label>
           <select id="adjust_reason" class="form-input">
             <option value="Stock Opname">Stock Opname (Selisih Hitung)</option>
             <option value="Barang Rusak/Kadaluarsa">Barang Rusak / Kadaluarsa</option>
@@ -11327,11 +11333,11 @@ Terima kasih dan selamat berlatih!`;
         <div style="background:var(--bg-light);padding:16px;border-radius:12px;margin-bottom:20px;border:1px solid var(--border-color)">
           <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:12px;align-items:flex-end">
             <div class="form-group" style="margin:0">
-              <label class="form-label" style="font-size:11px">DARI TANGGAL</label>
+              <label for="report_start" class="form-label" style="font-size:11px">DARI TANGGAL</label>
               <input type="date" id="report_start" class="form-input" value="${today}">
             </div>
             <div class="form-group" style="margin:0">
-              <label class="form-label" style="font-size:11px">SAMPAI TANGGAL</label>
+              <label for="report_end" class="form-label" style="font-size:11px">SAMPAI TANGGAL</label>
               <input type="date" id="report_end" class="form-input" value="${today}">
             </div>
             <button class="btn btn-primary" onclick="generateRangeReport()" style="height:42px">
@@ -12096,10 +12102,10 @@ Terima kasih dan selamat berlatih!`;
                   <code style="background:var(--bg-light);padding:2px 4px;border-radius:4px">{link}</code> : Link Perpanjangan Online
                 </p>
                 
-                <label class="form-label" style="font-size:11px">TEMPLATE MENDEKATI EXPIRED</label>
+                <label for="expiringTemplateInput" class="form-label" style="font-size:11px">TEMPLATE MENDEKATI EXPIRED</label>
                 <textarea id="expiringTemplateInput" class="form-input" style="height:120px;resize:vertical;font-size:13px;margin-bottom:16px" placeholder="Pesan mendekati expired..."></textarea>
                 
-                <label class="form-label" style="font-size:11px">TEMPLATE SUDAH EXPIRED</label>
+                <label for="expiredTemplateInput" class="form-label" style="font-size:11px">TEMPLATE SUDAH EXPIRED</label>
                 <textarea id="expiredTemplateInput" class="form-input" style="height:120px;resize:vertical;font-size:13px" placeholder="Pesan sudah expired..."></textarea>
                 
                 <button class="btn btn-primary" style="width:100%;margin-top:20px" onclick="saveFollowupTemplates()" id="btnSaveFollowupTemplate">
@@ -12425,10 +12431,10 @@ Terima kasih dan selamat berlatih!`;
       </div>
       <div class="modal-body">
         <form id="addBranchForm" onsubmit="submitAddBranch(event)">
-          <label class="form-label">Nama Cabang Baru</label>
+          <label for="newBranchName" class="form-label">Nama Cabang Baru</label>
           <input type="text" id="newBranchName" class="form-input" required placeholder="Contoh: Cabang Jakarta">
 
-          <label class="form-label">Warna Tema (Opsional)</label>
+          <label for="newBranchThemeColor" class="form-label">Warna Tema (Opsional)</label>
           <input type="color" id="newBranchThemeColor" class="form-input" style="height:40px; padding:0"
             value="#4f46e5">
 
@@ -12452,26 +12458,26 @@ Terima kasih dan selamat berlatih!`;
         <form id="editBranchIdentityForm" onsubmit="submitBranchIdentity(event)">
           <input type="hidden" id="editBranchId">
 
-          <label class="form-label">Nama Cabang</label>
+          <label for="editBranchName" class="form-label">Nama Cabang</label>
           <input type="text" id="editBranchName" class="form-input" required>
 
-          <label class="form-label">Nomor Telepon / HP</label>
+          <label for="editBranchPhone" class="form-label">Nomor Telepon / HP</label>
           <input type="text" id="editBranchPhone" class="form-input" placeholder="Contoh: 08123456789">
 
-          <label class="form-label">Email Cabang</label>
+          <label for="editBranchEmail" class="form-label">Email Cabang</label>
           <input type="email" id="editBranchEmail" class="form-input" placeholder="Contoh: info@emailcabang.com">
 
-          <label class="form-label">Nomor Rekening</label>
+          <label for="editBranchBankAccount" class="form-label">Nomor Rekening</label>
           <input type="text" id="editBranchBankAccount" class="form-input"
             placeholder="BCA 12345678 a/n Rekening Cabang">
 
-          <label class="form-label">Alamat Lengkap</label>
+          <label for="editBranchAddress" class="form-label">Alamat Lengkap</label>
           <textarea id="editBranchAddress" class="form-input" rows="3" placeholder="Jl. Sudirman No 1..."></textarea>
 
-          <label class="form-label">Warna Tema Utama</label>
+          <label for="editBranchThemeColor" class="form-label">Warna Tema Utama</label>
           <input type="color" id="editBranchThemeColor" class="form-input" style="height:40px; padding:0">
 
-          <label class="form-label">URL Foto / Logo</label>
+          <label for="editBranchLogoUrl" class="form-label">URL Foto / Logo</label>
           <input type="text" id="editBranchLogoUrl" class="form-input" placeholder="https://link-gambar.com/logo.jpg">
 
           <div style="margin-top:20px; text-align:right">
@@ -12708,10 +12714,10 @@ Terima kasih dan selamat berlatih!`;
                   <input type="hidden" id="editUserPhotoBase64">
                 </div>
                 
-                <label class="form-label">Nama Lengkap</label>
+                <label for="editUserName" class="form-label">Nama Lengkap</label>
                 <input type="text" id="editUserName" class="form-input" required>
                 
-                <label class="form-label">Role</label>
+                <label for="editUserRole" class="form-label">Role</label>
                 <select id="editUserRole" class="form-input" required>
                   <option value="Staff">Staff</option>
                   <option value="Admin">Admin</option>
@@ -12720,10 +12726,10 @@ Terima kasih dan selamat berlatih!`;
                   <option value="Super Admin">Super Admin</option>
                 </select>
                 
-                <label class="form-label">Akses Cabang</label>
+                <label for="editUserBranchId" class="form-label">Akses Cabang</label>
                 <select id="editUserBranchId" class="form-input" required></select>
                 
-                <label class="form-label">Password Baru (Kosongkan bila tetap)</label>
+                <label for="editUserPassword" class="form-label">Password Baru (Kosongkan bila tetap)</label>
                 <input type="text" id="editUserPassword" class="form-input" placeholder="********">
                 
                 <div style="margin-top:20px; text-align:right">
@@ -12811,10 +12817,10 @@ Terima kasih dan selamat berlatih!`;
                   <input type="hidden" id="addUserPhotoBase64">
                 </div>
                 
-                <label class="form-label">Nama Lengkap</label>
+                <label for="addUserName" class="form-label">Nama Lengkap</label>
                 <input type="text" id="addUserName" class="form-input" required>
                 
-                <label class="form-label">Role</label>
+                <label for="addUserRole" class="form-label">Role</label>
                 <select id="addUserRole" class="form-input" required>
                   <option value="Staff">Staff</option>
                   <option value="Admin">Admin</option>
@@ -12823,15 +12829,15 @@ Terima kasih dan selamat berlatih!`;
                   <option value="Super Admin">Super Admin</option>
                 </select>
                 
-                <label class="form-label">Akses Cabang</label>
+                <label for="addUserBranchId" class="form-label">Akses Cabang</label>
                 <select id="addUserBranchId" class="form-input" required>
                   ${getBranchOptionsHtml()}
                 </select>
                 
-                <label class="form-label">Username</label>
+                <label for="addUserUsername" class="form-label">Username</label>
                 <input type="text" id="addUserUsername" class="form-input" required>
                 
-                <label class="form-label">Password Sementara</label>
+                <label for="addUserPassword" class="form-label">Password Sementara</label>
                 <input type="text" id="addUserPassword" class="form-input" value="password123" required>
                 
                 <div style="margin-top:20px; text-align:right">
@@ -12853,7 +12859,7 @@ Terima kasih dan selamat berlatih!`;
               <form id="resetPasswordForm" onsubmit="submitResetPassword(event)">
                 <input type="hidden" id="resetUserId">
                 <p>Mereset password untuk: <strong id="resetUsernameDisplay"></strong></p>
-                <label class="form-label">Password Baru</label>
+                <label for="resetNewPassword" class="form-label">Password Baru</label>
                 <input type="text" id="resetNewPassword" class="form-input" required>
                 
                 <div style="margin-top:20px; text-align:right">
