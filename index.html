@@ -10837,6 +10837,7 @@ Terima kasih dan selamat berlatih!`;
 
     function syncRealtimeData() {
       if (!currentUser || currentView !== 'dashboard') return;
+      if (SyncManager && SyncManager.isSyncing) return; // Mencegah bentrok dengan runSync
       const indicator = document.getElementById('liveIndicator');
       if (indicator) indicator.style.display = 'block';
 
