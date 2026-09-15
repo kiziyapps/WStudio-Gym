@@ -213,8 +213,15 @@
     }
 
     function executeProxyRequest(methodName, args, successCallback, failureCallback) {
-      const currentBranchId = (typeof currentUser !== 'undefined' && currentUser && currentUser.branchId) ? currentUser.branchId : (document.getElementById('loginBranch') ? document.getElementById('loginBranch').value : null);
-      
+      let currentBranchId = null;
+      if (typeof currentUser !== 'undefined' && currentUser && currentUser.branchId && currentUser.branchId !== 'ALL') {
+        currentBranchId = currentUser.branchId;
+      } else {
+        const branchSelect = document.getElementById('loginBranch');
+        if (branchSelect && branchSelect.value) {
+          currentBranchId = branchSelect.value;
+        }
+      }
       // CACHE INTERCEPTOR: Jangan tembak server jika data read-only sudah ada di memori
       // Hanya terapkan untuk fungsi get/fetch
       const isReadMethod = methodName.startsWith('get') || methodName.startsWith('load') || methodName.startsWith('fetch');
@@ -264,7 +271,7 @@
 
     // ================ LOCAL CACHE & SYNC MANAGER ================
     const LocalCache = {
-      prefix: 'wstudio_cache_',
+      prefix: 'wstudio_cache_v2_',
       set: function (key, data, expiryMinutes = 60) {
         const item = {
           data: data,
