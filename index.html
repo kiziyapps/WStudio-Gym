@@ -76,26 +76,35 @@
       }
 
       const payload = { method: method, args: args, branchId: branchId };
+      const maxRetries = 3;
+      let attempt = 0;
 
-      const finalUrl = GAS_REST_API_URL + "?t=" + Date.now();
-      fetch(finalUrl, {
-        method: 'POST',
-        body: JSON.stringify(payload),
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-      })
-        .then(async response => {
+      const doFetch = async () => {
+        attempt++;
+        const finalUrl = GAS_REST_API_URL + "?t=" + Date.now();
+        try {
+          const response = await fetch(finalUrl, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+          });
           const text = await response.text();
+          let data;
           try {
-            return JSON.parse(text);
+            data = JSON.parse(text);
           } catch (e) {
             if (text.includes('<html') || text.includes('<!DOCTYPE')) {
+              if (attempt < maxRetries) {
+                console.warn(`[API] Terdeteksi HTML, server sibuk. Retrying ${attempt}/${maxRetries}...`);
+                await new Promise(r => setTimeout(r, attempt * 1500));
+                return doFetch();
+              }
               console.error("Terdeteksi respon HTML pada Proxy:", text.substring(0, 200));
               throw new Error("Koneksi ke server terputus atau server sedang sibuk (Timeout/Quota). Silakan coba beberapa saat lagi.");
             }
             throw new Error("Invalid response dari server: " + text.substring(0, 50));
           }
-        })
-        .then(data => {
+
           console.log('Full API Response:', data);
           if (data.success) {
             if (onSuccess) onSuccess(data.result);
@@ -104,11 +113,18 @@
             console.error('API Error:', errMsg, data);
             if (onFailure) onFailure(new Error(errMsg));
           }
-        })
-        .catch(error => {
+        } catch (error) {
+          if (attempt < maxRetries) {
+             console.warn(`[API] Network error. Retrying ${attempt}/${maxRetries}...`);
+             await new Promise(r => setTimeout(r, attempt * 1500));
+             return doFetch();
+          }
           console.error('Network/Fetch Error:', error);
           if (onFailure) onFailure(error);
-        });
+        }
+      };
+
+      doFetch();
     }
   </script>
   <meta charset="UTF-8">
@@ -3331,7 +3347,7 @@
       <!-- Developer Branding -->
       <div class="developer-branding"
         style="text-align: center; cursor: pointer; opacity: 0.9; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center;"
-        onclick="window.open('https://wa.me/6285777723458', '_blank')"
+        onclick="window.open('https://api.whatsapp.com/send/?phone=6285777723458', '_blank', 'noopener,noreferrer')"
         onmouseover="this.style.opacity='1'; this.style.transform='scale(1.05)'"
         onmouseout="this.style.opacity='0.9'; this.style.transform='scale(1)'">
         <img src="https://i.imgur.com/NO5dVfb.png" alt="KIZIY Logo"
@@ -3471,7 +3487,7 @@
       <!-- Developer Branding -->
       <div class="developer-branding"
         style="text-align: center; padding: 30px 0; margin-top: 40px; border-top: 1px solid var(--border-color); cursor: pointer; opacity: 0.8; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center;"
-        onclick="window.open('https://wa.me/6285777723458', '_blank')"
+        onclick="window.open('https://api.whatsapp.com/send/?phone=6285777723458', '_blank', 'noopener,noreferrer')"
         onmouseover="this.style.opacity='1'; this.style.transform='scale(1.05)'"
         onmouseout="this.style.opacity='0.8'; this.style.transform='scale(1)'">
         <img src="https://i.imgur.com/NO5dVfb.png" alt="KIZIY Logo"
