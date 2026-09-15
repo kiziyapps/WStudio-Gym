@@ -106,6 +106,17 @@
           }
 
           console.log('Full API Response:', data);
+          
+          // Retry jika proxy mengembalikan fallback JSON karena gagal menghubungi Google
+          if (data && data.status === 'Kiziy REST API is Active') {
+            if (attempt < maxRetries) {
+              console.warn(`[API] Proxy gagal meneruskan request (Fallback JSON). Retrying ${attempt}/${maxRetries}...`);
+              await new Promise(r => setTimeout(r, attempt * 1500));
+              return doFetch();
+            }
+            throw new Error("Proxy server sedang kelebihan beban atau gagal menghubungi backend Google.");
+          }
+
           if (data.success) {
             if (onSuccess) onSuccess(data.result);
           } else {
@@ -194,8 +205,9 @@
         try {
           const response = await fetch(url, options);
           const text = await response.text();
+          let data;
           try {
-            return JSON.parse(text);
+            data = JSON.parse(text);
           } catch (e) {
             if (text.includes('<html') || text.includes('<!DOCTYPE')) {
               if (i < retries) {
@@ -208,13 +220,19 @@
             }
             throw new Error("Invalid response dari server: " + text.substring(0, 50));
           }
-        } catch (err) {
-          // Jika murni network error, coba lagi
-          if (i < retries && (err.message.includes("Network Error") || err.message.includes("fetch"))) {
-            await new Promise(r => setTimeout(r, 1000 * (i + 1)));
-            continue;
+          
+          if (data && data.status === 'Kiziy REST API is Active') {
+            if (i < retries) {
+              await new Promise(r => setTimeout(r, 1000 * (i + 1)));
+              continue;
+            }
+            throw new Error("Proxy server sedang kelebihan beban atau gagal menghubungi backend Google.");
           }
-          throw err;
+          
+          return data;
+        } catch (err) {
+          if (i === retries) throw err;
+          await new Promise(r => setTimeout(r, 1000 * (i + 1)));
         }
       }
     }
