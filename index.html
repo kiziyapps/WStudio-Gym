@@ -69,6 +69,25 @@
     });
 
     function executeApi(method, args, onSuccess, onFailure) {
+      // Global Fallback Handler: Mencegah tombol/layar hang jika programmer lupa menulis .withFailureHandler
+      if (!onFailure) {
+        onFailure = function (err) {
+          console.error('[Global Error Handler] API terputus pada fungsi:', method, err);
+          if (typeof hideLoading === 'function') hideLoading();
+          if (typeof showToast === 'function') showToast('Server sibuk atau koneksi terputus. Silakan coba beberapa saat lagi.', 'error', 5000);
+          
+          // Memulihkan tombol-tombol yang tersangkut loading
+          const spinners = document.querySelectorAll('.fa-spinner.fa-spin');
+          spinners.forEach(s => {
+            const btn = s.closest('button');
+            if (btn) {
+              btn.disabled = false;
+              s.remove();
+            }
+          });
+        };
+      }
+
       // Merutekan semua panggilan API lama ke sistem Antrean (RequestQueue) yang baru
       if (typeof executeProxyRequest === 'function') {
         executeProxyRequest(method, args, onSuccess, onFailure);
