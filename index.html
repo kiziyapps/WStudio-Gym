@@ -69,73 +69,12 @@
     });
 
     function executeApi(method, args, onSuccess, onFailure) {
-      let branchId = null;
-      const branchSelect = document.getElementById('loginBranch');
-      if (branchSelect && branchSelect.value) {
-        branchId = branchSelect.value;
+      // Merutekan semua panggilan API lama ke sistem Antrean (RequestQueue) yang baru
+      if (typeof executeProxyRequest === 'function') {
+        executeProxyRequest(method, args, onSuccess, onFailure);
+      } else {
+        console.error("Fatal Error: executeProxyRequest tidak ditemukan!");
       }
-
-      const payload = { method: method, args: args, branchId: branchId };
-      const maxRetries = 3;
-      let attempt = 0;
-
-      const doFetch = async () => {
-        attempt++;
-        const finalUrl = GAS_REST_API_URL + "?t=" + Date.now();
-        try {
-          const response = await fetch(finalUrl, {
-            method: 'POST',
-            body: JSON.stringify(payload),
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-          });
-          const text = await response.text();
-          let data;
-          try {
-            data = JSON.parse(text);
-          } catch (e) {
-            if (text.includes('<html') || text.includes('<!DOCTYPE')) {
-              if (attempt < maxRetries) {
-                console.warn(`[API] Terdeteksi HTML, server sibuk. Retrying ${attempt}/${maxRetries}...`);
-                await new Promise(r => setTimeout(r, attempt * 1500));
-                return doFetch();
-              }
-              console.error("Terdeteksi respon HTML pada Proxy:", text.substring(0, 200));
-              throw new Error("Koneksi ke server terputus atau server sedang sibuk (Timeout/Quota). Silakan coba beberapa saat lagi.");
-            }
-            throw new Error("Invalid response dari server: " + text.substring(0, 50));
-          }
-
-          console.log('Full API Response:', data);
-          
-          // Retry jika proxy mengembalikan fallback JSON karena gagal menghubungi Google
-          if (data && data.status === 'Kiziy REST API is Active') {
-            if (attempt < maxRetries) {
-              console.warn(`[API] Proxy gagal meneruskan request (Fallback JSON). Retrying ${attempt}/${maxRetries}...`);
-              await new Promise(r => setTimeout(r, attempt * 1500));
-              return doFetch();
-            }
-            throw new Error("Proxy server sedang kelebihan beban atau gagal menghubungi backend Google.");
-          }
-
-          if (data.success) {
-            if (onSuccess) onSuccess(data.result);
-          } else {
-            const errMsg = data.error || data.message || 'Terjadi kesalahan sistem yang tidak diketahui';
-            console.error('API Error:', errMsg, data);
-            if (onFailure) onFailure(new Error(errMsg));
-          }
-        } catch (error) {
-          if (attempt < maxRetries) {
-             console.warn(`[API] Network error. Retrying ${attempt}/${maxRetries}...`);
-             await new Promise(r => setTimeout(r, attempt * 1500));
-             return doFetch();
-          }
-          console.error('Network/Fetch Error:', error);
-          if (onFailure) onFailure(error);
-        }
-      };
-
-      doFetch();
     }
   </script>
   <meta charset="UTF-8">
@@ -174,7 +113,7 @@
     const RequestQueue = {
       queue: [],
       activeCount: 0,
-      maxConcurrent: 3, // Maksimal 3 request ke GAS dalam satu waktu
+      maxConcurrent: 1, // Maksimal 1 request ke GAS dalam satu waktu (Sekuensial Murni)
       
       enqueue: function(requestFn) {
         return new Promise((resolve, reject) => {
