@@ -13015,7 +13015,7 @@ Terima kasih dan selamat berlatih!`;
 
       let photoHtml = '';
       if (member.profilePic) {
-        let photoUrl = member.profilePic;
+        let photoUrl = getDirectLink(member.profilePic);
         photoHtml = `<div style="text-align:center; margin-bottom:15px"><img src="${photoUrl}" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:3px solid var(--primary)"></div>`;
       } else {
         photoHtml = `<div style="text-align:center; margin-bottom:15px"><div style="width:100px; height:100px; border-radius:50%; background:#e2e8f0; display:inline-flex; align-items:center; justify-content:center; color:var(--text-secondary); font-size:40px; border:3px solid var(--primary)"><i class="fas fa-user"></i></div></div>`;
@@ -13034,14 +13034,43 @@ Terima kasih dan selamat berlatih!`;
         </tbody>
       </table>
 
-      <div style="margin-top:20px; text-align:center;">
+      <div style="margin-top:20px; display:flex; flex-direction:column; gap:10px; text-align:center;">
         <button class="btn btn-outline" onclick="resendWelcomeEmail('${member.memberId || member.id}')" style="width:100%; justify-content:center;">
           <i class="fas fa-envelope"></i> Kirim Ulang Email Registrasi
+        </button>
+        <button class="btn btn-info" onclick="resendRegistrationWA('${member.memberId || member.id}')" style="width:100%; justify-content:center; background:#25D366; color:white; border:none;">
+          <i class="fab fa-whatsapp"></i> Kirim Ulang WA Registrasi
         </button>
       </div>
     `;
 
       modal.style.display = 'flex';
+    }
+
+    function resendRegistrationWA(memberId) {
+      const members = LocalCache.get('all_members') || [];
+      const member = members.find(m => m.memberId === memberId || m.id === memberId);
+      if (!member) {
+        showToast('Data member tidak ditemukan', 'error');
+        return;
+      }
+      if (!member.phone) {
+        showToast('Nomor HP member tidak tersedia', 'warning');
+        return;
+      }
+      const waData = {
+        memberId: member.memberId || member.id,
+        name: member.fullName || member.name || '-',
+        package: member.currentPackage || member.package || '-',
+        expiry: member.expiryDate || member.expiry || '-',
+        receipt: '-',
+        price: 0,
+        total: 0,
+        payment: '-',
+        qr: 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + (member.memberId || member.id)
+      };
+      const txt = generateReceiptText('registration', waData);
+      shareToWhatsApp(member.phone, txt);
     }
 
     function showPOSReceiptDetail(transactionId) {
