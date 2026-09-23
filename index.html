@@ -10568,19 +10568,48 @@ Terima kasih dan selamat berlatih!`;
         'Hapus Pengeluaran',
         'Apakah Anda yakin ingin menghapus catatan pengeluaran ini?\nTindakan ini tidak dapat dibatalkan.',
         function () {
+          // Optimistic UI Update
+          let rowToHide = null;
+          let eventTarget = window.event ? window.event.target : null;
+          let expenseAmount = 0;
+          if (eventTarget) {
+            const btn = eventTarget.closest('button');
+            if (btn) {
+               rowToHide = btn.closest('tr');
+               if (rowToHide) {
+                 // Try to get amount from row (e.g. from a td containing Rp or just parsing text)
+                 const amountTd = Array.from(rowToHide.querySelectorAll('td')).find(td => td.innerText.includes('Rp'));
+                 if (amountTd) {
+                    expenseAmount = parseInt(amountTd.innerText.replace(/[^0-9]/g, '')) || 0;
+                 }
+               }
+            }
+          }
+          if (rowToHide) rowToHide.style.display = 'none';
+
           showLoading();
           google.script.run
             .withSuccessHandler(function (res) {
               hideLoading();
               if (res && res.success) {
                 showToast('✅  Pengeluaran dihapus', 'success');
-                refreshExpenses();
+                if (rowToHide) rowToHide.remove();
+                
+                // Optimistically update total
+                const totalEl = document.getElementById('expTotalValue');
+                if (totalEl && expenseAmount > 0) {
+                   const currentTotal = parseInt(totalEl.innerText.replace(/[^0-9]/g, '')) || 0;
+                   const newTotal = Math.max(0, currentTotal - expenseAmount);
+                   totalEl.innerText = formatCurrency(newTotal);
+                }
               } else {
+                if (rowToHide) rowToHide.style.display = '';
                 showToast(' Gagal: ' + (res.message || 'Error'), 'error');
               }
             })
             .withFailureHandler(function (err) {
               hideLoading();
+              if (rowToHide) rowToHide.style.display = '';
               showToast('Error: ' + err.message, 'error');
             })
             .deleteExpense(id);
@@ -11821,14 +11850,25 @@ Terima kasih dan selamat berlatih!`;
       showConfirm('PERHATIAN: Anda yakin ingin menghapus transaksi ini? Data terkait seperti stok atau check-in akan ikut disesuaikan. Data yang dihapus akan masuk ke riwayat penghapusan.', function (ok) {
         if (!ok) return;
 
+        // Optimistic UI Update
+        let rowToHide = null;
+        let eventTarget = window.event ? window.event.target : null;
+        if (eventTarget) {
+          const btn = eventTarget.closest('button');
+          if (btn) rowToHide = btn.closest('tr');
+        }
+        if (rowToHide) rowToHide.style.display = 'none';
+
         showLoading('Menghapus transaksi...');
         google.script.run
           .withSuccessHandler(function (res) {
             hideLoading();
             if (res.success) {
               showToast(res.message, 'success');
-              // Refresh tables
-              const contentArea = document.getElementById('contentArea').innerHTML;
+              if (rowToHide) rowToHide.remove();
+
+              // Refresh tables silently
+              const contentArea = document.getElementById('contentArea') ? document.getElementById('contentArea').innerHTML : '';
               if (contentArea.includes('id="posTodayTransactions"')) {
                 loadTodayPOSTransactions();
               }
@@ -11838,16 +11878,14 @@ Terima kasih dan selamat berlatih!`;
               if (document.getElementById('posHistoryTableContainer') && document.getElementById('posHistoryTableContainer').innerHTML !== '') {
                 loadPOSTransactionHistory();
               }
-              // Refresh dashboard widgets if on dashboard
-              if (contentArea.includes('id="dashboardContent"')) {
-                loadDashboardData();
-              }
             } else {
+              if (rowToHide) rowToHide.style.display = '';
               showToast(res.message, 'error');
             }
           })
           .withFailureHandler(function (err) {
             hideLoading();
+            if (rowToHide) rowToHide.style.display = '';
             showToast('Error: ' + err.message, 'error');
           })
           .deleteTransaction(transactionId, reason.trim(), currentUser?.name || 'Admin');
@@ -11862,19 +11900,39 @@ Terima kasih dan selamat berlatih!`;
       showConfirm('Anda yakin ingin menghapus data check-in ini? Jika ini adalah check-in PT, sesi PT member akan dikembalikan.', function (ok) {
         if (!ok) return;
 
+        // Optimistic UI Update
+        let rowToHide = null;
+        let eventTarget = window.event ? window.event.target : null;
+        if (eventTarget) {
+          const btn = eventTarget.closest('button');
+          if (btn) rowToHide = btn.closest('tr');
+        }
+        if (rowToHide) rowToHide.style.display = 'none';
+
         showLoading('Menghapus check-in...');
         google.script.run
           .withSuccessHandler(function (res) {
             hideLoading();
             if (res.success) {
               showToast(res.message, 'success');
+              if (rowToHide) rowToHide.remove();
+              
+              // Optimistic UI Update for dashboard stats
+              const visitEl = document.getElementById('todayVisits');
+              if (visitEl && visitEl.innerText) {
+                 const currentVal = parseInt(visitEl.innerText.replace(/[^0-9]/g, '')) || 0;
+                 if (currentVal > 0) visitEl.innerText = (currentVal - 1).toLocaleString('id-ID');
+              }
+              
               loadTodayCheckins();
             } else {
+              if (rowToHide) rowToHide.style.display = '';
               showToast(res.message, 'error');
             }
           })
           .withFailureHandler(function (err) {
             hideLoading();
+            if (rowToHide) rowToHide.style.display = '';
             showToast('Gagal: ' + err.message, 'error');
           })
           .deleteCheckin(checkinId, currentUser?.name || 'Admin');
@@ -11889,21 +11947,33 @@ Terima kasih dan selamat berlatih!`;
       showConfirm('Anda yakin ingin menghapus riwayat pembaruan stok ini? Stok produk terkait akan dikembalikan ke nilai sebelum pembaruan.', function (ok) {
         if (!ok) return;
 
+        let rowToHide = null;
+        let eventTarget = window.event ? window.event.target : null;
+        if (eventTarget) {
+          const btn = eventTarget.closest('button');
+          if (btn) rowToHide = btn.closest('tr');
+        }
+        if (rowToHide) rowToHide.style.display = 'none';
+
         showLoading('Menghapus riwayat stok...');
         google.script.run
           .withSuccessHandler(function (res) {
             hideLoading();
             if (res.success) {
               showToast(res.message, 'success');
-              loadRestockHistory();
+              if (rowToHide) rowToHide.remove();
+              
+              // Silently refresh without blocking UI
               if (typeof loadPOSProducts === 'function') loadPOSProducts(true);
               if (typeof loadCatalogView === 'function' && document.getElementById('catalogProductsTable')) loadCatalogProducts();
             } else {
+              if (rowToHide) rowToHide.style.display = '';
               showToast(res.message, 'error');
             }
           })
           .withFailureHandler(function (err) {
             hideLoading();
+            if (rowToHide) rowToHide.style.display = '';
             showToast('Gagal: ' + err.message, 'error');
           })
           .deleteRestockRecord(restockId, currentUser?.name || 'Admin');
