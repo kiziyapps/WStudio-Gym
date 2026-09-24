@@ -13321,7 +13321,10 @@ Terima kasih dan selamat berlatih!`;
         let gTotalFitness = 0;
         for (let paket in fitnessGroups) {
           fitnessAoA.push(["Paket:", paket]);
-          fitnessAoA.push(["Tanggal", "No. Resi", "Member ID", "Nama Member", "Metode Pembayaran", "Status", "Harga Paket", "Biaya Reg.", "Diskon", "Total Transaksi"]);
+          fitnessAoA.push([
+            "Tanggal Transaksi", "Tanggal Approval", "No. Resi", "Member ID", "Nama Member", 
+            "Metode Pembayaran", "Status", "Keterangan Selisih", "Harga Paket", "Biaya Reg.", "Diskon", "Total Transaksi"
+          ]);
           
           let subtotal = 0;
           let list = fitnessGroups[paket];
@@ -13329,20 +13332,35 @@ Terima kasih dan selamat berlatih!`;
           list.sort((a,b) => new Date(a.dateToUse) - new Date(b.dateToUse));
 
           list.forEach(r => {
-            let tgl = new Date(r.dateToUse);
-            let tglStr = isNaN(tgl.getTime()) ? r.dateToUse : tgl.toLocaleDateString('id-ID') + ' ' + tgl.toLocaleTimeString('id-ID');
+            let tglTrx = new Date(r.timestamp);
+            let tglApp = new Date(r.verifiedAt);
+            
+            let trxStr = isNaN(tglTrx.getTime()) ? (r.timestamp||'-') : tglTrx.toLocaleDateString('id-ID');
+            let appStr = isNaN(tglApp.getTime()) ? (r.verifiedAt||'-') : tglApp.toLocaleDateString('id-ID');
+            
+            let diffNotes = '';
+            if (!isNaN(tglTrx.getTime()) && !isNaN(tglApp.getTime())) {
+                // Normalize to start of day for comparison
+                let d1 = new Date(tglTrx.getFullYear(), tglTrx.getMonth(), tglTrx.getDate());
+                let d2 = new Date(tglApp.getFullYear(), tglApp.getMonth(), tglApp.getDate());
+                let diffTime = d2 - d1;
+                let diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+                if (diffDays > 0) diffNotes = `Approval mundur ${diffDays} hari`;
+                else if (diffDays < 0) diffNotes = `Approval mendahului ${Math.abs(diffDays)} hari`;
+            }
+
             fitnessAoA.push([
-              tglStr, r.resi, r.memberId, r.nama, r.metode, r.status, 
+              trxStr, appStr, r.resi, r.memberId, r.nama, r.metode, r.status, diffNotes,
               Number(r.harga||0), Number(r.registrasi||0), Number(r.diskon||0), Number(r.total||0)
             ]);
             subtotal += Number(r.total || 0);
           });
           
-          fitnessAoA.push(["", "", "", "", "", "", "", "", "Subtotal:", subtotal]);
+          fitnessAoA.push(["", "", "", "", "", "", "", "", "", "", "Subtotal:", subtotal]);
           fitnessAoA.push([]); // blank line
           gTotalFitness += subtotal;
         }
-        fitnessAoA.push(["", "", "", "", "", "", "", "", "TOTAL KESELURUHAN:", gTotalFitness]);
+        fitnessAoA.push(["", "", "", "", "", "", "", "", "", "", "TOTAL KESELURUHAN:", gTotalFitness]);
 
         const wsFitness = XLSX.utils.aoa_to_sheet(fitnessAoA);
         XLSX.utils.book_append_sheet(wb, wsFitness, "Fitness & Membership");
@@ -13446,7 +13464,6 @@ Terima kasih dan selamat berlatih!`;
         if (typeof showToast === 'function') showToast('Gagal membuat file Excel: ' + err.message, 'error');
       }
     }
-  </script>
   <!-- End of added missing features -->
 
 </body>
