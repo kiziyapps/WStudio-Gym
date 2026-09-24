@@ -13323,7 +13323,7 @@ Terima kasih dan selamat berlatih!`;
           fitnessAoA.push(["Paket:", paket]);
           fitnessAoA.push([
             "Tanggal Transaksi", "Tanggal Approval", "No. Resi", "Member ID", "Nama Member", 
-            "Metode Pembayaran", "Status", "Keterangan Selisih", "Harga Paket", "Biaya Reg.", "Diskon", "Total Transaksi"
+            "Metode Pembayaran", "Status", "Keterangan Selisih", "Bukti Pembayaran", "Harga Paket", "Biaya Reg.", "Diskon", "Total Transaksi"
           ]);
           
           let subtotal = 0;
@@ -13350,17 +13350,17 @@ Terima kasih dan selamat berlatih!`;
             }
 
             fitnessAoA.push([
-              trxStr, appStr, r.resi, r.memberId, r.nama, r.metode, r.status, diffNotes,
+              trxStr, appStr, r.resi, r.memberId, r.nama, r.metode, r.status, diffNotes, r.bukti,
               Number(r.harga||0), Number(r.registrasi||0), Number(r.diskon||0), Number(r.total||0)
             ]);
             subtotal += Number(r.total || 0);
           });
           
-          fitnessAoA.push(["", "", "", "", "", "", "", "", "", "", "Subtotal:", subtotal]);
+          fitnessAoA.push(["", "", "", "", "", "", "", "", "", "", "", "Subtotal:", subtotal]);
           fitnessAoA.push([]); // blank line
           gTotalFitness += subtotal;
         }
-        fitnessAoA.push(["", "", "", "", "", "", "", "", "", "", "TOTAL KESELURUHAN:", gTotalFitness]);
+        fitnessAoA.push(["", "", "", "", "", "", "", "", "", "", "", "TOTAL KESELURUHAN:", gTotalFitness]);
 
         const wsFitness = XLSX.utils.aoa_to_sheet(fitnessAoA);
         XLSX.utils.book_append_sheet(wb, wsFitness, "Fitness & Membership");
