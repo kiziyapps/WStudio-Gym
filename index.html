@@ -420,11 +420,12 @@
         promises.push(new Promise((resolve) => {
           google.script.run
             .withSuccessHandler(res => {
-              if (res && res.success && res.stats) {
-                LocalCache.set('dashboard_stats', res.stats, 30);
-                window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { stats: res.stats } }));
-              }
-              resolve();
+              try {
+                if (res && res.success && res.stats) {
+                  LocalCache.set('dashboard_stats', res.stats, 30);
+                  window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { stats: res.stats } }));
+                }
+              } finally { resolve(); }
             })
             .withFailureHandler(() => { hasError = true; resolve(); })
             .getDashboardStats(null, null, force);
@@ -434,11 +435,12 @@
         promises.push(new Promise((resolve) => {
           google.script.run
             .withSuccessHandler(res => {
-              if (res && res.success && res.packages) {
-                LocalCache.set('catalogue_packages', res.packages, 60);
-                window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { packages: res.packages } }));
-              }
-              resolve();
+              try {
+                if (res && res.success && res.packages) {
+                  LocalCache.set('catalogue_packages', res.packages, 60);
+                  window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { packages: res.packages } }));
+                }
+              } finally { resolve(); }
             })
             .withFailureHandler(() => { hasError = true; resolve(); })
             .getPackages(force);
@@ -448,11 +450,12 @@
         promises.push(new Promise((resolve) => {
           google.script.run
             .withSuccessHandler(res => {
-              if (res && res.success && res.products) {
-                LocalCache.set('pos_products', res.products, 60);
-                window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { products: res.products } }));
-              }
-              resolve();
+              try {
+                if (res && res.success && res.products) {
+                  LocalCache.set('pos_products', res.products, 60);
+                  window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { products: res.products } }));
+                }
+              } finally { resolve(); }
             })
             .withFailureHandler(() => { hasError = true; resolve(); })
             .getProducts(force);
@@ -462,12 +465,13 @@
         promises.push(new Promise((resolve) => {
           google.script.run
             .withSuccessHandler(res => {
-              if (res && res.success) {
-                if (res.transactions) LocalCache.set('recent_transactions', res.transactions, 60);
-                if (res.checkins) LocalCache.set('today_checkins', res.checkins, 60);
-                window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: res }));
-              }
-              resolve();
+              try {
+                if (res && res.success) {
+                  if (res.transactions) LocalCache.set('recent_transactions', res.transactions, 60);
+                  if (res.checkins) LocalCache.set('today_checkins', res.checkins, 60);
+                  window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: res }));
+                }
+              } finally { resolve(); }
             })
             .withFailureHandler(() => { hasError = true; resolve(); })
             .getRecentActivity();
@@ -479,18 +483,20 @@
           const fetchMembersChunk = (offset = 0) => {
             google.script.run
               .withSuccessHandler(res => {
-                if (res && res.success && res.members) {
-                  accumulatedMembers = accumulatedMembers.concat(res.members);
-                  if (res.hasMore) {
-                    fetchMembersChunk(res.nextOffset);
-                  } else {
-                    LocalCache.set('all_members', accumulatedMembers, 120);
-                    SearchIndex.build(accumulatedMembers);
-                    window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { members: accumulatedMembers } }));
-                    resolve();
+                try {
+                  if (res && res.success && res.members) {
+                    accumulatedMembers = accumulatedMembers.concat(res.members);
+                    if (res.hasMore) {
+                      fetchMembersChunk(res.nextOffset);
+                      return; // Do not resolve yet
+                    } else {
+                      LocalCache.set('all_members', accumulatedMembers, 120);
+                      SearchIndex.build(accumulatedMembers);
+                      window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { members: accumulatedMembers } }));
+                    }
                   }
-                } else {
-                  resolve();
+                } finally { 
+                  if (!res || !res.hasMore) resolve(); 
                 }
               })
               .withFailureHandler(() => { hasError = true; resolve(); })
@@ -505,7 +511,7 @@
             self.updateIndicator('offline', 'Error Sync');
           } else {
             self.lastSync = Date.now();
-            localStorage.setItem('wstudio_last_sync', self.lastSync.toString());
+            try { localStorage.setItem('wstudio_last_sync', self.lastSync.toString()); } catch(e) {}
             self.updateIndicator('success', 'Updated 100%!');
             setTimeout(() => self.updateIndicator('online', 'Online'), 3000);
           }
