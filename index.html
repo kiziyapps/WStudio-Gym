@@ -3827,10 +3827,6 @@ Terima kasih dan selamat berlatih!`;
       el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
-    function hideAlert(containerId) {
-      const el = document.getElementById(containerId);
-      if (el) { el.style.display = 'none'; }
-    }
 
     function showConfirm(msg, cb) {
       confirmCallback = cb;
@@ -3860,13 +3856,6 @@ Terima kasih dan selamat berlatih!`;
       return navigator.onLine;
     }
 
-    function showOfflineMessage() {
-      if (!checkInternetConnection()) {
-        showToast('Tidak ada koneksi internet. Periksa jaringan Anda.', 'warning', 5000);
-        return true;
-      }
-      return false;
-    }
 
     // ================ AUTH ================
     function initApp() {
@@ -3904,30 +3893,7 @@ Terima kasih dan selamat berlatih!`;
     }
 
     function renderLoginForm() {
-      document.getElementById('loadingOverlay').style.display = 'flex';
-      setTimeout(() => {
-        google.script.run.withSuccessHandler(function (backendBranches) {
-          const select = document.getElementById('loginBranch');
-          if (select && backendBranches && backendBranches.length > 0) {
-            currentLoginBranches = backendBranches;
-
-            select.innerHTML = backendBranches.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
-
-            // Event listener untuk ganti identitas secara dinamis
-            select.addEventListener('change', function (e) {
-              updateBrandingUI(e.target.value);
-            });
-
-            // Trigger branding awal
-            updateBrandingUI(backendBranches[0].id);
-          } else if (select) {
-            select.innerHTML = '<option value="">Tidak ada cabang aktif</option>';
-          }
-          document.getElementById('loadingOverlay').style.display = 'none';
-          document.getElementById('authView').style.display = 'flex';
-        }).getActiveBranches();
-      }, 500);
-
+      // Set the HTML structure first so DOM elements are ready
       document.getElementById('authCard').innerHTML = `
         <div class="auth-header" style="text-align: center; margin-bottom: 32px;">
           <div style="background: var(--primary); width: 80px; height: 80px; border-radius: 24px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(88, 86, 214, 0.2);">
@@ -3985,6 +3951,38 @@ Terima kasih dan selamat berlatih!`;
           </div>
         </div>
       `;
+
+      // Jika data cabang sudah tersimpan di memory, gunakan langsung (menghindari blank saat logout)
+      if (currentLoginBranches && currentLoginBranches.length > 0) {
+        populateBranchDropdown(currentLoginBranches);
+        document.getElementById('authView').style.display = 'flex';
+      } else {
+        document.getElementById('loadingOverlay').style.display = 'flex';
+        setTimeout(() => {
+          google.script.run.withSuccessHandler(function (backendBranches) {
+            if (backendBranches && backendBranches.length > 0) {
+              currentLoginBranches = backendBranches;
+              populateBranchDropdown(backendBranches);
+            } else {
+              const select = document.getElementById('loginBranch');
+              if (select) select.innerHTML = '<option value="">Tidak ada cabang aktif</option>';
+            }
+            document.getElementById('loadingOverlay').style.display = 'none';
+            document.getElementById('authView').style.display = 'flex';
+          }).getActiveBranches();
+        }, 500);
+      }
+    }
+
+    function populateBranchDropdown(branches) {
+      const select = document.getElementById('loginBranch');
+      if (!select) return;
+      select.innerHTML = branches.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+      select.addEventListener('change', function (e) {
+        updateBrandingUI(e.target.value);
+      });
+      // Trigger branding awal
+      updateBrandingUI(branches[0].id);
     }
 
 
@@ -4150,6 +4148,7 @@ Terima kasih dan selamat berlatih!`;
 
     // ================ NAVIGATION ================
     function showView(view) {
+      currentView = view;
       document.querySelectorAll('.menu-item').forEach(el =>
         el.classList.toggle('active', el.dataset.view === view)
       );
@@ -6246,6 +6245,9 @@ Terima kasih dan selamat berlatih!`;
                           <div style="display:flex;gap:4px">
                             <button class="btn btn-sm btn-outline" style="padding:4px 8px" onclick="ReceiptGenerator.showPreview(JSON.parse(decodeURIComponent('${encodeURIComponent(JSON.stringify({ items: t.items || [], receiptNumber: t.id, customerName: t.customer, total: t.total, paymentMethod: t.payment, cashier: t.cashier })).replace(/'/g, "%27")}')), 'pos')" title="Cetak Resi">
                               <i class="fas fa-print"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline" style="padding:4px 8px; color:#25D366; border-color:#25D366" onclick="sendPOSReceiptToWA('${t.id}', JSON.parse(decodeURIComponent('${encodeURIComponent(JSON.stringify({ items: t.items || [], subtotal: t.subtotal || t.total, discount: t.discount || 0, total: t.total, paymentMethod: t.payment, customerName: t.customer, whatsapp: t.phone || t.whatsapp || '' })).replace(/'/g, "%27")}')))" title="Kirim Struk WA">
+                              <i class="fab fa-whatsapp"></i>
                             </button>
                             <button class="btn btn-sm btn-outline" style="padding:4px 8px; color:#ef4444; border-color:#ef4444" onclick="deleteTransactionUI('${t.id}')" title="Hapus Transaksi">
                               <i class="fas fa-trash"></i>
@@ -8602,47 +8604,6 @@ Terima kasih dan selamat berlatih!`;
       totalSpan.textContent = formatCurrency(price);
     }
 
-    function searchVisitorForVisit(query) {
-      if (window.visitSearchTimeout) clearTimeout(window.visitSearchTimeout);
-      const searchInput = query.trim();
-      if (searchInput.length < 2) {
-        document.getElementById('visitSearchResults').innerHTML = '';
-        return;
-      }
-      document.getElementById('visitSearchResults').innerHTML = '<div style="text-align:center;padding:10px;color:var(--text-secondary)"><i class="fas fa-spinner fa-spin"></i></div>';
-      window.visitSearchTimeout = setTimeout(function () {
-        google.script.run
-          .withSuccessHandler(function (res) {
-            const el = document.getElementById('visitSearchResults');
-            if (!el) return;
-            if (res && res.success && res.visitors && res.visitors.length > 0) {
-              let html = '';
-              res.visitors.forEach(v => {
-                const visitorJson = encodeURIComponent(JSON.stringify(v)).replace(/'/g, "%27");
-                html += `
-                  <div onclick="selectVisitorForVisit(decodeURIComponent('${visitorJson}'))" 
-                       style="padding:10px;background:white;border:1px solid var(--border-color);border-radius:8px;cursor:pointer;margin-bottom:6px;font-size:12px">
-                    <b>${escapeHtml(v.name)}</b>
-                    <div style="color:var(--text-secondary);font-size:11px">HP: ${v.phone}</div>
-                  </div>
-                `;
-              });
-              el.innerHTML = html;
-            } else {
-              el.innerHTML = '<div style="padding:10px;text-align:center;font-size:12px;color:var(--text-secondary)">Tidak ditemukan</div>';
-            }
-          })
-          .searchPreviousVisitors(searchInput);
-      }, 300);
-    }
-
-    function selectVisitorForVisit(json) {
-      const v = JSON.parse(json);
-      document.getElementById('visit_name').value = v.name;
-      document.getElementById('visit_phone').value = v.phone;
-      document.getElementById('visitSearchResults').innerHTML = '';
-      document.getElementById('visit_search').value = v.name;
-    }
 
     function closeVisitModal() {
       document.getElementById('visitModal').style.display = 'none';
@@ -9975,8 +9936,11 @@ Terima kasih dan selamat berlatih!`;
                     <td><span class="badge badge-${m.status === 'Aktif' || !m.status ? 'success' : 'secondary'}">${m.status || 'Aktif'}</span></td>
                     <td>${formatDate(m.expiryDate || m.expiry)}</td>
                     <td>
-                      <button class="btn btn-sm btn-outline" onclick="viewMemberDetail('${m.memberId || m.id}')">
+                      <button class="btn btn-sm btn-outline" title="Detail Member" onclick="viewMemberDetail('${m.memberId || m.id}')">
                         <i class="fas fa-eye"></i>
+                      </button>
+                      <button class="btn btn-sm btn-outline" style="color:var(--primary-color); border-color:var(--primary-color)" title="Cetak Kartu Member" onclick="printMemberCard('${m.memberId || m.id}')">
+                        <i class="fas fa-id-card"></i>
                       </button>
                     </td>
                   </tr>
