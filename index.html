@@ -11464,10 +11464,11 @@ Terima kasih dan selamat berlatih!`;
         .withSuccessHandler(function (res) {
           if (res.success) {
             renderDailyReport(res.report);
-            // Cache jika ini adalah laporan hari ini (range kosong atau start=end=today)
+            // Cache dikurangi menjadi 1 menit saja (sebelumnya 30 menit). 
+            // Jika 30 menit, kasir akan bingung karena transaksi baru tidak langsung muncul di laporan harian.
             const today = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
             if ((!start || start === today) && (!end || end === today)) {
-              LocalCache.set('daily_report_' + today, res.report, 30);
+              LocalCache.set('daily_report_' + today, res.report, 1);
             }
           } else {
             if (loadArea) loadArea.innerHTML = '<div class="alert alert-error">Gagal memuat laporan: ' + res.message + '</div>';
