@@ -413,110 +413,98 @@
         const self = this;
 
         let hasError = false;
+        const lastMemSync = self.lastSync || 0;
 
-        const promises = [];
-
-        // 1. Dashboard
-        promises.push(new Promise((resolve) => {
-          google.script.run
-            .withSuccessHandler(res => {
-              try {
-                if (res && res.success && res.stats) {
+        google.script.run
+          .withSuccessHandler(res => {
+            try {
+              if (res && res.success) {
+                // 1. Dashboard
+                if (res.stats) {
                   LocalCache.set('dashboard_stats', res.stats, 30);
                   window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { stats: res.stats } }));
                 }
-              } finally { resolve(); }
-            })
-            .withFailureHandler(() => { hasError = true; resolve(); })
-            .getDashboardStats(null, null, force);
-        }));
-
-        // 2. Packages
-        promises.push(new Promise((resolve) => {
-          google.script.run
-            .withSuccessHandler(res => {
-              try {
-                if (res && res.success && res.packages) {
+                
+                // 2. Packages
+                if (res.packages) {
                   LocalCache.set('catalogue_packages', res.packages, 60);
                   window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { packages: res.packages } }));
                 }
-              } finally { resolve(); }
-            })
-            .withFailureHandler(() => { hasError = true; resolve(); })
-            .getPackages(force);
-        }));
 
-        // 3. Products
-        promises.push(new Promise((resolve) => {
-          google.script.run
-            .withSuccessHandler(res => {
-              try {
-                if (res && res.success && res.products) {
+                // 3. Products
+                if (res.products) {
                   LocalCache.set('pos_products', res.products, 60);
                   window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { products: res.products } }));
                 }
-              } finally { resolve(); }
-            })
-            .withFailureHandler(() => { hasError = true; resolve(); })
-            .getProducts(force);
-        }));
 
-        // 4. Activity
-        promises.push(new Promise((resolve) => {
-          google.script.run
-            .withSuccessHandler(res => {
-              try {
-                if (res && res.success) {
-                  if (res.transactions) LocalCache.set('recent_transactions', res.transactions, 60);
-                  if (res.checkins) LocalCache.set('today_checkins', res.checkins, 60);
-                  window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: res }));
+                // 4. Activity
+                if (res.activity) {
+                  if (res.activity.transactions) LocalCache.set('recent_transactions', res.activity.transactions, 60);
+                  if (res.activity.checkins) LocalCache.set('today_checkins', res.activity.checkins, 60);
+                  window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: res.activity }));
                 }
-              } finally { resolve(); }
-            })
-            .withFailureHandler(() => { hasError = true; resolve(); })
-            .getRecentActivity();
-        }));
 
-        // 5. Members
-        promises.push(new Promise((resolve) => {
-          let accumulatedMembers = [];
-          const fetchMembersChunk = (offset = 0) => {
-            google.script.run
-              .withSuccessHandler(res => {
-                try {
-                  if (res && res.success && res.members) {
-                    accumulatedMembers = accumulatedMembers.concat(res.members);
-                    if (res.hasMore) {
-                      fetchMembersChunk(res.nextOffset);
-                      return; // Do not resolve yet
+                // 5. Members (Delta)
+                if (res.membersDelta) {
+                  if (res.membersDelta.members && res.membersDelta.members.length > 0) {
+                    let accumulatedMembers = res.membersDelta.members;
+                    
+                    const finishMemberSync = (finalMembers) => {
+                       const existing = LocalCache.get('all_members') || [];
+                       const updated = existing.length > 0 ? existing.map(m => {
+                         const match = finalMembers.find(fm => fm.id === m.id);
+                         return match || m;
+                       }).concat(finalMembers.filter(fm => !existing.some(m => m.id === fm.id))) : finalMembers;
+                       
+                       LocalCache.set('all_members', updated, 120);
+                       SearchIndex.build(updated);
+                       window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { members: updated } }));
+                    };
+                    
+                    if (res.membersDelta.hasMore) {
+                      const fetchMembersChunk = (offset) => {
+                        google.script.run
+                          .withSuccessHandler(chunkRes => {
+                            if (chunkRes && chunkRes.success && chunkRes.members) {
+                              accumulatedMembers = accumulatedMembers.concat(chunkRes.members);
+                              if (chunkRes.hasMore) {
+                                fetchMembersChunk(chunkRes.nextOffset);
+                              } else {
+                                finishMemberSync(accumulatedMembers);
+                              }
+                            }
+                          })
+                          .withFailureHandler(() => { finishMemberSync(accumulatedMembers); })
+                          .getMembersDelta(lastMemSync, offset, 1000);
+                      };
+                      fetchMembersChunk(res.membersDelta.nextOffset);
                     } else {
-                      LocalCache.set('all_members', accumulatedMembers, 120);
-                      SearchIndex.build(accumulatedMembers);
-                      window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { members: accumulatedMembers } }));
+                      finishMemberSync(accumulatedMembers);
                     }
                   }
-                } finally { 
-                  if (!res || !res.hasMore) resolve(); 
                 }
-              })
-              .withFailureHandler(() => { hasError = true; resolve(); })
-              .getMembersDelta(self.lastSync, offset, 1000);
-          };
-          fetchMembersChunk(0);
-        }));
 
-        Promise.all(promises).then(() => {
-          self.isSyncing = false;
-          if (hasError) {
+                self.lastSync = Date.now();
+                try { localStorage.setItem('wstudio_last_sync', self.lastSync.toString()); } catch(e) {}
+                self.updateIndicator('success', 'Updated 100%!');
+                setTimeout(() => self.updateIndicator('online', 'Online'), 3000);
+              } else {
+                hasError = true;
+                self.updateIndicator('offline', 'Error Sync');
+              }
+            } catch (e) {
+              console.error('Sync process error:', e);
+            } finally {
+              self.isSyncing = false;
+              if (typeof SyncQueue !== 'undefined') SyncQueue.process();
+            }
+          })
+          .withFailureHandler(() => {
+            self.isSyncing = false;
             self.updateIndicator('offline', 'Error Sync');
-          } else {
-            self.lastSync = Date.now();
-            try { localStorage.setItem('wstudio_last_sync', self.lastSync.toString()); } catch(e) {}
-            self.updateIndicator('success', 'Updated 100%!');
-            setTimeout(() => self.updateIndicator('online', 'Online'), 3000);
-          }
-          if (typeof SyncQueue !== 'undefined') SyncQueue.process();
-        });
+            if (typeof SyncQueue !== 'undefined') SyncQueue.process();
+          })
+          .getInitialSyncData(lastMemSync, 0, 1000);
       },
       updateIndicator: function (status, text) {
         const dot = document.getElementById('syncStatusDot');
