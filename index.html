@@ -3873,7 +3873,7 @@ Terima kasih dan selamat berlatih!`;
     let currentLoginBranches = [];
 
     function updateBrandingUI(branchId) {
-      const config = currentLoginBranches.find(b => b.id === branchId);
+      const config = currentLoginBranches.find(b => String(b.id) === String(branchId));
       if (!config) return;
 
       // Update logo
