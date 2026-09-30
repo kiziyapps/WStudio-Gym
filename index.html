@@ -408,13 +408,98 @@
         if (this.isSyncing || !currentUser) return;
         if (!force && (Date.now() - this.lastSync < this.syncInterval)) return;
 
-        this.updateIndicator('syncing', 'Syncing...');
+        this.updateIndicator('syncing', 'Syncing Data...');
         this.isSyncing = true;
         const self = this;
 
         let hasError = false;
 
-        const finishSync = () => {
+        const promises = [];
+
+        // 1. Dashboard
+        promises.push(new Promise((resolve) => {
+          google.script.run
+            .withSuccessHandler(res => {
+              if (res && res.success && res.stats) {
+                LocalCache.set('dashboard_stats', res.stats, 30);
+                window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { stats: res.stats } }));
+              }
+              resolve();
+            })
+            .withFailureHandler(() => { hasError = true; resolve(); })
+            .getDashboardStats(null, null, force);
+        }));
+
+        // 2. Packages
+        promises.push(new Promise((resolve) => {
+          google.script.run
+            .withSuccessHandler(res => {
+              if (res && res.success && res.packages) {
+                LocalCache.set('catalogue_packages', res.packages, 60);
+                window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { packages: res.packages } }));
+              }
+              resolve();
+            })
+            .withFailureHandler(() => { hasError = true; resolve(); })
+            .getPackages(force);
+        }));
+
+        // 3. Products
+        promises.push(new Promise((resolve) => {
+          google.script.run
+            .withSuccessHandler(res => {
+              if (res && res.success && res.products) {
+                LocalCache.set('pos_products', res.products, 60);
+                window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { products: res.products } }));
+              }
+              resolve();
+            })
+            .withFailureHandler(() => { hasError = true; resolve(); })
+            .getProducts(force);
+        }));
+
+        // 4. Activity
+        promises.push(new Promise((resolve) => {
+          google.script.run
+            .withSuccessHandler(res => {
+              if (res && res.success) {
+                if (res.transactions) LocalCache.set('recent_transactions', res.transactions, 60);
+                if (res.checkins) LocalCache.set('today_checkins', res.checkins, 60);
+                window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: res }));
+              }
+              resolve();
+            })
+            .withFailureHandler(() => { hasError = true; resolve(); })
+            .getRecentActivity();
+        }));
+
+        // 5. Members
+        promises.push(new Promise((resolve) => {
+          let accumulatedMembers = [];
+          const fetchMembersChunk = (offset = 0) => {
+            google.script.run
+              .withSuccessHandler(res => {
+                if (res && res.success && res.members) {
+                  accumulatedMembers = accumulatedMembers.concat(res.members);
+                  if (res.hasMore) {
+                    fetchMembersChunk(res.nextOffset);
+                  } else {
+                    LocalCache.set('all_members', accumulatedMembers, 120);
+                    SearchIndex.build(accumulatedMembers);
+                    window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { members: accumulatedMembers } }));
+                    resolve();
+                  }
+                } else {
+                  resolve();
+                }
+              })
+              .withFailureHandler(() => { hasError = true; resolve(); })
+              .getMembersDelta(self.lastSync, offset, 1000);
+          };
+          fetchMembersChunk(0);
+        }));
+
+        Promise.all(promises).then(() => {
           self.isSyncing = false;
           if (hasError) {
             self.updateIndicator('offline', 'Error Sync');
@@ -424,95 +509,8 @@
             self.updateIndicator('success', 'Updated 100%!');
             setTimeout(() => self.updateIndicator('online', 'Online'), 3000);
           }
-          // Jalankan queue secara berkala
           if (typeof SyncQueue !== 'undefined') SyncQueue.process();
-        };
-
-        const step5_Members = () => {
-          self.updateIndicator('syncing', 'Syncing Members... 80%');
-          let accumulatedMembers = [];
-          const fetchMembersChunk = (offset = 0) => {
-            google.script.run
-              .withSuccessHandler(res => {
-                if (res && res.success && res.members) {
-                  accumulatedMembers = accumulatedMembers.concat(res.members);
-                  if (res.hasMore) {
-                    self.updateIndicator('syncing', `Syncing Members... ${accumulatedMembers.length}`);
-                    fetchMembersChunk(res.nextOffset);
-                    return;
-                  } else {
-                    LocalCache.set('all_members', accumulatedMembers, 120);
-                    SearchIndex.build(accumulatedMembers);
-                    window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { members: accumulatedMembers } }));
-                  }
-                }
-                finishSync();
-              })
-              .withFailureHandler(err => { hasError = true; finishSync(); })
-              .getMembersDelta(self.lastSync, offset, 1000);
-          };
-          fetchMembersChunk(0);
-        };
-
-        const step4_Activity = () => {
-          self.updateIndicator('syncing', 'Syncing Activity... 60%');
-          google.script.run
-            .withSuccessHandler(res => {
-              if (res && res.success) {
-                if (res.transactions) LocalCache.set('recent_transactions', res.transactions, 60);
-                if (res.checkins) LocalCache.set('today_checkins', res.checkins, 60);
-                window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: res }));
-              }
-              setTimeout(step5_Members, 1000);
-            })
-            .withFailureHandler(err => { hasError = true; setTimeout(step5_Members, 1000); })
-            .getRecentActivity();
-        };
-
-        const step3_Products = () => {
-          self.updateIndicator('syncing', 'Syncing Products... 40%');
-          google.script.run
-            .withSuccessHandler(res => {
-              if (res && res.success && res.products) {
-                LocalCache.set('pos_products', res.products, 60);
-                window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { products: res.products } }));
-              }
-              setTimeout(step4_Activity, 1000);
-            })
-            .withFailureHandler(err => { hasError = true; setTimeout(step4_Activity, 1000); })
-            .getProducts(force);
-        };
-
-        const step2_Packages = () => {
-          self.updateIndicator('syncing', 'Syncing Packages... 20%');
-          google.script.run
-            .withSuccessHandler(res => {
-              if (res && res.success && res.packages) {
-                LocalCache.set('catalogue_packages', res.packages, 60);
-                window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { packages: res.packages } }));
-              }
-              setTimeout(step3_Products, 1000);
-            })
-            .withFailureHandler(err => { hasError = true; setTimeout(step3_Products, 1000); })
-            .getPackages(force);
-        };
-
-        const step1_Dashboard = () => {
-          self.updateIndicator('syncing', 'Syncing Dashboard... 0%');
-          google.script.run
-            .withSuccessHandler(res => {
-              if (res && res.success && res.stats) {
-                LocalCache.set('dashboard_stats', res.stats, 30);
-                window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { stats: res.stats } }));
-              }
-              setTimeout(step2_Packages, 1000);
-            })
-            .withFailureHandler(err => { hasError = true; setTimeout(step2_Packages, 1000); })
-            .getDashboardStats(null, null, force);
-        };
-
-        // Mulai eksekusi rantai sinkronisasi (sekuensial)
-        step1_Dashboard();
+        });
       },
       updateIndicator: function (status, text) {
         const dot = document.getElementById('syncStatusDot');
