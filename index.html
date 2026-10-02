@@ -596,9 +596,32 @@
 
     // ================ IMPROVEMENT 3: LOCAL RECEIPT GENERATOR ================
     function getActiveBranchInfo() {
-      if (typeof currentUser !== 'undefined' && currentUser && currentUser.branchId && typeof currentLoginBranches !== 'undefined') {
-        const b = currentLoginBranches.find(cb => String(cb.id) === String(currentUser.branchId));
-        if (b) return b;
+      let bId = null;
+      if (typeof currentBranchId !== 'undefined' && currentBranchId && currentBranchId !== 'ALL') {
+        bId = currentBranchId;
+      } else if (typeof currentUser !== 'undefined' && currentUser && currentUser.branchId && currentUser.branchId !== 'ALL') {
+        bId = currentUser.branchId;
+      } else if (document.getElementById('loginBranch') && document.getElementById('loginBranch').value && document.getElementById('loginBranch').value !== 'ALL') {
+        bId = document.getElementById('loginBranch').value;
+      }
+      
+      if (bId) {
+        if (typeof currentLoginBranches !== 'undefined' && currentLoginBranches) {
+          const b = currentLoginBranches.find(cb => String(cb.id) === String(bId));
+          if (b) return b;
+        }
+        if (typeof currentAdminBranches !== 'undefined' && currentAdminBranches) {
+          const b = currentAdminBranches.find(cb => String(cb.id) === String(bId));
+          if (b) return b;
+        }
+      }
+      
+      // Fallback to first available branch if 'ALL' or unknown
+      if (typeof currentLoginBranches !== 'undefined' && currentLoginBranches && currentLoginBranches.length > 0) {
+        return currentLoginBranches[0];
+      }
+      if (typeof currentAdminBranches !== 'undefined' && currentAdminBranches && currentAdminBranches.length > 0) {
+        return currentAdminBranches[0];
       }
       return null;
     }
@@ -10270,7 +10293,7 @@ Terima kasih dan selamat berlatih!`;
               const pic = u.profilePic ? getDirectLink(u.profilePic) : "https://i.imgur.com/vHEx3jR.png";
               let branchName = "Semua Cabang";
               if (u.branchId !== "ALL" && typeof currentLoginBranches !== 'undefined') {
-                const b = currentLoginBranches.find(cb => cb.id === u.branchId);
+                const b = currentLoginBranches.find(cb => String(cb.id) === String(u.branchId));
                 if (b) branchName = b.name;
               }
               return `
@@ -12716,7 +12739,7 @@ Terima kasih dan selamat berlatih!`;
     }
 
     function openEditBranchIdentityModal(branchId) {
-      const branch = currentAdminBranches.find(b => b.id === branchId);
+      const branch = currentAdminBranches.find(b => String(b.id) === String(branchId));
       if (!branch) return;
 
       document.getElementById('editBranchId').value = branch.id;
@@ -13099,7 +13122,7 @@ Terima kasih dan selamat berlatih!`;
 
     function viewMemberDetail(memberId) {
       const members = LocalCache.get('all_members') || [];
-      const member = members.find(m => m.memberId === memberId || m.id === memberId);
+      const member = members.find(m => String(m.memberId || m.id) === String(memberId));
       if (!member) {
         showToast('Data member tidak ditemukan', 'error');
         return;
@@ -13147,7 +13170,7 @@ Terima kasih dan selamat berlatih!`;
 
     function resendRegistrationWA(memberId) {
       const members = LocalCache.get('all_members') || [];
-      const member = members.find(m => m.memberId === memberId || m.id === memberId);
+      const member = members.find(m => String(m.memberId || m.id) === String(memberId));
       if (!member) {
         showToast('Data member tidak ditemukan', 'error');
         return;
@@ -13173,7 +13196,7 @@ Terima kasih dan selamat berlatih!`;
 
     function showPOSReceiptDetail(transactionId) {
       const trxData = LocalCache.get('pos_transactions') || [];
-      const t = trxData.find(x => x.transactionId === transactionId || x[0] === transactionId);
+      const t = trxData.find(x => String(x.transactionId || x[0]) === String(transactionId));
       if (!t) {
         showToast('Transaksi POS tidak ditemukan', 'error');
         return;
