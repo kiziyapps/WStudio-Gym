@@ -5522,61 +5522,78 @@ Terima kasih dan selamat berlatih!`;
                 <head>
                   <title>Member Card - ${m.name}</title>
                   <style>
-                    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@400;700&display=swap');
+                    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@400;500;700&display=swap');
                     :root {
                       --primary: ${themeColor};
                       --primary-light: ${themeRgba};
                     }
-                    body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #fff; font-family: 'Roboto', sans-serif; }
+                    body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #e5e7eb; font-family: 'Roboto', sans-serif; }
                     .card { 
-                      width: 350px; height: 210px; background: #000; color: white; border-radius: 12px; position: relative; overflow: hidden; 
-                      box-shadow: none; border: 1px solid #222; -webkit-print-color-adjust: exact;
+                      width: 360px; height: 220px; 
+                      background: linear-gradient(135deg, #1f1f22 0%, #111 100%); 
+                      color: white; border-radius: 16px; position: relative; overflow: hidden; 
+                      box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); 
+                      -webkit-print-color-adjust: exact;
                     }
-                    /* Decorative background elements */
+                    /* Premium radial glows */
                     .card::before {
-                      content: ''; position: absolute; top: -50px; right: -50px; width: 150px; height: 150px;
-                      background: linear-gradient(135deg, var(--primary-light), transparent); border-radius: 50%; z-index: 1;
+                      content: ''; position: absolute; top: -60px; right: -60px; width: 180px; height: 180px;
+                      background: radial-gradient(circle, var(--primary-light) 0%, transparent 70%); z-index: 1;
                     }
                     .card::after {
-                      content: ''; position: absolute; bottom: -30px; left: -30px; width: 100px; height: 100px;
-                      background: linear-gradient(135deg, rgba(250, 204, 21, 0.1), transparent); border-radius: 50%; z-index: 1;
+                      content: ''; position: absolute; bottom: -40px; left: -40px; width: 150px; height: 150px;
+                      background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%); z-index: 1;
                     }
-                    .card-content { position: relative; z-index: 2; padding: 15px; display: flex; height: 100%; box-sizing: border-box; }
-                    .card-left { flex: 0 0 100px; display: flex; flex-direction: column; align-items: center; }
-                    .card-right { flex: 1; padding-left: 18px; display: flex; flex-direction: column; justify-content: space-between; border-left: 1px solid rgba(255,255,255,0.1); }
+                    .card-content { 
+                      position: relative; z-index: 2; padding: 20px; display: flex; height: 100%; box-sizing: border-box; gap: 16px; 
+                    }
+                    .card-left { 
+                      flex: 0 0 90px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; 
+                    }
+                    .card-right { 
+                      flex: 1; display: flex; flex-direction: column; justify-content: space-between;
+                    }
                     
                     .photo-container { 
-                      width: 90px; height: 110px; border: 2px solid var(--primary); border-radius: 8px; overflow: hidden; background: #111; 
-                      box-shadow: 0 4px 10px rgba(0,0,0,0.5); margin-bottom: 10px;
+                      width: 80px; height: 100px; border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; overflow: hidden; background: #000; 
+                      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
                     }
                     .photo-container img { width: 100%; height: 100%; object-fit: cover; }
                     
                     .qr-container { 
-                      width: 65px; height: 65px; background: white; padding: 4px; border-radius: 6px; 
-                      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                      width: 60px; height: 60px; background: white; padding: 4px; border-radius: 8px; 
                     }
-                    .qr-container img { width: 100%; height: 100%; }
+                    .qr-container img { width: 100%; height: 100%; object-fit: contain; }
                     
-                    .header { margin-bottom: 12px; display: flex; flex-direction: column; }
-                    .gym-name { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; color: var(--primary); letter-spacing: 1px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 6px; }
-                    .gym-name img { height: 20px; object-fit: contain; }
-                    .tagline { font-size: 8px; color: #ccc; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+                    .header { display: flex; align-items: center; gap: 12px; }
+                    .logo-container {
+                      width: 38px; height: 38px; background: white; border-radius: 10px; padding: 3px;
+                      display: flex; justify-content: center; align-items: center; flex-shrink: 0;
+                      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+                    }
+                    .logo-container img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 7px; }
                     
-                    .member-info { margin-bottom: 10px; }
-                    .member-name { font-size: 17px; font-weight: 700; color: #fff; text-transform: uppercase; margin: 0; line-height: 1.2; word-break: break-word; }
-                    .member-id { font-family: monospace; font-size: 14px; color: var(--primary); font-weight: bold; margin-top: 2px; }
+                    .gym-name { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700; color: #fff; letter-spacing: 1.5px; line-height: 1.2; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+                    .tagline { font-size: 8px; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; font-weight: 600; }
                     
-                    .details { display: grid; grid-template-columns: 1fr; gap: 4px; }
-                    .info-row { font-size: 10px; display: flex; align-items: center; gap: 8px; color:var(--text-secondary); }
-                    .info-row b { color: #facc15; font-size: 11px; }
+                    .member-info { margin-top: auto; margin-bottom: 12px; border-left: 2px solid var(--primary); padding-left: 10px; }
+                    .member-name { font-size: 17px; font-weight: 700; color: #fff; text-transform: uppercase; margin: 0 0 4px 0; line-height: 1.2; letter-spacing: 0.5px; word-break: break-word; }
+                    .member-id { font-family: monospace; font-size: 13px; color: #aaa; letter-spacing: 1px; }
+                    
+                    .details { 
+                      display: flex; flex-direction: column; justify-content: center; height: 68px;
+                      border-top: 1px solid rgba(255,255,255,0.08); padding-top: 4px; margin-top: -4px; 
+                    }
+                    .info-row { font-size: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; color: #9ca3af; }
+                    .info-row b { color: #fff; font-size: 11px; font-weight: 600; text-align: right; }
                     
                     .footer-tag { 
-                      position: absolute; bottom: 0; right: 0; padding: 5px 15px; background: var(--primary); color: white; 
-                      font-size: 10px; font-weight: 700; border-top-left-radius: 12px; letter-spacing: 1px;
+                      position: absolute; bottom: 0; right: 0; padding: 6px 16px; background: var(--primary); color: white; 
+                      font-size: 10px; font-weight: 700; border-top-left-radius: 16px; letter-spacing: 1.5px;
                     }
                     @media print {
                       body { background: none; }
-                      .card { border: none; }
+                      .card { border: none; box-shadow: none; }
                     }
                   
     /* Skeleton Loading UI */
@@ -5613,18 +5630,16 @@ Terima kasih dan selamat berlatih!`;
                         </div>
                       </div>
                       <div class="card-right">
-                        <div>
-                          <div class="header">
-                            <div class="gym-name">
-                              ${logoUrl ? '<img src="' + logoUrl + '" alt="Logo">' : ''}
-                              <span>${escapeHtml(branchName)}</span>
-                            </div>
+                        <div class="header">
+                          ${logoUrl ? '<div class="logo-container"><img src="' + logoUrl + '" alt="Logo"></div>' : ''}
+                          <div>
+                            <div class="gym-name">${escapeHtml(branchName)}</div>
                             <div class="tagline">Power 💪 Fitness 🏃 Health</div>
                           </div>
-                          <div class="member-info">
-                            <div class="member-name">${m.name}</div>
-                            <div class="member-id">${m.id}</div>
-                          </div>
+                        </div>
+                        <div class="member-info">
+                          <div class="member-name">${m.name}</div>
+                          <div class="member-id">${m.id}</div>
                         </div>
                         <div class="details">
                           <div class="info-row"><span>PAKET:</span> <b>${m.package}</b></div>
@@ -5632,10 +5647,9 @@ Terima kasih dan selamat berlatih!`;
                         </div>
                       </div>
                     </div>
-                    <div class="footer-tag">VIP MEMBER</div>
+                    <div class="footer-tag">MEMBER CARD</div>
                   </div>
-                
-</body>
+                </body>
               </html>
             `);
             printWindow.document.close();
