@@ -6103,7 +6103,11 @@ Terima kasih dan selamat berlatih!`;
 
       const selOpt = pkgEl.options[pkgEl.selectedIndex];
       const price = parseInt(selOpt.dataset.price) || 0;
-      const durationDays = parseInt(selOpt.dataset.duration) || 0;
+      const durStr = String(selOpt.dataset.duration || '').toLowerCase();
+      let durationDays = parseInt(durStr) || 0;
+      if (durStr.includes('bulan')) durationDays *= 30;
+      else if (durStr.includes('tahun')) durationDays *= 365;
+      else if (durStr.includes('minggu')) durationDays *= 7;
       const payment = payEl.value;
 
       showConfirm(`KONFIRMASI PERPANJANGAN\nMember: ${selectedMember.fullName}\nTotal: ${formatCurrency(price)}`, function (ok) {
