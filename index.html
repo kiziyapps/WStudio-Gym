@@ -550,7 +550,7 @@
         console.time(' Building Search Index');
         this.map = members;
         this.index = members.map(m => {
-          return `${(m.memberId || m.id || '').toLowerCase()}|${(m.fullName || m.name || '').toLowerCase()}|${(m.phone || '').toLowerCase()}`;
+          return `${String(m.memberId || m.id || '').toLowerCase()}|${String(m.fullName || m.name || '').toLowerCase()}|${String(m.phone || '').toLowerCase()}`;
         }).join('\n');
         console.timeEnd(' Building Search Index');
       },
@@ -941,9 +941,9 @@
       if (!all || all.length === 0) return null;
 
       return all.filter(m =>
-        (m.fullName || m.name || '').toLowerCase().includes(q) ||
-        (m.memberId || m.id || '').toLowerCase().includes(q) ||
-        (m.phone || '').includes(q)
+        String(m.fullName || m.name || '').toLowerCase().includes(q) ||
+        String(m.memberId || m.id || '').toLowerCase().includes(q) ||
+        String(m.phone || '').includes(q)
       ).slice(0, 10);
     }
   </script>
@@ -4924,8 +4924,8 @@ Terima kasih dan selamat berlatih!`;
               <label class="form-label">Pilih Paket *</label>
               <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
                 ${pkgs.length ? pkgs.filter(p => {
-        const t = (p.type || '').toLowerCase();
-        const n = (p.name || '').toLowerCase();
+        const t = String(p.type || '').toLowerCase();
+        const n = String(p.name || '').toLowerCase();
         return !t.includes('pt') && !t.includes('trainer') && !t.includes('harian') && !t.includes('visit') &&
           !n.includes('harian') && !n.includes('visit');
       }).map(p => `
@@ -5753,8 +5753,8 @@ Terima kasih dan selamat berlatih!`;
                 <select id="trx_package" class="form-input">
                   <option value="">-- Pilih Paket --</option>
                   ${pkgs.filter(p => {
-        const t = (p.type || '').toLowerCase();
-        const n = (p.name || '').toLowerCase();
+        const t = String(p.type || '').toLowerCase();
+        const n = String(p.name || '').toLowerCase();
         return !t.includes('pt') && !t.includes('trainer') && !t.includes('harian') && !t.includes('visit') &&
           !n.includes('harian') && !n.includes('visit');
       }).map(p =>
@@ -5955,8 +5955,8 @@ Terima kasih dan selamat berlatih!`;
     }
 
     function escapeHtml(unsafe) {
-      if (!unsafe) return '';
-      return unsafe
+      if (unsafe == null) return '';
+      return String(unsafe)
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
@@ -6589,7 +6589,7 @@ Terima kasih dan selamat berlatih!`;
 
         if (query) {
           filtered = filtered.filter(p =>
-            p.name.toLowerCase().includes(query) ||
+            String(p.name).toLowerCase().includes(query) ||
             (p.barcode && p.barcode.toString().includes(query))
           );
         }
@@ -7216,9 +7216,9 @@ Terima kasih dan selamat berlatih!`;
       }
 
       const filtered = posProducts.filter(p =>
-        p.name.toLowerCase().includes(val.toLowerCase()) ||
-        p.id.toLowerCase().includes(val.toLowerCase()) ||
-        (p.barcode && p.barcode.includes(val))
+        String(p.name).toLowerCase().includes(val.toLowerCase()) ||
+        String(p.id).toLowerCase().includes(val.toLowerCase()) ||
+        (p.barcode && String(p.barcode).includes(val))
       );
 
       if (filtered.length === 0) {
@@ -9680,7 +9680,7 @@ Terima kasih dan selamat berlatih!`;
 
       let type = 'extension';
       if (approval.type === 'Registration') type = 'registration';
-      else if (approval.type === 'PT' || (data.package && data.package.toLowerCase().includes('pt'))) type = 'pt';
+      else if (approval.type === 'PT' || (data.package && String(data.package).toLowerCase().includes('pt'))) type = 'pt';
 
       // Jika statusnya masih 'Pending' (belum di-approve bayar), buat pesan konfirmasi
       if (approval.status === 'Pending') {
