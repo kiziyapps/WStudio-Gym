@@ -258,7 +258,7 @@
       }
       // CACHE INTERCEPTOR: Jangan tembak server jika data read-only sudah ada di memori
       // Hanya terapkan untuk fungsi get/fetch
-      const isReadMethod = methodName.startsWith('get') || methodName.startsWith('load') || methodName.startsWith('fetch');
+      const isReadMethod = (methodName.startsWith('get') || methodName.startsWith('load') || methodName.startsWith('fetch')) && methodName !== 'getInitialSyncData' && methodName !== 'getMembersDelta';
       const cacheKey = 'proxy_' + methodName + '_' + JSON.stringify(args) + '_' + currentBranchId;
       
       if (isReadMethod && typeof LocalCache !== 'undefined') {
@@ -442,6 +442,7 @@
 
         let hasError = false;
         const lastMemSync = self.lastSync || 0;
+        let isChunking = false;
 
         google.script.run
           .withSuccessHandler(res => {
@@ -487,9 +488,15 @@
                        LocalCache.set('all_members', updated, 120);
                        SearchIndex.build(updated);
                        window.dispatchEvent(new CustomEvent('wstudio_sync_complete', { detail: { members: updated } }));
+                       
+                       if (isChunking) {
+                         self.isSyncing = false;
+                         if (typeof SyncQueue !== 'undefined') SyncQueue.process();
+                       }
                     };
                     
                     if (res.membersDelta.hasMore) {
+                      isChunking = true;
                       const fetchMembersChunk = (offset) => {
                         google.script.run
                           .withSuccessHandler(chunkRes => {
@@ -523,8 +530,10 @@
             } catch (e) {
               console.error('Sync process error:', e);
             } finally {
-              self.isSyncing = false;
-              if (typeof SyncQueue !== 'undefined') SyncQueue.process();
+              if (!isChunking) {
+                self.isSyncing = false;
+                if (typeof SyncQueue !== 'undefined') SyncQueue.process();
+              }
             }
           })
           .withFailureHandler(() => {
