@@ -5316,6 +5316,28 @@ Terima kasih dan selamat berlatih!`;
 
               if (res && res.success === true) {
                 const checkinTime = res.checkinTime ? new Date(res.checkinTime) : new Date();
+
+                // Optimistic Cache Update for New Member
+                try {
+                  const newMember = {
+                    id: res.memberId,
+                    memberId: res.memberId,
+                    name: res.memberName || name,
+                    fullName: res.memberName || name,
+                    phone: res.memberPhone || phone,
+                    email: res.memberEmail || email,
+                    expiry: res.expiryDate,
+                    status: 'Aktif',
+                    package: res.currentPackage || pkg.name
+                  };
+                  LocalCache.update('all_members', (members) => {
+                    const list = Array.isArray(members) ? members : [];
+                    list.push(newMember);
+                    return list;
+                  });
+                  if (typeof SearchIndex !== 'undefined') SearchIndex.build(LocalCache.get('all_members'));
+                } catch(e) { console.error('Error updating cache', e); }
+
                 const daysLeft = res.daysLeft || 0;
 
                 let warningHtml = '';
@@ -9295,57 +9317,71 @@ Terima kasih dan selamat berlatih!`;
         });
     }
 
+    function renderPTSessions(serverList, el) {
+      let list = serverList || [];
+      const queue = SyncQueue.get();
+      const pending = queue.filter(q => q.action === 'registerPTSession');
+      const allMembers = LocalCache.get('all_members') || [];
+
+      pending.forEach(p => {
+        const data = p.args[0] || {};
+        const m = allMembers.find(mem => (mem.memberId || mem.id) === data.memberId);
+        list.unshift({
+          memberName: m ? (m.fullName || m.name) : 'Member',
+          packageName: 'PT',
+          totalSessions: data.totalSessions || 0,
+          remainingSessions: data.totalSessions || 0,
+          expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          isSyncing: true
+        });
+      });
+
+      if (!list || !list.length) {
+        el.innerHTML = '<p style="text-align:center;padding:30px;color:var(--text-secondary);background:var(--bg-light);border-radius:8px">Tidak ada sesi PT aktif</p>';
+        return;
+      }
+
+      el.innerHTML = list.map(s => {
+        const progress = Math.round((s.remainingSessions / s.totalSessions) * 100) || 0;
+        return `
+          <div style="background:var(--bg-light); border:1px solid var(--border-color); border-radius:12px; padding:16px; margin-bottom:12px; position:relative">
+            ${s.isSyncing ? '<div style="position:absolute; top:10px; right:10px; font-size:10px; color:#f59e0b"><i class="fas fa-sync fa-spin"></i> Syncing...</div>' : ''}
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <b style="font-size:15px">${escapeHtml(s.memberName || '-')}</b>
+              <span class="badge badge-success">Aktif</span>
+            </div>
+            <div style="color:#475569;font-size:13px;margin-bottom:8px">
+              <div>Trainer: ${escapeHtml(s.packageName || '-')}</div>
+              <div>Sesi: <b>${s.remainingSessions || 0}</b> / ${s.totalSessions || 0} tersisa</div>
+              <div>Berlaku s/d: ${formatDate(s.expiryDate)}</div>
+            </div>
+            <div style="background:#e2e8f0;border-radius:20px;height:8px;overflow:hidden">
+              <div style="background:linear-gradient(90deg,#22c55e,#16a34a);border-radius:20px;height:8px;width:${progress}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
     function loadActivePTSessions() {
       const el = document.getElementById('ptActiveList');
       if (!el) return;
 
+      // 1. Render Local Cache First (Super Fast UI)
+      const cachedSessions = LocalCache.get('active_pt_sessions');
+      if (cachedSessions) {
+        renderPTSessions(cachedSessions, el);
+      } else {
+        el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-secondary)"><i class="fas fa-spinner fa-spin"></i> Memuat Sesi PT...</div>';
+      }
+
+      // 2. Fetch Latest from Server
       google.script.run
         .withSuccessHandler(function (res) {
           if (!el) return;
           let list = (res && res.success) ? res.sessions : [];
-
-          // MERGE PENDING PT SESSIONS (OPTIMISTIC)
-          const queue = SyncQueue.get();
-          const pending = queue.filter(q => q.action === 'registerPTSession');
-          const allMembers = LocalCache.get('all_members') || [];
-
-          pending.forEach(p => {
-            const data = p.args[0] || {};
-            const m = allMembers.find(mem => (mem.memberId || mem.id) === data.memberId);
-            list.unshift({
-              memberName: m ? (m.fullName || m.name) : 'Member',
-              packageName: 'PT',
-              totalSessions: data.totalSessions || 0,
-              remainingSessions: data.totalSessions || 0,
-              expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-              isSyncing: false
-            });
-          });
-
-          if (!list || !list.length) {
-            el.innerHTML = '<p style="text-align:center;padding:30px;color:var(--text-secondary);background:var(--bg-light);border-radius:8px">Tidak ada sesi PT aktif</p>';
-            return;
-          }
-
-          el.innerHTML = list.map(s => {
-            const progress = Math.round((s.remainingSessions / s.totalSessions) * 100) || 0;
-            return `
-              <div style="background:var(--bg-light); border:1px solid var(--border-color); border-radius:12px; padding:16px; margin-bottom:12px">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-                  <b style="font-size:15px">${escapeHtml(s.memberName || '-')}</b>
-                  <span class="badge badge-success">Aktif</span>
-                </div>
-                <div style="color:#475569;font-size:13px;margin-bottom:8px">
-                  <div>Trainer: ${escapeHtml(s.packageName || '-')}</div>
-                  <div>Sesi: <b>${s.remainingSessions || 0}</b> / ${s.totalSessions || 0} tersisa</div>
-                  <div>Berlaku s/d: ${formatDate(s.expiryDate)}</div>
-                </div>
-                <div style="background:#e2e8f0;border-radius:20px;height:8px;overflow:hidden">
-                  <div style="background:linear-gradient(90deg,#22c55e,#16a34a);border-radius:20px;height:8px;width:${progress}%"></div>
-                </div>
-              </div>
-            `;
-          }).join('');
+          LocalCache.set('active_pt_sessions', list, 30); // Simpan ke local cache 30 menit
+          renderPTSessions(list, el);
         })
         .withFailureHandler(function (err) {
           console.error('Load PT sessions error:', err);
