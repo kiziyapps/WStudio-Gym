@@ -210,41 +210,6 @@
       }
     }
 
-    if (typeof google === 'undefined' || typeof google.script === 'undefined' || typeof google.script.run === 'undefined') {
-      window.google = {
-        script: {
-          run: new Proxy({}, {
-            get: function (target, methodName) {
-              if (methodName === 'withSuccessHandler') {
-                return function (successCallback) {
-                  return new Proxy({}, {
-                    get: function (t, nextMethod) {
-                      if (nextMethod === 'withFailureHandler') {
-                        return function (failureCallback) {
-                          return new Proxy({}, {
-                            get: function (tt, finalMethod) {
-                              return function (...args) {
-                                executeProxyRequest(finalMethod, args, successCallback, failureCallback);
-                              };
-                            }
-                          });
-                        };
-                      }
-                      return function (...args) {
-                        executeProxyRequest(nextMethod, args, successCallback, null);
-                      };
-                    }
-                  });
-                };
-              }
-              return function (...args) {
-                executeProxyRequest(methodName, args, null, null);
-              };
-            }
-          })
-        }
-      };
-    }
 
     function executeProxyRequest(methodName, args, successCallback, failureCallback) {
       let currentBranchId = null;
@@ -3906,10 +3871,6 @@ Terima kasih dan selamat berlatih!`;
       confirmCallback = null;
     }
 
-    function checkInternetConnection() {
-      return navigator.onLine;
-    }
-
 
     // ================ AUTH ================
     function initApp() {
@@ -5035,6 +4996,8 @@ Terima kasih dan selamat berlatih!`;
             </div>
           </div>
         </div>
+
+        <div id="memberResult" style="display:none; margin-top:20px;"></div>
 
         <div class="form-card" style="margin-top:20px">
           <div class="form-card-header" style="display:flex; justify-content:space-between; align-items:center">
@@ -8409,74 +8372,6 @@ Terima kasih dan selamat berlatih!`;
       previewArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
-    function doCheckin() {
-      const mid = (document.getElementById('ci_memberId')?.value || '').trim().toUpperCase();
-      if (!mid) {
-        showToast('⚠️ Masukkan Member ID', 'warning');
-        return;
-      }
-
-      const btn = document.getElementById('btnCheckin');
-      const originalText = btn.innerHTML;
-
-      // 1. TAMPILKAN FEEDBACK INSTAN (OPTIMISTIC)
-      try {
-        const allMembers = LocalCache.get('all_members') || [];
-        const localM = allMembers.find(m => (m.memberId || m.id) === mid);
-
-        if (localM) {
-          showCheckinSuccess({
-            success: true,
-            message: 'Check-In Berhasil',
-            memberName: localM.fullName || localM.name,
-            memberId: localM.memberId || localM.id,
-            currentPackage: localM.currentPackage || localM.package,
-            expiryDate: localM.expiryDate || localM.expiry,
-            daysLeft: localM.daysLeft,
-            checkinTime: new Date().toISOString()
-          }, mid);
-
-          // RESET UI IMMEDIATELY
-          document.getElementById('ci_memberId').value = '';
-          document.getElementById('checkinPreviewArea').innerHTML = '';
-
-          // 2. MASUKKAN KE QUEUE UNTUK SYNC DI LATAR BELAKANG
-          SyncQueue.add('processCheckIn', [{ memberId: mid }, currentUser?.name || 'Admin']);
-          loadTodayCheckins();
-          return;
-        }
-      } catch (e) {
-        console.warn('Optimistic Check-in failed, falling back to online:', e);
-      }
-
-      // FALLBACK: Jika data tidak ada di cache lokal
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
-      btn.disabled = true;
-      showLoading();
-
-      google.script.run
-        .withSuccessHandler(function (res) {
-          hideLoading();
-          btn.innerHTML = originalText;
-          btn.disabled = false;
-          if (res && res.success) {
-            document.getElementById('checkinPreviewArea').innerHTML = '';
-            showCheckinSuccess(res, mid);
-            document.getElementById('ci_memberId').value = '';
-            loadTodayCheckins();
-          } else {
-            showCheckinError(res, mid);
-          }
-        })
-        .withFailureHandler(function (err) {
-          hideLoading();
-          btn.innerHTML = originalText;
-          btn.disabled = false;
-          showToast('Error: ' + err.message, 'error');
-        })
-        .processCheckIn({ memberId: mid }, currentUser?.name || 'Admin');
-    }
-
     function doCheckinWithPT(forcedMid) {
       const mid = forcedMid || (document.getElementById('ci_memberId')?.value || '').trim().toUpperCase();
       if (!mid) {
@@ -10782,20 +10677,6 @@ Terima kasih dan selamat berlatih!`;
     }
 
 
-    function toggleExpenseSplit() {
-      const type = document.getElementById('exp_type').value;
-      document.getElementById('split_section').style.display = type === 'Global' ? 'block' : 'none';
-    }
-
-    function balanceSplit(source) {
-      const gymInput = document.getElementById('exp_gym_split');
-      const retailInput = document.getElementById('exp_retail_split');
-      if (source === 'gym') {
-        retailInput.value = 100 - (Number(gymInput.value) || 0);
-      } else {
-        gymInput.value = 100 - (Number(retailInput.value) || 0);
-      }
-    }
 
     function showDashboardDetail(type) {
       const financialTypes = [
@@ -11950,11 +11831,6 @@ Terima kasih dan selamat berlatih!`;
         .getFilteredPOSTransactions(start, end);
     }
 
-    // STOCK HISTORY
-    function showStockOpnameHistory() {
-      // This is already inside showInventoryTools in index.html
-      // We'll update the render part there.
-    }
     // ================ TRANSACTION DELETION UI ================
     function deleteTransactionUI(transactionId) {
       const reason = prompt('Masukkan alasan penghapusan transaksi (Wajib):');
