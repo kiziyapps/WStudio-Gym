@@ -5432,6 +5432,43 @@ Terima kasih dan selamat berlatih!`;
 
                 resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
+                // Optimistic Update for Recent Transactions
+                const tbody = document.querySelector('#regRecentTransactions tbody');
+                if (tbody) {
+                  const tDate = new Date().toLocaleString('id-ID', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
+                  const rData = {
+                    receiptNumber: res.receiptNumber || '-',
+                    memberName: res.memberName || name,
+                    packageName: res.currentPackage || pkg.name,
+                    totalAmount: res.totalAmount || totalAmount,
+                    paymentMethod: res.paymentMethod || pay,
+                    qr: res.qrCodeUrl || '',
+                    expiry: res.expiryDate || '-'
+                  };
+                  const rDataStr = encodeURIComponent(JSON.stringify(rData)).replace(/'/g, "%27");
+                  const newRow = `
+                    <tr style="background:#f0fdf4; transition: background 2s;">
+                      <td><code>${res.receiptNumber || '-'}</code></td>
+                      <td>${tDate}</td>
+                      <td>
+                        <b>${escapeHtml(res.memberName || name)}</b><br>
+                        <small style="color:var(--text-secondary)">${res.memberId || '-'}</small>
+                      </td>
+                      <td>${escapeHtml(res.currentPackage || pkg.name)}</td>
+                      <td><b>${formatCurrency(res.totalAmount || totalAmount)}</b><br><span class="badge badge-outline" style="font-size:10px">${escapeHtml(res.paymentMethod || pay)}</span></td>
+                      <td>
+                        <div style="display:flex;gap:4px">
+                          <button class="btn btn-sm btn-outline" style="padding:4px 8px" onclick="ReceiptGenerator.showPreview(JSON.parse(decodeURIComponent('${rDataStr}')), 'membership')" title="Cetak Resi">
+                            <i class="fas fa-print"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>`;
+                  tbody.insertAdjacentHTML('afterbegin', newRow);
+                } else {
+                  loadRecentPanelTransactions('Registration', 'regRecentTransactions');
+                }
+
               } else {
                 resultEl.className = 'result-card error';
                 resultEl.style.display = 'block';
@@ -6125,6 +6162,7 @@ Terima kasih dan selamat berlatih!`;
           currentUser?.name || 'Admin'
         ]);
 
+        loadRecentPanelTransactions('Extension', 'extRecentTransactions'); // Refresh Optimistic UI
         showToast('✅ Transaksi dimasukkan ke antrean', 'success');
       });
     }
@@ -6347,6 +6385,58 @@ Terima kasih dan selamat berlatih!`;
         .withSuccessHandler(function (res) {
           if (res && res.success) {
             let list = res.transactions || [];
+            
+            // OPTIMISTIC MERGE DARI QUEUE LOKAL
+            const queue = SyncQueue.get();
+            const allMembers = LocalCache.get('all_members') || [];
+            
+            if (typeFilter === 'Extension') {
+              const pending = queue.filter(q => q.action === 'processTransaction');
+              pending.forEach(p => {
+                const data = p.args[0] || {};
+                const m = allMembers.find(x => (x.memberId || x.id) === data.memberId);
+                list.unshift({
+                  receiptNumber: 'SYNCING...',
+                  transactionDate: new Date(p.timestamp).toLocaleString('id-ID', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'}),
+                  memberName: m ? (m.fullName || m.name) : 'Member',
+                  memberId: data.memberId,
+                  packageName: data.packageId || 'Perpanjangan',
+                  totalAmount: data.totalAmount || 0,
+                  paymentMethod: data.paymentMethod || '-'
+                });
+              });
+            } else if (typeFilter === 'PT') {
+              const pending = queue.filter(q => q.action === 'registerPTSession');
+              pending.forEach(p => {
+                const data = p.args[0] || {};
+                const m = allMembers.find(x => (x.memberId || x.id) === data.memberId);
+                list.unshift({
+                  receiptNumber: 'SYNCING...',
+                  transactionDate: new Date(p.timestamp).toLocaleString('id-ID', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'}),
+                  memberName: m ? (m.fullName || m.name) : 'Member',
+                  memberId: data.memberId,
+                  packageName: 'PT ' + (data.totalSessions || 0) + ' Sesi',
+                  totalAmount: data.totalAmount || 0,
+                  paymentMethod: data.paymentMethod || '-'
+                });
+              });
+            } else if (typeFilter === 'Visit') {
+              const pending = queue.filter(q => q.action === 'processVisitCheckIn' || q.action === 'processCheckInWithPT');
+              pending.forEach(p => {
+                const data = p.args[0] || {};
+                const m = allMembers.find(x => (x.memberId || x.id) === data.memberId);
+                list.unshift({
+                  receiptNumber: 'SYNCING...',
+                  transactionDate: new Date(p.timestamp).toLocaleString('id-ID', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'}),
+                  memberName: m ? (m.fullName || m.name) : 'Member',
+                  memberId: data.memberId,
+                  packageName: 'Visit / Check-in',
+                  totalAmount: 0,
+                  paymentMethod: '-'
+                });
+              });
+            }
+
             if (list.length === 0) {
               el.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-secondary)">Belum ada transaksi terakhir</div>';
               return;
@@ -9201,6 +9291,7 @@ Terima kasih dan selamat berlatih!`;
             setTimeout(() => { resultEl.style.display = 'none'; }, 5000);
             resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }
+          loadRecentPanelTransactions('PT', 'ptRecentTransactions'); // Refresh Optimistic UI
         });
     }
 
@@ -9474,7 +9565,11 @@ Terima kasih dan selamat berlatih!`;
                 showToast(res.message, 'success');
 
                 const approval = typeof index === 'number' ? currentApprovals[index] : currentApprovals.find(a => String(a.approvalId) === String(id));
-                loadApprovals();
+                if (approval) {
+                  approval.status = 'Paid';
+                  renderApprovals(currentApprovals); // Optimistic local UI update
+                }
+                setTimeout(loadApprovals, 500); // Sync softly in background
 
                 if (approval) {
                   const data = approval.data || {};
@@ -9531,7 +9626,11 @@ Terima kasih dan selamat berlatih!`;
               hideLoading();
               if (res && res.success) {
                 showToast(res.message, 'success');
-                loadApprovals();
+                if (typeof index === 'number' && currentApprovals[index]) {
+                  currentApprovals.splice(index, 1);
+                  renderApprovals(currentApprovals); // Optimistic local UI update
+                }
+                setTimeout(loadApprovals, 500); // Sync softly in background
               } else {
                 showToast(res ? res.message : 'Gagal mengaktivasi member', 'error');
               }
